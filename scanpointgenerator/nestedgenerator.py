@@ -25,7 +25,9 @@ class NestedGenerator(ScanPointGenerator):
         for outer in outer_generator():
             inner_iterator = inner_generator()
             if self.snake:
-                inner_iterator = reversed(inner_iterator)
+                # Reverse the inner iterator as in place list
+                inner_iterator = list(inner_iterator)
+                inner_iterator.reverse()
             for inner in inner_iterator:
                 yield outer + inner
 

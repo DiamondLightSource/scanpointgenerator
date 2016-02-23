@@ -23,7 +23,7 @@ class LineGenerator(ScanPointGenerator):
 
     def _calc(self, i):
         """Calculate the position for a given index"""
-        return self.start + i * self.step
+        return [self.start + i * self.step]
 
     def positions(self):
         """An iterator yielding demand positions at each scan point"""
@@ -32,7 +32,8 @@ class LineGenerator(ScanPointGenerator):
 
     def indexes(self):
         """An iterator yielding dataset indexes at each scan point"""
-        return xrange(self.num)
+        for i in xrange(self.num):
+            yield [i]
 
     def bounds(self):
         """An iterator yielding lower and upper position bounds for each scan
