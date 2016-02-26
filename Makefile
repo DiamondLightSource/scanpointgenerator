@@ -27,12 +27,12 @@ install: dist docs
 publish:
 	$(PYTHON) setup.py register sdist upload
 	rm ~/.pypirc
-	
+
 testpublish:
 	$(PYTHON) setup.py register -r https://testpypi.python.org/pypi sdist upload -r https://testpypi.python.org/pypi
 
 test:
-	PYTHONPATH=../cothread/prefix/lib/python2.7/site-packages $(PYTHON) setup.py test
+	$(PYTHON) setup.py test
 
 docs/html/index.html: $(wildcard docs/*.rst docs/conf.py)
 	sphinx-build -b html docs docs/html

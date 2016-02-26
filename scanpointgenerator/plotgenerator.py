@@ -47,7 +47,7 @@ def plot_generator(gen):
     t[1:] = np.sqrt((x[1:] - x[:-1])**2 + (y[1:] - y[:-1])**2)
     t = np.cumsum(t)
     t /= t[-1]
-    tck, u = interpolate.splprep([x, y], s=0)
+    tck, _ = interpolate.splprep([x, y], s=0)
 
     # Plot each line
     for i, start in enumerate(starts):
@@ -62,15 +62,3 @@ def plot_generator(gen):
     # And the capture points
     plt.plot(capx, capy, linestyle="", marker="x", color="k", markersize=10)
     plt.show()
-
-if __name__ == "__main__":
-    from pkg_resources import require
-    require("scipy")
-    require("matplotlib")
-    from linegenerator import LineGenerator
-    from nestedgenerator import NestedGenerator
-    xs = LineGenerator("x", "mm", 0, 0.1, 5)
-    ys = LineGenerator("y", "mm", 1, 0.1, 4)
-    gen = NestedGenerator(ys, xs, snake=True)
-    plot_generator(gen)
-
