@@ -7,20 +7,18 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 --------------------------
 Added:
 
-- Added device name and type to structure, along with exit() method
-
 `0-2`_ - 2014-08-05
 -------------------
 Added:
 
 - Documentation
 
-0-1 - 2014-08-03
+0-1 - 2016-02-26
 ----------------
 Added:
 
-- Initial structure with ZeroMQ comms
+- Initial structure with Line and Nested generators
 
-.. _Unreleased: https://github.com/dls-controls/malcolm/compare/0-2...HEAD
-.. _0-2: https://github.com/dls-controls/malcolm/compare/0-1...0-2
+.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/0-2...HEAD
+.. _0-2: https://github.com/dls-controls/scanpointgenerator/compare/0-1...0-2
 
