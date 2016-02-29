@@ -26,7 +26,6 @@ install: dist docs
 # Upload to pypi
 publish:
 	$(PYTHON) setup.py register sdist upload
-	rm ~/.pypirc
 
 testpublish:
 	$(PYTHON) setup.py register -r https://testpypi.python.org/pypi sdist upload -r https://testpypi.python.org/pypi

@@ -1,4 +1,4 @@
 Writing new scan point generators
 =================================
 
-What you should do
+Copy an existing one until this documentation is written...

@@ -6,7 +6,9 @@ class LineGenerator(ScanPointGenerator):
     """Generate equally spaced scan points in one dimension"""
 
     def __init__(self, name, units, start, step, num):
-        """Args:
+        """Initialise the generator
+
+        Args:
             name (str): The scannable name. E.g. "x"
             units (str): The scannable units. E.g. "mm"
             start (float): The first position to be generated. E.g. 1.5

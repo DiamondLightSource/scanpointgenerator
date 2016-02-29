@@ -8,15 +8,15 @@ involves big changes, please file a ticket before making a pull request! We
 want to make sure you don't spend your time coding something that might not fit
 the scope of the project.
 
-.. _dls_controls repository: https://github.com/dls-controls/malcolm/issues
+.. _dls_controls repository: https://github.com/dls-controls/scanpointgenerator/issues
 
 Running the tests
 -----------------
 
 To get the source source code and run the unit tests, run::
 
-    $ git clone git://github.com/dls_controls/malcolm.git
-    $ cd malcolm
+    $ git clone git://github.com/dls_controls/scanpointgenerator.git
+    $ cd scanpointgenerator
     $ virtualenv env
     $ . env/bin/activate
     $ pip install nose
@@ -30,10 +30,8 @@ before submitting a pull request!
 Code Quality
 ------------
 
-For code quality, please run flake8::
-
-    $ pip install flake8
-    $ flake8 .
+Landscape.io will test code quality when you create a pull request. Please
+follow PEP8.
 
 Code Styling
 ------------
@@ -48,7 +46,7 @@ Please arrange imports with the following style
     from mock import patch
 
     # Local package imports
-    from malcolm.version import __version__
+    from scanpointgenerator.version import __version__
 
 Please follow `Google's python style`_ guide wherever possible.
 
@@ -61,14 +59,14 @@ When in the project directory::
 
     $ pip install -r requirements/docs.txt
     $ python setup.py build_sphinx
-    $ open docs/_build/html/index.html
+    $ open docs/html/index.html
 
 Release Checklist
 -----------------
 
 Before a new release, please go through the following checklist:
 
-* Bump version in malcolm/version.py
+* Bump version in scanpointgenerator/version.py
 * Add a release note in CHANGELOG.rst
 * Git tag the version
 * Upload to pypi::

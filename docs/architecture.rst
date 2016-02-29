@@ -18,7 +18,7 @@ API:
 Using the API
 -------------
 
-You call the thing like this::
+You would use a generator in a step scan like this::
 
     >>> for point in generator.positions():
     >>>     for mname, mpos in point.positions.items():

@@ -1,3 +1,6 @@
+MARKER_SIZE = 10
+
+
 def plot_generator(gen):
     import matplotlib.pyplot as plt
     import numpy as np
@@ -5,8 +8,8 @@ def plot_generator(gen):
 
     # points for spline generation
     x, y = [], []
-    # capture points
-    capx, capy = [], []
+    # capture points and indexes
+    capx, capy, capi = [], [], []
     # segment start for colour changing
     starts = []
     for point in gen.iterator():
@@ -16,12 +19,18 @@ def plot_generator(gen):
         if len(x) == 0 or x[-1] != xlower or y[-1] != ylower:
             if len(x) != 0:
                 # add in a tiny fractional distance
+                xneg = x[-1] - xlower > 0
+                yneg = y[-1] - ylower > 0
                 xdiff = (x[-1] - x[-2]) * 0.01
                 ydiff = (y[-1] - y[-2]) * 0.01
                 for i in range(3):
                     x.append(x[-1] + xdiff)
                     y.append(y[-1] + ydiff)
                 # add the padding on the input
+                if xneg:
+                    xdiff *= -1
+                if yneg:
+                    ydiff *= -1
                 for i in reversed(range(3)):
                     x.append(xlower + xdiff * (i + 1))
                     y.append(ylower + ydiff * (i + 1))
@@ -35,6 +44,7 @@ def plot_generator(gen):
         y.append(ypos)
         capx.append(xpos)
         capy.append(ypos)
+        capi.append(point.indexes)
         # And upper point
         starts.append(len(x))
         x.append(point.upper["x"])
@@ -60,5 +70,17 @@ def plot_generator(gen):
         plt.plot(sx, sy, linewidth=2)
 
     # And the capture points
-    plt.plot(capx, capy, linestyle="", marker="x", color="k", markersize=10)
+    plt.plot(capx, capy, linestyle="", marker="x", color="k",
+             markersize=MARKER_SIZE)
+
+    # And a start position
+    plt.plot([x[0]], [y[0]], 'o')
+    plt.annotate("Start", (x[0], y[0]), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
+                 textcoords='offset points')
+
+    # And the indexes
+    for i, x, y in zip(capi, capx, capy):
+        plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
+                     textcoords='offset points')
+
     plt.show()

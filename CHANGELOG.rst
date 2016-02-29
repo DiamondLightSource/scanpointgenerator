@@ -7,11 +7,12 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 --------------------------
 Added:
 
-`0-2`_ - 2014-08-05
+`0-2`_ - 2016-02-29
 -------------------
 Added:
 
 - Documentation
+- Indexes to plots
 
 0-1 - 2016-02-26
 ----------------
