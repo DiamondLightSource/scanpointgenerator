@@ -19,6 +19,7 @@ class LineGenerator(ScanPointGenerator):
         self.num = num
         self.position_units = {name: units}
         self.index_dims = [self.num]
+        self.index_names = [name]
 
     def _calc(self, i):
         """Calculate the position for a given index"""

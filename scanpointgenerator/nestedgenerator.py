@@ -18,6 +18,7 @@ class NestedGenerator(ScanPointGenerator):
         self.position_units = outer.position_units.copy()
         self.position_units.update(inner.position_units)
         self.index_dims = outer.index_dims + inner.index_dims
+        self.index_names = outer.index_names + inner.index_names
 
     def iterator(self):
         for i, outer in enumerate(self.outer.iterator()):

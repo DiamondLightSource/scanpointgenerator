@@ -12,6 +12,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm"))
         self.assertEqual(self.g.index_dims, [5])
+        self.assertEqual(self.g.index_names, ["x"])
 
     def test_iterator(self):
         positions = [1.0, 1.1, 1.2, 1.3, 1.4]

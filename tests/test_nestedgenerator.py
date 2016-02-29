@@ -14,6 +14,7 @@ class NestedGeneratorTest(ScanPointGeneratorTest):
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(y="mm", x="mm"))
         self.assertEqual(self.g.index_dims, [2, 3])
+        self.assertEqual(self.g.index_names, ["y", "x"])
 
     def test_positions(self):
         ypositions = [2.0, 2.0, 2.0, 2.1, 2.1, 2.1]
