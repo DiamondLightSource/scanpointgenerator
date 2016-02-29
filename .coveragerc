@@ -1,3 +1,4 @@
 [report]
 omit =
-    */plotgenerator.py
+    scanpointgenerator/plotgenerator.py
+    scanpointgenerator/version.py
