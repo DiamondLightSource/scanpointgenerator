@@ -50,6 +50,13 @@ def plot_generator(gen):
         x.append(point.upper["x"])
         y.append(point.upper.get("y", 0))
 
+    # Plot labels
+    plt.xlabel("X (%s)" % gen.position_units["x"])
+    if "y" in gen.position_units:
+        plt.ylabel("Y (%s)" % gen.position_units["y"])
+    else:
+        plt.tick_params(left='off', labelleft='off')
+
     # Define curves parametrically
     x = np.array(x)
     y = np.array(y)
@@ -74,7 +81,7 @@ def plot_generator(gen):
              markersize=MARKER_SIZE)
 
     # And a start position
-    plt.plot([x[0]], [y[0]], 'o')
+    plt.plot([x[0]], [y[0]], 'bo')
     plt.annotate("Start", (x[0], y[0]), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
                  textcoords='offset points')
 
@@ -82,5 +89,6 @@ def plot_generator(gen):
     for i, x, y in zip(capi, capx, capy):
         plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
                      textcoords='offset points')
-
+    indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
+    plt.title("Dataset: [%s]" % (", ".join(indexes)))
     plt.show()

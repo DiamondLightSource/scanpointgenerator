@@ -7,6 +7,8 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 --------------------------
 Added:
 
+- Documentation on writing new generators
+
 `0-2`_ - 2016-02-29
 -------------------
 Added:
