@@ -7,6 +7,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 --------------------------
 Added:
 
+`0-3`_ - 2016-03-03
+-------------------
+Added:
+
 - Documentation on writing new generators
 
 `0-2`_ - 2016-02-29
@@ -22,6 +26,7 @@ Added:
 
 - Initial structure with Line and Nested generators
 
-.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/0-2...HEAD
+.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/0-3...HEAD
+.. _0-3: https://github.com/dls-controls/scanpointgenerator/compare/0-2...0-3
 .. _0-2: https://github.com/dls-controls/scanpointgenerator/compare/0-1...0-2
 
