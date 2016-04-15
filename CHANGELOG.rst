@@ -3,9 +3,11 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-`Unreleased`_ - unreleased
---------------------------
+`0-4`_ - 2016-04-15
+-------------------
 Added:
+
+- MANIFEST.in file to allow install in travis builds
 
 `0-3`_ - 2016-03-03
 -------------------
