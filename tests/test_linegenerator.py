@@ -26,7 +26,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 4)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
 
 
