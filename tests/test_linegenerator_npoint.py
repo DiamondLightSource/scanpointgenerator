@@ -14,9 +14,9 @@ class InitTest(unittest.TestCase):
         self.assertEqual(self.g.index_names, ["x"])
 
     def test_points(self):
-        positions = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
-        lower = [-1.0, 1.0, 3.0, 5.0, 7.0, 9.0]
-        upper = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0]
+        positions = [1.0, 3.0, 5.0, 7.0, 9.0]
+        lower = [0.0, 2.0, 4.0, 6.0, 8.0]
+        upper = [2.0, 4.0, 6.0, 8.0, 10.0]
         indexes = [0, 1, 2, 3, 4]
 
         for i, p in enumerate(self.g.iterator()):
