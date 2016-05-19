@@ -1,10 +1,24 @@
 MARKER_SIZE = 10
 
+from pkg_resources import require
+require('matplotlib')
+require('numpy')
+require('scipy')
 
-def plot_generator(gen):
+
+def plot_generator(gen, roi=None):
+    from matplotlib.patches import Rectangle, Circle
     import matplotlib.pyplot as plt
     import numpy as np
     from scipy import interpolate
+
+    if roi is not None:
+        overlay = plt.subplot(111, aspect='equal')
+        if roi.name == "Rectangle":
+            lower_left = (roi.centre[0] - roi.width/2, roi.centre[1] - roi.height/2)
+            overlay.add_patch(Rectangle(lower_left, roi.width, roi.height, fill=False))
+        if roi.name == "Circle":
+            overlay.add_patch(Circle(roi.centre, roi.radius, fill=False))
 
     # points for spline generation
     x, y = [], []
