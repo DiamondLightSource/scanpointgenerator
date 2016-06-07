@@ -7,7 +7,7 @@ from scanpointgenerator import LineGenerator
 class LineGeneratorTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.g = LineGenerator("x", "mm", 1, 0.1, 5)
+        self.g = LineGenerator("x", "mm", 1.0, 9.0, 5)
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm"))
@@ -15,9 +15,9 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_names, ["x"])
 
     def test_iterator(self):
-        positions = [1.0, 1.1, 1.2, 1.3, 1.4]
-        lower = [0.95, 1.05, 1.15, 1.25, 1.35]
-        upper = [1.05, 1.15, 1.25, 1.35, 1.45]
+        positions = [1.0, 3.0, 5.0, 7.0, 9.0]
+        lower = [0.0, 2.0, 4.0, 6.0, 8.0]
+        upper = [2.0, 4.0, 6.0, 8.0, 10.0]
         indexes = [0, 1, 2, 3, 4]
         for i, p in enumerate(self.g.iterator()):
             self.assertEqual(p.positions, dict(x=positions[i]))
