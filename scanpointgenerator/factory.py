@@ -7,7 +7,7 @@ class Factory(object):
         self.generator = generator
         self.roi = roi
 
-    def create_points(self):
+    def iterator(self):
 
         for point in self.generator.iterator():
             if self.roi.contains_point(point):

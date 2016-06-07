@@ -4,14 +4,15 @@ from scanpointgenerator.factory import Factory
 from scanpointgenerator import NestedGenerator, LineGenerator
 
 
+# TODO: Patch generators and contains_point
 class FactoryTest(unittest.TestCase):
 
     def setUp(self):
         self.roi = RectangularROI([0.0, 0.0], 5.0, 8.0)
 
-        x = LineGenerator("x", "mm", 0.0, 1.0, 10)
-        y = LineGenerator("y", "mm", 0.0, 1.0, 10)
-        self.g = NestedGenerator(y, x, snake=True)
+        x = LineGenerator("x", "mm", 0.0, 9.0, 10)
+        y = LineGenerator("y", "mm", 0.0, 9.0, 10)
+        self.g = NestedGenerator(y, x, alternate_direction=True)
 
     def test_given_points_then_filter(self):
 
@@ -23,5 +24,5 @@ class FactoryTest(unittest.TestCase):
 
         factory = Factory(self.g, self.roi)
 
-        for i, point in enumerate(factory.create_points()):
+        for i, point in enumerate(factory.iterator()):
             self.assertEqual(expected_points[i], point.positions)
