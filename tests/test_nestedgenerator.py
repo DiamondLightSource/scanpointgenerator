@@ -7,9 +7,9 @@ from scanpointgenerator import NestedGenerator, LineGenerator
 class NestedGeneratorTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.x = LineGenerator("x", "mm", 1, 0.1, 3)
-        self.y = LineGenerator("y", "mm", 2, 0.1, 2)
-        self.g = NestedGenerator(self.y, self.x, snake=True)
+        self.x = LineGenerator("x", "mm", 1.0, 1.2, 3)
+        self.y = LineGenerator("y", "mm", 2.0, 2.1, 2)
+        self.g = NestedGenerator(self.y, self.x, alternate_direction=True)
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(y="mm", x="mm"))
@@ -33,7 +33,7 @@ class NestedGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [yindexes[i], xindexes[i]])
 
     def test_double_nest(self):
-        self.z = LineGenerator("z", "mm", 1.0, 1.0, 2)
+        self.z = LineGenerator("z", "mm", 1.0, 2.0, 2)
         self.g2 = NestedGenerator(self.z, self.g)
 
         zpositions = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
