@@ -10,7 +10,7 @@ class InitTest(unittest.TestCase):
         inner_scan = dict(name='x', units='mm', num=3)
         outer_scan = dict(name='y', units='mm', num=2)
 
-        self.g = GridGenerator(bounding_box, inner_scan, outer_scan, snake=True)
+        self.g = GridGenerator(bounding_box, inner_scan, outer_scan, alternate_direction=True)
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(y="mm", x="mm"))
@@ -18,17 +18,19 @@ class InitTest(unittest.TestCase):
         self.assertEqual(self.g.index_names, ["y", "x"])
 
     def test_positions(self):
-        y_positions = [1.0, 1.0, 1.0, 3.0, 3.0, 3.0]
-        x_positions = [1.0, 3.0, 5.0, 5.0, 3.0, 1.0]
-        x_lower = [0.0, 2.0, 4.0, 6.0, 4.0, 2.0]
-        x_upper = [2.0, 4.0, 6.0, 4.0, 2.0, 0.0]
-        y_indexes = [0, 0, 0, 1, 1, 1]
-        x_indexes = [0, 1, 2, 2, 1, 0]
+        positions = [{'y': 0.0, 'x': 0.0}, {'y': 0.0, 'x': 3.0},
+                     {'y': 0.0, 'x': 6.0}, {'y': 4.0, 'x': 6.0},
+                     {'y': 4.0, 'x': 3.0}, {'y': 4.0, 'x': 0.0}]
+        lower = [{'y': 0.0, 'x': -1.5}, {'y': 0.0, 'x': 1.5},
+                 {'y': 0.0, 'x': 4.5}, {'y': 4.0, 'x': 7.5},
+                 {'y': 4.0, 'x': 4.5}, {'y': 4.0, 'x': 1.5}]
+        upper = [{'y': 0.0, 'x': 1.5}, {'y': 0.0, 'x': 4.5},
+                 {'y': 0.0, 'x': 7.5}, {'y': 4.0, 'x': 4.5},
+                 {'y': 4.0, 'x': 1.5}, {'y': 4.0, 'x': -1.5}]
+        indexes = [[0, 0], [0, 1], [0, 2], [1, 2], [1, 1], [1, 0]]
+
         for i, p in enumerate(self.g.iterator()):
-            self.assertEqual(p.positions, dict(
-                y=y_positions[i], x=x_positions[i]))
-            self.assertEqual(p.lower, dict(
-                y=y_positions[i], x=x_lower[i]))
-            self.assertEqual(p.upper, dict(
-                y=y_positions[i], x=x_upper[i]))
-            self.assertEqual(p.indexes, [y_indexes[i], x_indexes[i]])
+            self.assertEqual(p.positions, positions[i])
+            self.assertEqual(p.lower, lower[i])
+            self.assertEqual(p.upper, upper[i])
+            self.assertEqual(p.indexes, indexes[i])
