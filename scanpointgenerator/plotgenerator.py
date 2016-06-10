@@ -1,10 +1,5 @@
 MARKER_SIZE = 10
 
-from pkg_resources import require
-require('matplotlib')
-require('numpy')
-require('scipy')
-
 
 def plot_generator(gen, roi=None):
     from matplotlib.patches import Rectangle, Circle
@@ -64,12 +59,12 @@ def plot_generator(gen, roi=None):
         x.append(point.upper["x"])
         y.append(point.upper.get("y", 0))
 
-    # Plot labels
-    plt.xlabel("X (%s)" % gen.position_units["x"])
-    if "y" in gen.position_units:
-        plt.ylabel("Y (%s)" % gen.position_units["y"])
-    else:
-        plt.tick_params(left='off', labelleft='off')
+    # # Plot labels
+    # plt.xlabel("X (%s)" % gen.position_units["x"])
+    # if "y" in gen.position_units:
+    #     plt.ylabel("Y (%s)" % gen.position_units["y"])
+    # else:
+    #     plt.tick_params(left='off', labelleft='off')
 
     # Define curves parametrically
     x = np.array(x)
@@ -100,9 +95,9 @@ def plot_generator(gen, roi=None):
                  textcoords='offset points')
 
     # And the indexes
-    for i, x, y in zip(capi, capx, capy):
-        plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
-                     textcoords='offset points')
-    indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
-    plt.title("Dataset: [%s]" % (", ".join(indexes)))
+    # for i, x, y in zip(capi, capx, capy):
+    #     plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
+    #                  textcoords='offset points')
+    # indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
+    # plt.title("Dataset: [%s]" % (", ".join(indexes)))
     plt.show()

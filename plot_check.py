@@ -7,6 +7,11 @@ from scanpointgenerator.spiralgenerator import SpiralGenerator
 from scanpointgenerator.lissajousgenerator import LissajousGenerator
 from scanpointgenerator.factory import Factory
 
+from pkg_resources import require
+require('matplotlib')
+require('numpy')
+require('scipy')
+
 
 def test_check():
 
