@@ -60,11 +60,11 @@ def plot_generator(gen, roi=None):
         y.append(point.upper.get("y", 0))
 
     # # Plot labels
-    # plt.xlabel("X (%s)" % gen.position_units["x"])
-    # if "y" in gen.position_units:
-    #     plt.ylabel("Y (%s)" % gen.position_units["y"])
-    # else:
-    #     plt.tick_params(left='off', labelleft='off')
+    plt.xlabel("X (%s)" % gen.position_units["x"])
+    if "y" in gen.position_units:
+        plt.ylabel("Y (%s)" % gen.position_units["y"])
+    else:
+        plt.tick_params(left='off', labelleft='off')
 
     # Define curves parametrically
     x = np.array(x)
@@ -73,7 +73,7 @@ def plot_generator(gen, roi=None):
     t[1:] = np.sqrt((x[1:] - x[:-1])**2 + (y[1:] - y[:-1])**2)
     t = np.cumsum(t)
     t /= t[-1]
-    # tck, _ = interpolate.splprep([x, y], s=0)
+    tck, _ = interpolate.splprep([x, y], s=0)
 
     # Plot each line
     for i, start in enumerate(starts):
@@ -82,8 +82,8 @@ def plot_generator(gen, roi=None):
         else:
             end = len(x) - 1
         tnew = np.linspace(t[start], t[end], num=1001, endpoint=True)
-        # sx, sy = interpolate.splev(tnew, tck)
-        # plt.plot(sx, sy, linewidth=2)
+        sx, sy = interpolate.splev(tnew, tck)
+        plt.plot(sx, sy, linewidth=2)
 
     # And the capture points
     plt.plot(capx, capy, linestyle="", marker="x", color="k",
@@ -95,9 +95,9 @@ def plot_generator(gen, roi=None):
                  textcoords='offset points')
 
     # And the indexes
-    # for i, x, y in zip(capi, capx, capy):
-    #     plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
-    #                  textcoords='offset points')
-    # indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
-    # plt.title("Dataset: [%s]" % (", ".join(indexes)))
+    for i, x, y in zip(capi, capx, capy):
+        plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
+                     textcoords='offset points')
+    indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
+    plt.title("Dataset: [%s]" % (", ".join(indexes)))
     plt.show()
