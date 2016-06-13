@@ -5,7 +5,7 @@ from scanpointgenerator.gridgenerator import GridGenerator
 from scanpointgenerator.spiralgenerator import SpiralGenerator
 from scanpointgenerator.lissajousgenerator import LissajousGenerator
 from scanpointgenerator.randomoffsetgenerator import RandomOffsetGenerator
-from scanpointgenerator.factory import Factory
+from scanpointgenerator.maskedgenerator import MaskedGenerator
 from plotgenerator2 import plot_generator
 
 from pkg_resources import require
@@ -35,7 +35,7 @@ def grid_circle_check():
 
     circle = CircularROI([2.0, 1.0], 2.0)
 
-    cut_out = Factory(gen, circle)
+    cut_out = MaskedGenerator(gen, circle)
 
     plot_generator(gen, circle)
     plot_generator(cut_out, circle)
@@ -52,7 +52,7 @@ def spiral_rectangle_check():
     gen = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 100.0, 100.0)
     rectangle = RectangularROI([0.0, 0.0], 100.0, 100.0)
 
-    cut_out = Factory(gen, rectangle)
+    cut_out = MaskedGenerator(gen, rectangle)
 
     plot_generator(cut_out, rectangle)
 
