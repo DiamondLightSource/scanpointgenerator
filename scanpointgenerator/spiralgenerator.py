@@ -31,10 +31,14 @@ class SpiralGenerator(ScanPointGenerator):
         return int((radius / (self.alpha * self.beta)) ** 2)
 
     def iterator(self):
-        for i in range(1, self._end_point(self.radius)):
+        for i in xrange(0, self._end_point(self.radius)):
             p = Point()
-            p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
-            p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
-            p.upper[self.name[0]], p.upper[self.name[1]] = self._calc(i + 0.5)
             p.indexes = [i]
+
+            i += 0.5  # Offset so lower bound of first point is not less than 0
+
+            p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
+            p.upper[self.name[0]], p.upper[self.name[1]] = self._calc(i + 0.5)
+            p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
+
             yield p
