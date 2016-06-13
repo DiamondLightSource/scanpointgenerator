@@ -1,6 +1,6 @@
 import unittest
 from scanpointgenerator.rectangular_roi import RectangularROI
-from scanpointgenerator.factory import Factory
+from scanpointgenerator.maskedgenerator import MaskedGenerator
 from scanpointgenerator import NestedGenerator, LineGenerator
 
 
@@ -22,7 +22,7 @@ class FactoryTest(unittest.TestCase):
                            {'y': 3.0, 'x': 2.0}, {'y': 3.0, 'x': 1.0}, {'y': 3.0, 'x': 0.0},
                            {'y': 4.0, 'x': 0.0}, {'y': 4.0, 'x': 1.0}, {'y': 4.0, 'x': 2.0}]
 
-        factory = Factory(self.g, self.roi)
+        factory = MaskedGenerator(self.g, self.roi)
 
         for i, point in enumerate(factory.iterator()):
             self.assertEqual(expected_points[i], point.positions)
