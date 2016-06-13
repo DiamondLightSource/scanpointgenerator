@@ -6,15 +6,16 @@ from scanpointgenerator.lissajousgenerator import LissajousGenerator
 class LissajousGeneratorTest(unittest.TestCase):
 
     def setUp(self):
-        bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        self.g = LissajousGenerator(['x', 'y'], "mm", bounding_box, 1, num_points=10)
+        self.bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
 
     def test_init(self):
-        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(self.g.index_dims, [10])
-        self.assertEqual(self.g.index_names, ["x", "y"])
+        g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1)
+        self.assertEqual(g.position_units, dict(x="mm", y="mm"))
+        self.assertEqual(g.index_dims, [100])
+        self.assertEqual(g.index_names, ["x", "y"])
 
     def test_iterator(self):
+        g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1, num_points=10)
         positions = [{'y': 0.0, 'x': 0.5},
                      {'y': 0.47552825814757677, 'x': 0.4045084971874737},
                      {'y': 0.2938926261462366, 'x': 0.15450849718747375},
@@ -47,7 +48,7 @@ class LissajousGeneratorTest(unittest.TestCase):
                  {'y': -0.29389262614623674, 'x': 0.47552825814757677}]
         indexes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-        for i, p in enumerate(self.g.iterator()):
+        for i, p in enumerate(g.iterator()):
             self.assertEqual(p.positions, positions[i])
             self.assertEqual(p.lower, lower[i])
             self.assertEqual(p.upper, upper[i])
