@@ -39,7 +39,7 @@ class LineGenerator(ScanPointGenerator):
         self.step = []
         for axis in range(len(self.start)):
             self.step.append(
-                abs(self.stop[axis] - self.start[axis])/(self.num - 1))
+                (self.stop[axis] - self.start[axis])/(self.num - 1))
 
         self.position_units = {}
         for dimension in self.name:
