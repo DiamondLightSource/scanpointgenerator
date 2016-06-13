@@ -73,7 +73,7 @@ def plot_generator(gen, roi=None):
     t[1:] = np.sqrt((x[1:] - x[:-1])**2 + (y[1:] - y[:-1])**2)
     t = np.cumsum(t)
     t /= t[-1]
-    tck, _ = interpolate.splprep([x, y], s=0)
+    # tck, _ = interpolate.splprep([x, y], s=0)
 
     # Plot each line
     for i, start in enumerate(starts):
@@ -82,8 +82,8 @@ def plot_generator(gen, roi=None):
         else:
             end = len(x) - 1
         tnew = np.linspace(t[start], t[end], num=1001, endpoint=True)
-        sx, sy = interpolate.splev(tnew, tck)
-        plt.plot(sx, sy, linewidth=2)
+        # sx, sy = interpolate.splev(tnew, tck)
+        # plt.plot(sx, sy, linewidth=2)
 
     # And the capture points
     plt.plot(capx, capy, linestyle="", marker="x", color="k",
