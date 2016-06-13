@@ -8,7 +8,6 @@ class LissajousGeneratorTest(unittest.TestCase):
     def setUp(self):
         bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
         self.g = LissajousGenerator(['x', 'y'], "mm", bounding_box, 1, num_points=10)
-        self.g.num_points = 10
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
