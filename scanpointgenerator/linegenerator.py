@@ -3,10 +3,10 @@ from point import Point
 
 
 def to_list(value):
-        if isinstance(value, list):
-            return value
-        else:
-            return [value]
+    if isinstance(value, list):
+        return value
+    else:
+        return [value]
 
 
 class LineGenerator(ScanPointGenerator):
