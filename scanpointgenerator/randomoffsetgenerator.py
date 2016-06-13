@@ -54,14 +54,16 @@ class RandomOffsetGenerator(ScanPointGenerator):
     @staticmethod
     def calculate_new_upper_bound(current_point, next_point):
         """
+        Calculate upper bound for current point based on next point
 
         Args:
-            next_point:
-            current_point:
+            next_point(Point): Next point to calculate bound with
+            current_point(Point): Current point to add bound to
 
         Returns:
-
+            Point: Current point with new upper bound
         """
+
         for axis in current_point.positions.keys():
             current_point.upper[axis] = \
                 (current_point.positions[axis] + next_point.positions[axis]) / 2
@@ -70,14 +72,16 @@ class RandomOffsetGenerator(ScanPointGenerator):
     @staticmethod
     def calculate_new_lower_bound(current_point, previous_point):
         """
+        Calculate lower bound for current point based on previous point
 
         Args:
-            previous_point:
-            current_point:
+            previous_point(Point): Previous point to calculate bound with
+            current_point(Point): Current point to add bound to
 
         Returns:
-
+            Point: Current point with new lower bound
         """
+
         for axis in current_point.positions.keys():
             current_point.lower[axis] = \
                 (current_point.positions[axis] + previous_point.positions[axis]) / 2
