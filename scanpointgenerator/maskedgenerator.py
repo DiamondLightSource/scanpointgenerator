@@ -1,6 +1,6 @@
 
 
-class Factory(object):
+class MaskedGenerator(object):
 
     def __init__(self, generator, roi):
 
