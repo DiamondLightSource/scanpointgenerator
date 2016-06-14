@@ -1,7 +1,7 @@
-from roi import BaseROI
+from roi import ROI
 
 
-class RectangularROI(BaseROI):
+class RectangularROI(ROI):
 
     def __init__(self, centre, width, height):
         super(RectangularROI, self).__init__("Rectangle", centre)
