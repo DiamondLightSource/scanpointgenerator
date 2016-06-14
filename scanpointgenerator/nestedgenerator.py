@@ -1,20 +1,22 @@
 from scanpointgenerator import ScanPointGenerator
 from point import Point
 
+
 class NestedGenerator(ScanPointGenerator):
     """Nest two generators, optionally alternating each row of the inner"""
 
-    def __init__(self, outer, inner, snake=False):
+    def __init__(self, outer, inner, alternate_direction=False):
         """Initialise the generator
 
         Args:
             outer (ScanPointGenerator): The slower generator
             inner (ScanPointGenerator): The faster generator
-            snake (bool): If True, alternate odd rows of the inner generator
+            alternate_direction (bool): If True, alternate odd rows of the inner generator
         """
         self.outer = outer
         self.inner = inner
-        self.snake = snake
+        self.snake = alternate_direction
+
         self.position_units = outer.position_units.copy()
         self.position_units.update(inner.position_units)
         self.index_dims = outer.index_dims + inner.index_dims

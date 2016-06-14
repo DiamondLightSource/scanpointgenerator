@@ -1,0 +1,94 @@
+from scanpointgenerator import ScanPointGenerator
+from point import Point
+
+
+class ArrayGenerator(ScanPointGenerator):
+    """Generate a given n-dimensional array of points"""
+
+    def __init__(self, name, units, points, lower_bounds=None, upper_bounds=None):
+        """Initialise the generator
+
+        Args:
+            name (list): ND list of scannable names. E.g. ["x", "y"]
+            units (str): The scannable units. E.g. "mm"
+            points (list): List of ND lists of coordinates
+            lower_bounds (list): List of ND lists of lower bound coordinates
+            upper_bounds (list): List of ND lists of upper bound coordinates
+        """
+
+        self.name = name
+        self.points = points
+        self.upper_bounds = upper_bounds
+        self.lower_bounds = lower_bounds
+        self.num = len(points)
+
+        self.position_units = {}
+        for dimension in self.name:
+            self.position_units[dimension] = units
+        self.index_dims = [self.num]
+        self.index_names = list(name)
+
+    def iterator(self):
+
+        for i in xrange(self.num):
+
+            point = Point()
+            for axis, coordinate in enumerate(self.points[i]):
+                point.positions[self.name[axis]] = coordinate
+
+                if self.upper_bounds is None:
+                    upper = self._calculate_upper_bound(i, axis, coordinate)
+                else:
+                    upper = self.upper_bounds[i][axis]
+                point.upper[self.name[axis]] = upper
+
+                if self.lower_bounds is None:
+                    lower = self._calculate_lower_bound(i, axis, coordinate)
+                else:
+                    lower = self.lower_bounds[i][axis]
+                point.lower[self.name[axis]] = lower
+
+            point.indexes = [i]
+            yield point
+
+    def _calculate_upper_bound(self, index, axis, coordinate):
+        """
+        Calculate upper bound for coordinate; if final coordinate then
+        calculate lower bound and extrapolate upper
+
+        Args:
+            index(int): Index of coordinate in list
+            axis(int): Index of coordinate axis in list
+            coordinate(float): Coordinate to calculate bounds for
+
+        Returns:
+            float: Upper bound of coordinate
+        """
+
+        if index == self.num - 1:
+            lower = (coordinate + self.points[index - 1][axis]) / 2
+            upper = coordinate + (coordinate - lower)
+        else:
+            upper = (self.points[index + 1][axis] + coordinate) / 2
+        return upper
+
+    def _calculate_lower_bound(self, index, axis, coordinate):
+        """
+        Calculate lower bound for coordinate; if first coordinate then
+        calculate upper bound and extrapolate lower
+
+        Args:
+            index(int): Index of coordinate in list
+            axis(int): Index of coordinate axis in list
+            coordinate(float): Coordinate to calculate bounds for
+
+        Returns:
+            float: Lower bound of coordinate
+        """
+
+        if index == 0:
+            upper = (self.points[index + 1][axis] + coordinate) / 2
+            lower = coordinate - (upper - coordinate)
+        else:
+            lower = (coordinate + self.points[index - 1][axis]) / 2
+        return lower

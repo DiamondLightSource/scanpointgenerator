@@ -7,7 +7,7 @@ from scanpointgenerator import LineGenerator
 class LineGeneratorTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.g = LineGenerator("x", "mm", 1, 0.1, 5)
+        self.g = LineGenerator("x", "mm", 1.0, 9.0, 5)
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm"))
@@ -15,9 +15,9 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_names, ["x"])
 
     def test_iterator(self):
-        positions = [1.0, 1.1, 1.2, 1.3, 1.4]
-        lower = [0.95, 1.05, 1.15, 1.25, 1.35]
-        upper = [1.05, 1.15, 1.25, 1.35, 1.45]
+        positions = [1.0, 3.0, 5.0, 7.0, 9.0]
+        lower = [0.0, 2.0, 4.0, 6.0, 8.0]
+        upper = [2.0, 4.0, 6.0, 8.0, 10.0]
         indexes = [0, 1, 2, 3, 4]
         for i, p in enumerate(self.g.iterator()):
             self.assertEqual(p.positions, dict(x=positions[i]))
@@ -26,7 +26,37 @@ class LineGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 4)
 
-if __name__=="__main__":
+
+class LineGenerator2DTest(ScanPointGeneratorTest):
+
+    def setUp(self):
+        self.g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+
+    def test_init(self):
+        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
+        self.assertEqual(self.g.index_dims, [5])
+        self.assertEqual(self.g.index_names, ["x", "y"])
+
+    def test_given_inconsistent_dims_then_raise_error(self):
+
+        with self.assertRaises(ValueError):
+            LineGenerator(["x"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+
+    def test_iterator(self):
+        x_positions = [1.0, 2.0, 3.0, 4.0, 5.0]
+        y_positions = [2.0, 4.0, 6.0, 8.0, 10.0]
+        lower = [0.5, 1.5, 2.5, 3.5, 4.5]
+        upper = [1.5, 2.5, 3.5, 4.5, 5.5]
+        indexes = [0, 1, 2, 3, 4]
+        for i, p in enumerate(self.g.iterator()):
+            self.assertEqual(p.positions, dict(x=x_positions[i],
+                                               y=y_positions[i]))
+            self.assertEqual(p.lower["x"], lower[i])
+            self.assertEqual(p.upper["x"], upper[i])
+            self.assertEqual(p.indexes, [indexes[i]])
+        self.assertEqual(i, 4)
+
+if __name__ == "__main__":
     unittest.main()
 
 

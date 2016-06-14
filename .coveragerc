@@ -2,3 +2,4 @@
 omit =
     scanpointgenerator/plotgenerator.py
     scanpointgenerator/version.py
+    plot_check.py

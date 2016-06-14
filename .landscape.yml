@@ -1,0 +1,4 @@
+ignore-paths:
+    - discarded_scripts/
+    - scanpointgenerator/plotgenerator.py
+    - plot_check.py
