@@ -1,7 +1,10 @@
+from collections import OrderedDict
+
 from scanpointgenerator import ScanPointGenerator
 from point import Point
 
 
+@ScanPointGenerator.register_subclass("NestedGenerator")
 class NestedGenerator(ScanPointGenerator):
     """Nest two generators, optionally alternating each row of the inner"""
 
@@ -15,7 +18,7 @@ class NestedGenerator(ScanPointGenerator):
         """
         self.outer = outer
         self.inner = inner
-        self.snake = alternate_direction
+        self.alternate_direction = alternate_direction
 
         self.position_units = outer.position_units.copy()
         self.position_units.update(inner.position_units)
@@ -26,7 +29,7 @@ class NestedGenerator(ScanPointGenerator):
         for i, outer in enumerate(self.outer.iterator()):
             inner_iterator = self.inner.iterator()
             alternate = False
-            if self.snake and i % 2:
+            if self.alternate_direction and i % 2:
                 alternate = True
                 # Reverse the inner iterator as in place list
                 inner_iterator = list(inner_iterator)
@@ -49,3 +52,32 @@ class NestedGenerator(ScanPointGenerator):
                 # Insert indexes
                 point.indexes = outer.indexes + inner.indexes
                 yield point
+
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        d = OrderedDict()
+        d['type'] = "NestedGenerator"
+        d['outer'] = self.outer.to_dict()
+        d['inner'] = self.inner.to_dict()
+        d['alternate_direction'] = self.alternate_direction
+
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create a NestedGenerator instance from a serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            NestedGenerator: New NestedGenerator instance
+        """
+
+        outer = ScanPointGenerator.from_dict(d['outer'])
+        inner = ScanPointGenerator.from_dict(d['inner'])
+        alternate_direction = d['alternate_direction']
+
+        return cls(outer, inner, alternate_direction)

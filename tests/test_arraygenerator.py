@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import unittest
 
 from test_util import ScanPointGeneratorTest
@@ -69,6 +71,40 @@ class LineGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.lower, dict(x=lower[i][0], y=lower[i][1]))
             self.assertEqual(p.upper, dict(x=upper[i][0], y=upper[i][1]))
             self.assertEqual(p.indexes, [indexes[i]])
+
+    def test_to_dict(self):
+        expected_dict = OrderedDict()
+        expected_dict['type'] = "ArrayGenerator"
+        expected_dict['name'] = ['x', 'y']
+        expected_dict['units'] = 'mm'
+        expected_dict['points'] = [[0.0, 0.0], [1.0, 5.0], [2.0, 10.0], [3.0, 15.0]]
+        expected_dict['lower_bounds'] = None
+        expected_dict['upper_bounds'] = None
+
+        d = self.g.to_dict()
+
+        self.assertEqual(expected_dict, d)
+
+    def test_from_dict(self):
+        points = [[0.0, 0.0], [1.0, 5.0], [2.0, 10.0], [3.0, 15.0]]
+        _dict = OrderedDict()
+        _dict['name'] = ['x', 'y']
+        _dict['units'] = 'mm'
+        _dict['points'] = points
+        _dict['lower_bounds'] = None
+        _dict['upper_bounds'] = None
+
+        units_dict = OrderedDict()
+        units_dict['x'] = 'mm'
+        units_dict['y'] = 'mm'
+
+        gen = ArrayGenerator.from_dict(_dict)
+
+        self.assertEqual(['x', 'y'], gen.name)
+        self.assertEqual(units_dict, gen.position_units)
+        self.assertEqual(points, gen.points)
+        self.assertIsNone(gen.lower_bounds)
+        self.assertIsNone(gen.upper_bounds)
 
 if __name__ == "__main__":
     unittest.main()

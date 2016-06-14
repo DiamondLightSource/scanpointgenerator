@@ -1,8 +1,10 @@
+from collections import OrderedDict
 import random
 
 from scanpointgenerator import ScanPointGenerator
 
 
+@ScanPointGenerator.register_subclass("RandomOffsetGenerator")
 class RandomOffsetGenerator(ScanPointGenerator):
     """Apply a random offset to the points of an ND ScanPointGenerator"""
 
@@ -16,6 +18,7 @@ class RandomOffsetGenerator(ScanPointGenerator):
         """
 
         self.gen = generator
+        self.seed = seed
         self.RNG = random.Random(x=seed)
         self.max_offset = max_offset
 
@@ -117,3 +120,32 @@ class RandomOffsetGenerator(ScanPointGenerator):
             lower = current_point.lower[axis]
             current_point.upper[axis] = position + (position - lower)
         yield current_point
+
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        d = OrderedDict()
+        d['type'] = "RandomOffsetGenerator"
+        d['generator'] = self.gen.to_dict()
+        d['seed'] = self.seed
+        d['max_offset'] = self.max_offset
+
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create a RandomOffsetGenerator instance from a serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            RandomOffsetGenerator: New RandomOffsetGenerator instance
+        """
+
+        gen = ScanPointGenerator.from_dict(d['generator'])
+        seed = d['seed']
+        max_offset = d['max_offset']
+
+        return cls(gen, seed, max_offset)

@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from scanpointgenerator import ScanPointGenerator
 from point import Point
 
@@ -9,6 +11,7 @@ def to_list(value):
         return [value]
 
 
+@ScanPointGenerator.register_subclass("LineGenerator")
 class LineGenerator(ScanPointGenerator):
     """Generate equally spaced scan points in N dimensions"""
 
@@ -41,7 +44,7 @@ class LineGenerator(ScanPointGenerator):
             self.step.append(
                 (self.stop[axis] - self.start[axis])/(self.num - 1))
 
-        self.position_units = {}
+        self.position_units = OrderedDict()
         for dimension in self.name:
             self.position_units[dimension] = units
         self.index_dims = [self.num]
@@ -61,3 +64,36 @@ class LineGenerator(ScanPointGenerator):
                 point.upper[self.name[axis]] = self._calc(i + 0.5, axis)
             point.indexes = [i]
             yield point
+
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        d = OrderedDict()
+        d['type'] = "LineGenerator"
+        d['name'] = self.name
+        d['units'] = self.position_units.values()[0]
+        d['start'] = self.start
+        d['stop'] = self.stop
+        d['num'] = self.num
+
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create a LineGenerator instance from a serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            LineGenerator: New LineGenerator instance
+        """
+
+        name = d['name']
+        units = d['units']
+        start = d['start']
+        stop = d['stop']
+        num = d['num']
+
+        return cls(name, units, start, stop, num)

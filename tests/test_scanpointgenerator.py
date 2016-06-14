@@ -3,6 +3,10 @@ import unittest
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator import ScanPointGenerator
 
+from pkg_resources import require
+require("mock")
+from mock import MagicMock
+
 
 class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
 
@@ -14,6 +18,27 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, None)
         self.assertEqual(self.g.index_names, None)
         self.assertRaises(NotImplementedError, self.g.iterator)
+
+    def test_to_dict_raises(self):
+        with self.assertRaises(NotImplementedError):
+            self.g.to_dict()
+
+    def test_from_dict_raises(self):
+        m = MagicMock()
+        self.g._generator_lookup['TestGenerator'] = m
+
+        gen_dict = dict(type="TestGenerator")
+        self.g.from_dict(gen_dict)
+
+        m.from_dict.assert_called_once_with(gen_dict)
+
+    def test_register_subclass(self):
+
+        @ScanPointGenerator.register_subclass("TestGenerator")
+        class TestGenerator(object):
+            pass
+
+        self.assertEqual(TestGenerator, ScanPointGenerator._generator_lookup["TestGenerator"])
 
 
 if __name__ == "__main__":

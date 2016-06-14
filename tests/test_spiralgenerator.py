@@ -1,6 +1,7 @@
+from collections import OrderedDict
 import unittest
 
-from scanpointgenerator.spiralgenerator import SpiralGenerator
+from scanpointgenerator import SpiralGenerator
 
 
 class SpiralGeneratorTest(unittest.TestCase):
@@ -43,3 +44,37 @@ class SpiralGeneratorTest(unittest.TestCase):
             self.assertEqual(p.upper, upper[i])
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 6)
+
+    def test_to_dict(self):
+        expected_dict = OrderedDict()
+        expected_dict['type'] = "SpiralGenerator"
+        expected_dict['name'] = ['x', 'y']
+        expected_dict['units'] = 'mm'
+        expected_dict['centre'] = [0.0, 0.0]
+        expected_dict['radius'] = 1.5
+        expected_dict['scale'] = 1
+
+        d = self.g.to_dict()
+
+        self.assertEqual(expected_dict, d)
+
+    def test_from_dict(self):
+        _dict = OrderedDict()
+        _dict['type'] = "SpiralGenerator"
+        _dict['name'] = ['x', 'y']
+        _dict['units'] = 'mm'
+        _dict['centre'] = [0.0, 0.0]
+        _dict['radius'] = 1.5
+        _dict['scale'] = 1
+
+        units_dict = OrderedDict()
+        units_dict['x'] = 'mm'
+        units_dict['y'] = 'mm'
+
+        gen = SpiralGenerator.from_dict(_dict)
+
+        self.assertEqual(['x', 'y'], gen.name)
+        self.assertEqual(units_dict, gen.position_units)
+        self.assertEqual([0.0, 0.0], gen.centre)
+        self.assertEqual(1.5, gen.radius)
+        self.assertEqual(1, gen.scale)

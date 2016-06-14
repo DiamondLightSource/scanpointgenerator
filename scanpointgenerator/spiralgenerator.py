@@ -1,8 +1,11 @@
-from scanpointgenerator import ScanPointGenerator
-from point import Point
+from collections import OrderedDict
 import math as m
 
+from scanpointgenerator import ScanPointGenerator
+from point import Point
 
+
+@ScanPointGenerator.register_subclass("SpiralGenerator")
 class SpiralGenerator(ScanPointGenerator):
 
     def __init__(self, names, units, centre, radius, scale=1.0):
@@ -10,6 +13,8 @@ class SpiralGenerator(ScanPointGenerator):
         self.units = units
         self.centre = centre
         self.radius = radius
+        self.scale = scale
+
         self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor
         self.beta = scale / (2 * m.pi)  # Radius scale factor
 
@@ -42,3 +47,36 @@ class SpiralGenerator(ScanPointGenerator):
             p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
 
             yield p
+
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        d = OrderedDict()
+        d['type'] = "SpiralGenerator"
+        d['name'] = self.name
+        d['units'] = self.position_units.values()[0]
+        d['centre'] = self.centre
+        d['radius'] = self.radius
+        d['scale'] = self.scale
+
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create a SpiralGenerator instance from a serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            SpiralGenerator: New SpiralGenerator instance
+        """
+
+        name = d['name']
+        units = d['units']
+        centre = d['centre']
+        radius = d['radius']
+        scale = d['scale']
+
+        return cls(name, units, centre, radius, scale)
