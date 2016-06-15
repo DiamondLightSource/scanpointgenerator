@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import math as m
 
-from scanpointgenerator import ScanPointGenerator
+from generator import ScanPointGenerator
 from point import Point
 
 

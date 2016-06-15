@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from scanpointgenerator import ScanPointGenerator
+from generator import ScanPointGenerator
 from roi import ROI
 
 

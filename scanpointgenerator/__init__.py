@@ -1,5 +1,5 @@
 from point import Point  # noqa
-from scanpointgenerator import ScanPointGenerator  # noqa
+from generator import ScanPointGenerator  # noqa
 from arraygenerator import ArrayGenerator  # noqa
 from linegenerator import LineGenerator  # noqa
 from lissajousgenerator import LissajousGenerator  # noqa
