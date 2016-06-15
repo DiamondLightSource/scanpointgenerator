@@ -1,12 +1,12 @@
 from collections import OrderedDict
 import math as m
 
-from generator import ScanPointGenerator
+from generator import Generator
 from point import Point
 
 
-@ScanPointGenerator.register_subclass("LissajousGenerator")
-class LissajousGenerator(ScanPointGenerator):
+@Generator.register_subclass("LissajousGenerator")
+class LissajousGenerator(Generator):
 
     def __init__(self, names, units, box, num_lobes, num_points=None):
         self.name = names

@@ -1,17 +1,17 @@
 from collections import OrderedDict
 import random
 
-from generator import ScanPointGenerator
+from generator import Generator
 
 
-@ScanPointGenerator.register_subclass("RandomOffsetGenerator")
-class RandomOffsetGenerator(ScanPointGenerator):
+@Generator.register_subclass("RandomOffsetGenerator")
+class RandomOffsetGenerator(Generator):
     """Apply a random offset to the points of an ND ScanPointGenerator"""
 
     def __init__(self, generator, seed, max_offset):
         """
         Args:
-            generator(ScanPointGenerator): ND generator to apply offset to
+            generator(Generator): ND generator to apply offset to
             seed(int): Seed for random offset generator
             max_offset(dict): ND dict of maximum allowed offset in
             generator-defined units
@@ -144,7 +144,7 @@ class RandomOffsetGenerator(ScanPointGenerator):
             RandomOffsetGenerator: New RandomOffsetGenerator instance
         """
 
-        gen = ScanPointGenerator.from_dict(d['generator'])
+        gen = Generator.from_dict(d['generator'])
         seed = d['seed']
         max_offset = d['max_offset']
 

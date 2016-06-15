@@ -1,7 +1,7 @@
 import unittest
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator import ScanPointGenerator
+from scanpointgenerator import Generator
 
 from pkg_resources import require
 require("mock")
@@ -11,7 +11,7 @@ from mock import MagicMock
 class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.g = ScanPointGenerator()
+        self.g = Generator()
 
     def test_init(self):
         self.assertEqual(self.g.position_units, None)
@@ -34,11 +34,11 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
 
     def test_register_subclass(self):
 
-        @ScanPointGenerator.register_subclass("TestGenerator")
+        @Generator.register_subclass("TestGenerator")
         class TestGenerator(object):
             pass
 
-        self.assertEqual(TestGenerator, ScanPointGenerator._generator_lookup["TestGenerator"])
+        self.assertEqual(TestGenerator, Generator._generator_lookup["TestGenerator"])
 
 
 if __name__ == "__main__":

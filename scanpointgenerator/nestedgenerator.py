@@ -1,19 +1,19 @@
 from collections import OrderedDict
 
-from generator import ScanPointGenerator
+from generator import Generator
 from point import Point
 
 
-@ScanPointGenerator.register_subclass("NestedGenerator")
-class NestedGenerator(ScanPointGenerator):
+@Generator.register_subclass("NestedGenerator")
+class NestedGenerator(Generator):
     """Nest two generators, optionally alternating each row of the inner"""
 
     def __init__(self, outer, inner, alternate_direction=False):
         """Initialise the generator
 
         Args:
-            outer (ScanPointGenerator): The slower generator
-            inner (ScanPointGenerator): The faster generator
+            outer (Generator): The slower generator
+            inner (Generator): The faster generator
             alternate_direction (bool): If True, alternate odd rows of the inner generator
         """
         self.outer = outer
@@ -76,8 +76,8 @@ class NestedGenerator(ScanPointGenerator):
             NestedGenerator: New NestedGenerator instance
         """
 
-        outer = ScanPointGenerator.from_dict(d['outer'])
-        inner = ScanPointGenerator.from_dict(d['inner'])
+        outer = Generator.from_dict(d['outer'])
+        inner = Generator.from_dict(d['inner'])
         alternate_direction = d['alternate_direction']
 
         return cls(outer, inner, alternate_direction)

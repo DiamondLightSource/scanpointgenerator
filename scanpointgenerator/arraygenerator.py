@@ -1,11 +1,11 @@
 from collections import OrderedDict
 
-from generator import ScanPointGenerator
+from generator import Generator
 from point import Point
 
 
-@ScanPointGenerator.register_subclass("ArrayGenerator")
-class ArrayGenerator(ScanPointGenerator):
+@Generator.register_subclass("ArrayGenerator")
+class ArrayGenerator(Generator):
     """Generate a given n-dimensional array of points"""
 
     def __init__(self, name, units, points, lower_bounds=None, upper_bounds=None):

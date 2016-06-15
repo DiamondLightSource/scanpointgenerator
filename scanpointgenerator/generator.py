@@ -1,6 +1,6 @@
 
 
-class ScanPointGenerator(object):
+class Generator(object):
     """Base class for all malcolm scan point generators
 
     Attributes:
@@ -40,7 +40,7 @@ class ScanPointGenerator(object):
             d(dict): Dictionary of attributes
 
         Returns:
-            ScanPointGenerator: New ScanPointGenerator instance
+            Generator: New ScanPointGenerator instance
         """
 
         generator_type = d["type"]
@@ -56,7 +56,7 @@ class ScanPointGenerator(object):
         Register a subclass so from_dict() works
 
         Args:
-            generator_type (ScanPointGenerator): Subclass to register
+            generator_type (Generator): Subclass to register
         """
 
         def decorator(generator):

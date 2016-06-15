@@ -1,12 +1,12 @@
 from collections import OrderedDict
 import math as m
 
-from generator import ScanPointGenerator
+from generator import Generator
 from point import Point
 
 
-@ScanPointGenerator.register_subclass("SpiralGenerator")
-class SpiralGenerator(ScanPointGenerator):
+@Generator.register_subclass("SpiralGenerator")
+class SpiralGenerator(Generator):
 
     def __init__(self, names, units, centre, radius, scale=1.0):
         self.name = names

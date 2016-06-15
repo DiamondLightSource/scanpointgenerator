@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from generator import ScanPointGenerator
+from generator import Generator
 from roi import ROI
 
 
@@ -51,7 +51,7 @@ class MaskedGenerator(object):
             MaskedGenerator: New MaskedGenerator instance
         """
 
-        gen = ScanPointGenerator.from_dict(d['generator'])
+        gen = Generator.from_dict(d['generator'])
 
         roi_list = []
         for roi_dict in d['rois']:

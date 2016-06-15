@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from generator import ScanPointGenerator
+from generator import Generator
 from point import Point
 
 
@@ -11,8 +11,8 @@ def to_list(value):
         return [value]
 
 
-@ScanPointGenerator.register_subclass("LineGenerator")
-class LineGenerator(ScanPointGenerator):
+@Generator.register_subclass("LineGenerator")
+class LineGenerator(Generator):
     """Generate equally spaced scan points in N dimensions"""
 
     def __init__(self, name, units, start, stop, num):
