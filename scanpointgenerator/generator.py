@@ -12,6 +12,7 @@ class Generator(object):
         index_names (list): List of the str dimension names for the dataset.
             This will have the same length as the index_dims. E.g. ["spiral_i"]
     """
+    alternate_direction = False
     position_units = None
     index_dims = None
     index_names = None
