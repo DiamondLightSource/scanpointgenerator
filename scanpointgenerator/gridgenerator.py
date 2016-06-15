@@ -1,5 +1,5 @@
 from linegenerator import LineGenerator
-from nestedgenerator import NestedGenerator
+from compoundgenerator import NestedGenerator
 
 
 class GridGenerator(NestedGenerator):

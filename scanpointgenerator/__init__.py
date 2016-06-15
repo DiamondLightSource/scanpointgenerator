@@ -4,7 +4,7 @@ from arraygenerator import ArrayGenerator  # noqa
 from linegenerator import LineGenerator  # noqa
 from lissajousgenerator import LissajousGenerator  # noqa
 from maskedgenerator import MaskedGenerator  # noqa
-from nestedgenerator import NestedGenerator  # noqa
+from compoundgenerator import NestedGenerator  # noqa
 from randomoffsetgenerator import RandomOffsetGenerator  # noqa
 from spiralgenerator import SpiralGenerator  # noqa
 from plotgenerator import plot_generator  # noqa
