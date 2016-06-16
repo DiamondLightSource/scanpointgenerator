@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import unittest
 
-from scanpointgenerator import MaskedGenerator, NestedGenerator, LineGenerator
+from scanpointgenerator import MaskedGenerator, CompoundGenerator, LineGenerator
 from scanpointgenerator.rectangular_roi import RectangularROI
 
 from pkg_resources import require
@@ -15,7 +15,7 @@ class MaskedGeneratorTest(unittest.TestCase):
         self.roi = RectangularROI([0.0, 0.0], 5.0, 8.0)
         x = LineGenerator("x", "mm", 0.0, 9.0, 10)
         y = LineGenerator("y", "mm", 0.0, 9.0, 10)
-        self.nest = NestedGenerator(y, x, alternate_direction=True)
+        self.nest = CompoundGenerator(y, x, alternate_direction=True)
 
     def test_init(self):
         gen = MaskedGenerator(self.nest, [self.roi])
@@ -72,7 +72,7 @@ class TestSerialisation(unittest.TestCase):
         self.assertEqual(expected_dict, d)
 
     @patch('scanpointgenerator.maskedgenerator.ROI')
-    @patch('scanpointgenerator.maskedgenerator.ScanPointGenerator')
+    @patch('scanpointgenerator.maskedgenerator.Generator')
     def test_from_dict(self, SPG_mock, ROI_mock):
         SPG_mock.from_dict.return_value = self.line
         ROI_mock.from_dict.return_value = self.roi
