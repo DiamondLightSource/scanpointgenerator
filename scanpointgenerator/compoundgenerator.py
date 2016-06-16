@@ -22,6 +22,7 @@ class CompoundGenerator(Generator):
 
         self.regions = regions
 
+        self.inner = generator_list[0].name[0]
         self.num_points = 1
         self.axis_lengths = {}
         self.repeat_periods = {}
@@ -84,9 +85,15 @@ class CompoundGenerator(Generator):
                 # Else just use the same point as last time
 
                 current_point = self.current_axis_points[axis]
-                point.positions[axis] = current_point.positions[axis]
-                point.upper[axis] = current_point.upper[axis]
-                point.lower[axis] = current_point.lower[axis]
+                if axis == self.inner:
+                    point.positions[axis] = current_point.positions[axis]
+                    point.upper[axis] = current_point.upper[axis]
+                    point.lower[axis] = current_point.lower[axis]
+                else:
+                    point.positions[axis] = current_point.positions[axis]
+                    point.upper[axis] = current_point.positions[axis]
+                    point.lower[axis] = current_point.positions[axis]
+
                 point.indexes += current_point.indexes
 
             if self.contains_point(point):
