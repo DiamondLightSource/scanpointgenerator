@@ -4,13 +4,15 @@ import unittest
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
+from scanpointgenerator.scanregion import ScanRegion
+from scanpointgenerator.circular_roi import CircularROI
 
 from pkg_resources import require
 require("mock")
 from mock import patch, MagicMock
 
 
-class NestedGeneratorTest(ScanPointGeneratorTest):
+class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def setUp(self):
         self.x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
@@ -54,6 +56,22 @@ class NestedGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.positions, dict(
                 x=xpositions[i], y=ypositions[i], z=zpositions[i]))
             self.assertEqual(p.indexes, [xindexes[i], yindexes[i], zindexes[i]])
+
+    def test_iterator_with_region(self):
+        xpositions = [1.0, 1.1, 1.2, 1.1, 1.0]
+        ypositions = [2.0, 2.0, 2.0, 2.1, 2.1]
+        xindexes = [0, 1, 2, 1, 0]
+        yindexes = [0, 0, 0, 1, 1]
+
+        circle = CircularROI([1.0, 2.0], 0.2)
+        scan_region = ScanRegion(circle, ['x', 'y'])
+
+        gen = CompoundGenerator([self.x, self.y], [scan_region])
+
+        for i, p in enumerate(gen.iterator()):
+            self.assertEqual(p.positions, dict(
+                x=xpositions[i], y=ypositions[i]))
+            self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
 
 
 class TestSerialisation(unittest.TestCase):
