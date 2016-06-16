@@ -17,6 +17,7 @@ class SpiralGenerator(Generator):
 
         self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor
         self.beta = scale / (2 * m.pi)  # Radius scale factor
+        self.num = self._end_point(self.radius)
 
         self.position_units = {names[0]: units, names[1]: units}
         self.index_dims = [self._end_point(self.radius) - 1]
