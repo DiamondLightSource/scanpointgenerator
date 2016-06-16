@@ -1,3 +1,4 @@
+from collections import OrderedDict
 
 
 class ScanRegion(object):
@@ -28,3 +29,29 @@ class ScanRegion(object):
         sub_point = (scannable_1, scannable_2)
 
         return self.roi.contains_point(sub_point)
+
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        d = OrderedDict()
+        d['roi'] = self.roi.to_dict()
+        d['scannables'] = self.scannables
+
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create a ScanRegion instance from a serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            ScanRegion: New ScanRegion instance
+        """
+
+        roi = d['roi'].from_dict()
+        scannables = d['scannables']
+
+        return cls(roi, scannables)
