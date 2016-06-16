@@ -1,8 +1,8 @@
 from linegenerator import LineGenerator
-from compoundgenerator import NestedGenerator
+from compoundgenerator import CompoundGenerator
 
 
-class GridGenerator(NestedGenerator):
+class GridGenerator(CompoundGenerator):
 
     def __init__(self, box, inner_scan, outer_scan, alternate_direction=False):
 
