@@ -86,13 +86,13 @@ class CompoundGenerator(Generator):
 
                 current_point = self.current_axis_points[axis]
                 if axis == self.inner:
-                    point.positions[axis] = current_point.positions[axis]
-                    point.upper[axis] = current_point.upper[axis]
-                    point.lower[axis] = current_point.lower[axis]
+                    point.positions.update(current_point.positions)
+                    point.upper.update(current_point.upper)
+                    point.lower.update(current_point.lower)
                 else:
-                    point.positions[axis] = current_point.positions[axis]
-                    point.upper[axis] = current_point.positions[axis]
-                    point.lower[axis] = current_point.positions[axis]
+                    point.positions.update(current_point.positions)
+                    point.upper.update(current_point.positions)
+                    point.lower.update(current_point.positions)
 
                 point.indexes += current_point.indexes
 
