@@ -29,6 +29,42 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, [3, 2])
         self.assertEqual(self.g.index_names, ["x", "y"])
 
+    def test_contains_point_true(self):
+        point = MagicMock()
+        point.positions.__getitem__.side_effect = [1.0, 2.0]
+        roi = MagicMock()
+        roi.contains_point.return_value = True
+        region = MagicMock()
+        region.scannables = ['x', 'y']
+        region.roi = roi
+        self.g.regions = [region]
+
+        response = self.g.contains_point(point)
+
+        call_list = [call[0][0] for call in point.positions.__getitem__.call_args_list]
+        self.assertIn('x', call_list)
+        self.assertIn('y', call_list)
+        roi.contains_point.assert_called_once_with([1.0, 2.0])
+        self.assertTrue(response)
+
+    def test_contains_point_false(self):
+        point = MagicMock()
+        point.positions.__getitem__.side_effect = [1.0, 2.0]
+        roi = MagicMock()
+        roi.contains_point.return_value = False
+        region = MagicMock()
+        region.scannables = ['x', 'y']
+        region.roi = roi
+        self.g.regions = [region]
+
+        response = self.g.contains_point(point)
+
+        call_list = [call[0][0] for call in point.positions.__getitem__.call_args_list]
+        self.assertIn('x', call_list)
+        self.assertIn('y', call_list)
+        roi.contains_point.assert_called_once_with([1.0, 2.0])
+        self.assertFalse(response)
+
     def test_positions(self):
         xpositions = [1.0, 1.1, 1.2, 1.2, 1.1, 1.0]
         ypositions = [2.0, 2.0, 2.0, 2.1, 2.1, 2.1]
