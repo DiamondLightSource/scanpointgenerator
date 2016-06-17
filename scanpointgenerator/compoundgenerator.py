@@ -58,20 +58,20 @@ class CompoundGenerator(Generator):
                 axis_period = self.axis_periods[axis]
                 axis_length = self.axis_lengths[axis]
 
-                if point_num == 0:
-                    index = 0
-                else:
-                    index = (point_num / (axis_period / axis_length)) % axis_length
+                index = (point_num / (axis_period / axis_length)) % axis_length
 
                 loop_number = point_num / axis_period
                 if self.alternate_direction[axis] and loop_number % 2:
-                    index = (axis_period - 1) - index
+                    index = (axis_length - 1) - index
+                    reverse = True
+                else:
+                    reverse = False
 
                 current_point = self.axis_points[axis][index]
 
                 if axis == self.inner:
                     point.positions.update(current_point.positions)
-                    if self.alternate_direction[axis] and loop_number % 2:
+                    if reverse:
                         point.upper.update(current_point.lower)
                         point.lower.update(current_point.upper)
                     else:
