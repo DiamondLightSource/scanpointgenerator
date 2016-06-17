@@ -21,10 +21,10 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.g = CompoundGenerator([self.x, self.y], [])
 
     def test_init(self):
-        self.assertEqual(self.g.generators['x'], self.x)
-        self.assertEqual(self.g.generators['y'], self.y)
+        self.assertEqual(self.g.generators[0], self.x)
+        self.assertEqual(self.g.generators[1], self.y)
         self.assertEqual(self.g.num_points, 6)
-        self.assertEqual(self.g.axis_lengths, dict(x=3, y=2))
+        self.assertEqual(self.g.lengths, [3, 2])
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [3, 2])
         self.assertEqual(self.g.index_names, ["x", "y"])
@@ -164,8 +164,8 @@ class TestSerialisation(unittest.TestCase):
 
         gen = CompoundGenerator.from_dict(_dict)
 
-        self.assertEqual(gen.generators['x'], self.l1)
-        self.assertEqual(gen.generators['y'], self.l2)
+        self.assertEqual(gen.generators[0], self.l1)
+        self.assertEqual(gen.generators[1], self.l2)
         self.assertEqual(gen.regions[0], self.r1)
 
 if __name__ == "__main__":

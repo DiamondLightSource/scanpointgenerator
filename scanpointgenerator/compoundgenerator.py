@@ -9,44 +9,38 @@ from point import Point
 class CompoundGenerator(Generator):
     """Nest N generators and apply filter regions to relevant generator pairs"""
 
-    def __init__(self, generator_list, regions):
+    def __init__(self, generators, regions):
         """
         Args:
-            generator_list(list(Generator)): List of Generators to nest
+            generators(list(Generator)): List of Generators to nest
             regions(list(ScanRegion)): List of regions to filter points by
         """
 
-        self.generators = OrderedDict()
-        for generator in generator_list:
-            self.generators[generator.name[0]] = generator
-
+        self.generators = generators
         self.regions = regions
 
-        self.axes = []
+        self.lengths = []
         self.num_points = 1
-        self.axis_lengths = {}
-        self.axis_periods = {}
-        self.alternate_direction = {}
-        self.axis_points = {}
-        for axis, generator in self.generators.items():
-            self.axes.append(generator.name[0])
+        self.periods = []
+        self.alternate_direction = []
+        self.point_sets = []
+        for generator in self.generators:
+            self.lengths.append(generator.num)
             self.num_points *= generator.num
-            self.axis_lengths[axis] = generator.num
-            self.axis_periods[axis] = self.num_points
-            self.alternate_direction[axis] = generator.alternate_direction
-            self.axis_points[axis] = list(generator.iterator())
-        self.inner = generator_list[0].name[0]
+            self.periods.append(self.num_points)
+            self.alternate_direction.append(generator.alternate_direction)
+            self.point_sets.append(list(generator.iterator()))
 
-        self.position_units = generator_list[0].position_units.copy()
-        for generator in generator_list[1:]:
+        self.position_units = generators[0].position_units.copy()
+        for generator in generators[1:]:
             self.position_units.update(generator.position_units)
 
         self.index_dims = []
-        for generator in generator_list:
+        for generator in generators:
             self.index_dims += generator.index_dims
 
         self.index_names = []
-        for generator in generator_list:
+        for generator in generators:
             self.index_names += generator.index_names
 
     def iterator(self):
@@ -54,24 +48,25 @@ class CompoundGenerator(Generator):
         for point_num in xrange(self.num_points):
 
             point = Point()
-            for axis in self.axes:
-                axis_period = self.axis_periods[axis]
-                axis_length = self.axis_lengths[axis]
+            for gen_index, points in enumerate(self.point_sets):
+                axis_period = self.periods[gen_index]
+                axis_length = self.lengths[gen_index]
 
-                index = (point_num / (axis_period / axis_length)) % axis_length
+                point_index = \
+                    (point_num / (axis_period / axis_length)) % axis_length
 
                 loop_number = point_num / axis_period
-                if self.alternate_direction[axis] and loop_number % 2:
-                    index = (axis_length - 1) - index
+                if self.alternate_direction[gen_index] and loop_number % 2:
+                    point_index = (axis_length - 1) - point_index
                     reverse = True
                 else:
                     reverse = False
 
-                current_point = self.axis_points[axis][index]
+                current_point = self.point_sets[gen_index][point_index]
 
-                if axis == self.inner:
+                if gen_index == 0:  # If innermost, generator use bounds
                     point.positions.update(current_point.positions)
-                    if reverse:
+                    if reverse:  # Swap bounds if reversing
                         point.upper.update(current_point.lower)
                         point.lower.update(current_point.upper)
                     else:
@@ -118,7 +113,7 @@ class CompoundGenerator(Generator):
         d['type'] = "CompoundGenerator"
 
         d['generators'] = []
-        for generator in self.generators.values():
+        for generator in self.generators:
             d['generators'].append(generator.to_dict())
 
         d['regions'] = []
