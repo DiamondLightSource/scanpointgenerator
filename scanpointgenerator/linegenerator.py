@@ -58,25 +58,14 @@ class LineGenerator(Generator):
         return self.start[axis] + i * self.step[axis]
 
     def iterator(self):
-        if self.reverse:
-            _range = reversed(xrange(self.num))
-        else:
-            _range = xrange(self.num)
 
-        for i in _range:
+        for i in xrange(self.num):
             point = Point()
 
             for axis in range(self.num_axes):
                 point.positions[self.name[axis]] = self._calc(i, axis)
-
-                lower = self._calc(i - 0.5, axis)
-                upper = self._calc(i + 0.5, axis)
-                if self.reverse:
-                    point.lower[self.name[axis]] = upper
-                    point.upper[self.name[axis]] = lower
-                else:
-                    point.lower[self.name[axis]] = lower
-                    point.upper[self.name[axis]] = upper
+                point.lower[self.name[axis]] = self._calc(i - 0.5, axis)
+                point.upper[self.name[axis]] = self._calc(i + 0.5, axis)
 
             point.indexes = [i]
             yield point

@@ -22,21 +22,20 @@ class CompoundGenerator(Generator):
 
         self.regions = regions
 
-        self.inner = generator_list[0].name[0]
+        self.axes = []
         self.num_points = 1
         self.axis_lengths = {}
-        self.repeat_periods = {}
-        self.current_axis_indexes = {}
+        self.axis_periods = {}
         self.alternate_direction = {}
+        self.axis_points = {}
         for axis, generator in self.generators.items():
+            self.axes.append(generator.name[0])
             self.num_points *= generator.num
             self.axis_lengths[axis] = generator.num
-            self.repeat_periods[axis] = self.num_points
-            self.current_axis_indexes[axis] = 0
+            self.axis_periods[axis] = self.num_points
             self.alternate_direction[axis] = generator.alternate_direction
-
-        self.current_axis_points = {}
-        self.iterators = {}
+            self.axis_points[axis] = list(generator.iterator())
+        self.inner = generator_list[0].name[0]
 
         self.position_units = generator_list[0].position_units.copy()
         for generator in generator_list[1:]:
@@ -55,40 +54,29 @@ class CompoundGenerator(Generator):
         for point_num in xrange(self.num_points):
 
             point = Point()
-            for axis, generator in self.generators.items():
-                repeat_period = self.repeat_periods[axis]
+            for axis in self.axes:
+                axis_period = self.axis_periods[axis]
                 axis_length = self.axis_lengths[axis]
 
                 if point_num == 0:
-                    new_index = 0
+                    index = 0
                 else:
-                    new_index = point_num / (repeat_period / axis_length) % axis_length
+                    index = (point_num / (axis_period / axis_length)) % axis_length
 
-                # If start of axis, reset iterator and index for axis
-                if new_index == 0:
+                loop_number = point_num / axis_period
+                if self.alternate_direction[axis] and loop_number % 2:
+                    index = (axis_period - 1) - index
 
-                    loop_number = point_num / repeat_period
-                    if self.alternate_direction[axis] and loop_number % 2:
-                        generator.reverse = True
-                    else:
-                        generator.reverse = False
-                    self.iterators[axis] = generator.iterator()
+                current_point = self.axis_points[axis][index]
 
-                    self.current_axis_points[axis] = self.iterators[axis].next()
-                    self.current_axis_indexes[axis] = 0
-
-                # Else if axis index has increased, get next point
-                elif new_index == self.current_axis_indexes[axis] + 1:
-                    self.current_axis_indexes[axis] = new_index
-                    self.current_axis_points[axis] = self.iterators[axis].next()
-
-                # Else just use the same point as last time
-
-                current_point = self.current_axis_points[axis]
                 if axis == self.inner:
                     point.positions.update(current_point.positions)
-                    point.upper.update(current_point.upper)
-                    point.lower.update(current_point.lower)
+                    if self.alternate_direction[axis]:
+                        point.upper.update(current_point.lower)
+                        point.lower.update(current_point.upper)
+                    else:
+                        point.upper.update(current_point.lower)
+                        point.lower.update(current_point.upper)
                 else:
                     point.positions.update(current_point.positions)
                     point.upper.update(current_point.positions)
