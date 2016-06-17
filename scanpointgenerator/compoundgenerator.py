@@ -71,12 +71,12 @@ class CompoundGenerator(Generator):
 
                 if axis == self.inner:
                     point.positions.update(current_point.positions)
-                    if self.alternate_direction[axis]:
+                    if self.alternate_direction[axis] and loop_number % 2:
                         point.upper.update(current_point.lower)
                         point.lower.update(current_point.upper)
                     else:
-                        point.upper.update(current_point.lower)
-                        point.lower.update(current_point.upper)
+                        point.upper.update(current_point.upper)
+                        point.lower.update(current_point.lower)
                 else:
                     point.positions.update(current_point.positions)
                     point.upper.update(current_point.positions)

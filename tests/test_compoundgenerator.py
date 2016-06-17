@@ -66,12 +66,16 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertFalse(response)
 
     def test_positions(self):
+        xlower = [0.95, 1.05, 1.15, 1.25, 1.15, 1.05]
         xpositions = [1.0, 1.1, 1.2, 1.2, 1.1, 1.0]
+        xupper = [1.05, 1.15, 1.25, 1.15, 1.05, 0.95]
         ypositions = [2.0, 2.0, 2.0, 2.1, 2.1, 2.1]
         xindexes = [0, 1, 2, 2, 1, 0]
         yindexes = [0, 0, 0, 1, 1, 1]
 
         for i, p in enumerate(self.g.iterator()):
+            self.assertEqual(p.upper['x'], xupper[i])
+            self.assertEqual(p.lower['x'], xlower[i])
             self.assertEqual(p.positions, dict(x=xpositions[i], y=ypositions[i]))
             self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
 
