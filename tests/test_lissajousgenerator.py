@@ -99,4 +99,4 @@ class LissajousGeneratorTest(unittest.TestCase):
         self.assertEqual(0.5, gen.x_max)
         self.assertEqual(1.0, gen.y_max)
         self.assertEqual([0.0, 0.0], gen.centre)
-        self.assertEqual(100, gen.num_points)
+        self.assertEqual(100, gen.num)

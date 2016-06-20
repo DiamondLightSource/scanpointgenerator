@@ -60,7 +60,7 @@ class TestSerialisation(unittest.TestCase):
 
         self.assertEqual(expected_dict, d)
 
-    @patch('scanpointgenerator.randomoffsetgenerator.ScanPointGenerator')
+    @patch('scanpointgenerator.randomoffsetgenerator.Generator')
     def test_from_dict(self, SPG_mock):
         SPG_mock.from_dict.return_value = self.l
 

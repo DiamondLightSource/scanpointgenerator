@@ -32,14 +32,12 @@ class ContainsPointTest(unittest.TestCase):
     def setUp(self):
         self.Circle = CircularROI([5.0, 15.0], 5.0)
 
-        self.point = Point()
-        self.point.positions['x'] = 7.0
-        self.point.positions['y'] = 11.0
+        self.point = [7.0, 11.0]
 
     def test_given_valid_point_then_return_True(self):
         self.assertTrue(self.Circle.contains_point(self.point))
 
     def test_given_point_outside_then_return_False(self):
-        self.point.positions['x'] = 9.0
+        self.point = [9.0, 11.0]
 
         self.assertFalse(self.Circle.contains_point(self.point))

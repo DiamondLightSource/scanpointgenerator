@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from scanpointgenerator import ScanPointGenerator
+from generator import Generator
 from point import Point
 
 
@@ -11,11 +11,13 @@ def to_list(value):
         return [value]
 
 
-@ScanPointGenerator.register_subclass("LineGenerator")
-class LineGenerator(ScanPointGenerator):
+@Generator.register_subclass("LineGenerator")
+class LineGenerator(Generator):
     """Generate equally spaced scan points in N dimensions"""
 
-    def __init__(self, name, units, start, stop, num):
+    reverse = False
+
+    def __init__(self, name, units, start, stop, num, alternate_direction=False):
         """Initialise the generator
 
         Args:
@@ -30,6 +32,7 @@ class LineGenerator(ScanPointGenerator):
         self.name = to_list(name)
         self.start = to_list(start)
         self.stop = to_list(stop)
+        self.alternate_direction = alternate_direction
 
         if len(self.name) != len(self.start) or \
            len(self.name) != len(self.stop):
@@ -55,6 +58,7 @@ class LineGenerator(ScanPointGenerator):
         return self.start[axis] + i * self.step[axis]
 
     def iterator(self):
+
         for i in xrange(self.num):
             point = Point()
 
@@ -62,6 +66,7 @@ class LineGenerator(ScanPointGenerator):
                 point.positions[self.name[axis]] = self._calc(i, axis)
                 point.lower[self.name[axis]] = self._calc(i - 0.5, axis)
                 point.upper[self.name[axis]] = self._calc(i + 0.5, axis)
+
             point.indexes = [i]
             yield point
 

@@ -14,9 +14,9 @@ class RectangularROI(ROI):
 
     def contains_point(self, point):
 
-        if abs(point.positions['x'] - self.centre[0]) > self.width/2:
+        if abs(point[0] - self.centre[0]) > self.width/2:
             return False
-        elif abs(point.positions['y'] - self.centre[1]) > self.height/2:
+        elif abs(point[1] - self.centre[1]) > self.height/2:
             return False
         else:
             return True

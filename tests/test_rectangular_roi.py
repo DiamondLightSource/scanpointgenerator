@@ -42,29 +42,27 @@ class ContainsPointTest(unittest.TestCase):
     def setUp(self):
         self.Rectangle = RectangularROI([0.0, 0.0], 4.0, 5.0)
 
-        self.point = Point()
-        self.point.positions['x'] = 1.0
-        self.point.positions['y'] = 2.0
+        self.point = [1.0, 2.0]
 
     def test_given_valid_point_then_return_True(self):
         self.assertTrue(self.Rectangle.contains_point(self.point))
 
     def test_given_point_high_then_return_False(self):
-        self.point.positions['x'] = 5.0
+        self.point = [5.0, 2.0]
 
         self.assertFalse(self.Rectangle.contains_point(self.point))
 
     def test_given_point_low_then_return_False(self):
-        self.point.positions['x'] = -3.0
+        self.point = [-3.0, 2.0]
 
         self.assertFalse(self.Rectangle.contains_point(self.point))
 
     def test_given_point_left_then_return_False(self):
-        self.point.positions['y'] = 4.0
+        self.point = [1.0, 4.0]
 
         self.assertFalse(self.Rectangle.contains_point(self.point))
 
     def test_given_point_right_then_return_False(self):
-        self.point.positions['y'] = -6.0
+        self.point = [1.0, -6.0]
 
         self.assertFalse(self.Rectangle.contains_point(self.point))

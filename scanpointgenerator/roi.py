@@ -12,6 +12,18 @@ class ROI(object):
     def contains_point(self, point):
         raise NotImplementedError
 
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        from collections import OrderedDict
+
+        d = OrderedDict()
+        d['type'] = "ROI"
+        d['name'] = self.name
+        d['centre'] = self.centre
+
+        return d
+
     @classmethod
     def from_dict(cls, d):
         """
