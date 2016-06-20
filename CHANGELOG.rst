@@ -3,6 +3,12 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+`0-5`_ - 2016-06-20
+-------------------
+Added:
+
+- Additions to work with GDA and Malcolm
+
 `0-4`_ - 2016-04-15
 -------------------
 Added:
