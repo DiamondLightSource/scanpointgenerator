@@ -1,7 +1,10 @@
+from collections import OrderedDict
+
 from scanpointgenerator import ScanPointGenerator
 from point import Point
 
 
+@ScanPointGenerator.register_subclass("ArrayGenerator")
 class ArrayGenerator(ScanPointGenerator):
     """Generate a given n-dimensional array of points"""
 
@@ -20,6 +23,7 @@ class ArrayGenerator(ScanPointGenerator):
         self.points = points
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
+
         self.num = len(points)
 
         self.position_units = {}
@@ -92,3 +96,36 @@ class ArrayGenerator(ScanPointGenerator):
         else:
             lower = (coordinate + self.points[index - 1][axis]) / 2
         return lower
+
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        d = OrderedDict()
+        d['type'] = "ArrayGenerator"
+        d['name'] = self.name
+        d['units'] = self.position_units.values()[0]
+        d['points'] = self.points
+        d['lower_bounds'] = self.lower_bounds
+        d['upper_bounds'] = self.upper_bounds
+
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create a ArrayGenerator instance from a serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            ArrayGenerator: New ArrayGenerator instance
+        """
+
+        name = d['name']
+        units = d['units']
+        points = d['points']
+        lower_bounds = d['lower_bounds']
+        upper_bounds = d['upper_bounds']
+
+        return cls(name, units, points, lower_bounds, upper_bounds)

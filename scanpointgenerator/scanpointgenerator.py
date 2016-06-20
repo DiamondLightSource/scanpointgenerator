@@ -1,3 +1,5 @@
+
+
 class ScanPointGenerator(object):
     """Base class for all malcolm scan point generators
 
@@ -13,6 +15,8 @@ class ScanPointGenerator(object):
     position_units = None
     index_dims = None
     index_names = None
+    # Lookup table for generator subclasses
+    _generator_lookup = {}
 
     def iterator(self):
         """An iterator yielding positions at each scan point
@@ -21,3 +25,43 @@ class ScanPointGenerator(object):
             Point: The next scan :class:`Point`
         """
         raise NotImplementedError
+
+    def to_dict(self):
+        """Abstract method to convert object attributes into a dictionary"""
+        raise NotImplementedError
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Abstract method to create a ScanPointGenerator instance from a
+        serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            ScanPointGenerator: New ScanPointGenerator instance
+        """
+
+        generator_type = d["type"]
+        generator = cls._generator_lookup[generator_type]
+        assert generator is not cls, \
+            "Subclass %s did not redefine from_dict" % generator_type
+        gen = generator.from_dict(d)
+        return gen
+
+    @classmethod
+    def register_subclass(cls, generator_type):
+        """
+        Register a subclass so from_dict() works
+
+        Args:
+            generator_type (ScanPointGenerator): Subclass to register
+        """
+
+        def decorator(generator):
+
+            cls._generator_lookup[generator_type] = generator
+
+            return generator
+        return decorator

@@ -1,8 +1,8 @@
-from roi import BaseROI
+from roi import ROI
 import math as m
 
 
-class CircularROI(BaseROI):
+class CircularROI(ROI):
 
     def __init__(self, centre, radius):
         super(CircularROI, self).__init__("Circle", centre)

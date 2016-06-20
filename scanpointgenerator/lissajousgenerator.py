@@ -1,8 +1,11 @@
-from scanpointgenerator import ScanPointGenerator
-from point import Point
+from collections import OrderedDict
 import math as m
 
+from scanpointgenerator import ScanPointGenerator
+from point import Point
 
+
+@ScanPointGenerator.register_subclass("LissajousGenerator")
 class LissajousGenerator(ScanPointGenerator):
 
     def __init__(self, names, units, box, num_lobes, num_points=None):
@@ -47,3 +50,41 @@ class LissajousGenerator(ScanPointGenerator):
             p.upper[self.name[0]], p.upper[self.name[1]] = self._calc(i + 0.5)
             p.indexes = [i]
             yield p
+
+    def to_dict(self):
+        """Convert object attributes into a dictionary"""
+
+        box = OrderedDict()
+        box['centre'] = self.centre
+        box['width'] = self.x_max * 2
+        box['height'] = self.y_max * 2
+
+        d = OrderedDict()
+        d['type'] = "LissajousGenerator"
+        d['name'] = self.name
+        d['units'] = self.position_units.values()[0]
+        d['box'] = box
+        d['num_lobes'] = self.x_freq
+        d['num_points'] = self.num_points
+
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create a LissajousGenerator instance from a serialised dictionary
+
+        Args:
+            d(dict): Dictionary of attributes
+
+        Returns:
+            LissajousGenerator: New LissajousGenerator instance
+        """
+
+        name = d['name']
+        units = d['units']
+        box = d['box']
+        num_lobes = d['num_lobes']
+        num_points = d['num_points']
+
+        return cls(name, units, box, num_lobes, num_points)

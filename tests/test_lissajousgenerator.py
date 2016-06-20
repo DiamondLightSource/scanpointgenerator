@@ -1,18 +1,19 @@
+from collections import OrderedDict
 import unittest
 
-from scanpointgenerator.lissajousgenerator import LissajousGenerator
+from scanpointgenerator import LissajousGenerator
 
 
 class LissajousGeneratorTest(unittest.TestCase):
 
     def setUp(self):
         self.bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
+        self.g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1)
 
     def test_init(self):
-        g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1)
-        self.assertEqual(g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(g.index_dims, [100])
-        self.assertEqual(g.index_names, ["x", "y"])
+        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
+        self.assertEqual(self.g.index_dims, [100])
+        self.assertEqual(self.g.index_names, ["x", "y"])
 
     def test_iterator(self):
         g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1, num_points=10)
@@ -54,3 +55,48 @@ class LissajousGeneratorTest(unittest.TestCase):
             self.assertEqual(p.upper, upper[i])
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 9)
+
+    def test_to_dict(self):
+        expected_dict = OrderedDict()
+        box = OrderedDict()
+        expected_dict['type'] = "LissajousGenerator"
+        box['centre'] = [0.0, 0.0]
+        box['width'] = 1.0
+        box['height'] = 1.0
+
+        expected_dict['name'] = ['x', 'y']
+        expected_dict['units'] = 'mm'
+        expected_dict['box'] = box
+        expected_dict['num_lobes'] = 1
+        expected_dict['num_points'] = 100
+
+        d = self.g.to_dict()
+
+        self.assertEqual(expected_dict, d)
+
+    def test_from_dict(self):
+        box = OrderedDict()
+        box['centre'] = [0.0, 0.0]
+        box['width'] = 1.0
+        box['height'] = 2.0
+
+        _dict = OrderedDict()
+        _dict['name'] = ['x', 'y']
+        _dict['units'] = 'mm'
+        _dict['box'] = box
+        _dict['num_lobes'] = 5
+        _dict['num_points'] = 100
+
+        units_dict = OrderedDict()
+        units_dict['x'] = 'mm'
+        units_dict['y'] = 'mm'
+
+        gen = LissajousGenerator.from_dict(_dict)
+
+        self.assertEqual(['x', 'y'], gen.name)
+        self.assertEqual(units_dict, gen.position_units)
+        self.assertEqual(5, gen.x_freq)
+        self.assertEqual(0.5, gen.x_max)
+        self.assertEqual(1.0, gen.y_max)
+        self.assertEqual([0.0, 0.0], gen.centre)
+        self.assertEqual(100, gen.num_points)

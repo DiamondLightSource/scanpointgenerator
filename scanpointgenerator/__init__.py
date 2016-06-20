@@ -1,6 +1,10 @@
-from point import Point # noqa
-from scanpointgenerator import ScanPointGenerator # noqa
-from linegenerator import LineGenerator # noqa
-from nestedgenerator import NestedGenerator # noqa
-from plotgenerator import plot_generator # noqa
-
+from point import Point  # noqa
+from scanpointgenerator import ScanPointGenerator  # noqa
+from arraygenerator import ArrayGenerator  # noqa
+from linegenerator import LineGenerator  # noqa
+from lissajousgenerator import LissajousGenerator  # noqa
+from maskedgenerator import MaskedGenerator  # noqa
+from nestedgenerator import NestedGenerator  # noqa
+from randomoffsetgenerator import RandomOffsetGenerator  # noqa
+from spiralgenerator import SpiralGenerator  # noqa
+from plotgenerator import plot_generator  # noqa

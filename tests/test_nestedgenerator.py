@@ -1,7 +1,13 @@
+from collections import OrderedDict
 import unittest
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator import NestedGenerator, LineGenerator
+from scanpointgenerator import NestedGenerator
+from scanpointgenerator import LineGenerator
+
+from pkg_resources import require
+require("mock")
+from mock import patch, MagicMock
 
 
 class NestedGeneratorTest(ScanPointGeneratorTest):
@@ -49,6 +55,51 @@ class NestedGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.positions, dict(
                 z=zpositions[i], y=ypositions[i], x=xpositions[i]))
             self.assertEqual(p.indexes, [zindexes[i], yindexes[i], xindexes[i]])
+
+
+class TestSerialisation(unittest.TestCase):
+
+    def setUp(self):
+        self.l1 = MagicMock()
+        self.l1_dict = MagicMock()
+
+        self.l2 = MagicMock()
+        self.l2_dict = MagicMock()
+
+        self.g = NestedGenerator(self.l1, self.l2, alternate_direction=True)
+
+    def test_to_dict(self):
+        self.l1.to_dict.return_value = self.l1_dict
+        self.l2.to_dict.return_value = self.l2_dict
+
+        expected_dict = OrderedDict()
+        expected_dict['type'] = "NestedGenerator"
+        expected_dict['outer'] = self.l1_dict
+        expected_dict['inner'] = self.l2_dict
+        expected_dict['alternate_direction'] = True
+
+        d = self.g.to_dict()
+
+        self.assertEqual(expected_dict, d)
+
+    @patch('scanpointgenerator.nestedgenerator.ScanPointGenerator')
+    def test_from_dict(self, SPG_mock):
+        SPG_mock.from_dict.side_effect = [self.l1, self.l2]
+
+        _dict = OrderedDict()
+        _dict['outer'] = self.l1_dict
+        _dict['inner'] = self.l2_dict
+        _dict['alternate_direction'] = True
+
+        units_dict = OrderedDict()
+        units_dict['x'] = 'mm'
+        units_dict['y'] = 'mm'
+
+        gen = NestedGenerator.from_dict(_dict)
+
+        self.assertEqual(gen.outer, self.l1)
+        self.assertEqual(gen.inner, self.l2)
+        self.assertEqual(True, gen.alternate_direction)
 
 if __name__ == "__main__":
     unittest.main()
