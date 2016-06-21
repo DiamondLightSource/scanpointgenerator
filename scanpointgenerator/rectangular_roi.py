@@ -1,4 +1,4 @@
-from roi import ROI
+from scanpointgenerator.roi import ROI
 
 
 class RectangularROI(ROI):

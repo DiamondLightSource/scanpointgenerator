@@ -1,5 +1,5 @@
 import unittest
-from scanpointgenerator.point import Point
+
 from scanpointgenerator.circular_roi import CircularROI
 
 

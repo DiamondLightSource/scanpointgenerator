@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import random
 
-from generator import Generator
+from scanpointgenerator import Generator
 
 
 @Generator.register_subclass("RandomOffsetGenerator")

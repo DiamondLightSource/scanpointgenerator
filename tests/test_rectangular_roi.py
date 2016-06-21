@@ -1,5 +1,5 @@
 import unittest
-from scanpointgenerator.point import Point
+
 from scanpointgenerator.rectangular_roi import RectangularROI
 
 

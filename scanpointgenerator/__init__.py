@@ -6,4 +6,5 @@ from scanpointgenerator.linegenerator import LineGenerator  # noqa
 from scanpointgenerator.lissajousgenerator import LissajousGenerator  # noqa
 from scanpointgenerator.randomoffsetgenerator import RandomOffsetGenerator  # noqa
 from scanpointgenerator.spiralgenerator import SpiralGenerator  # noqa
+from scanpointgenerator.scanregion import ScanRegion  # noqa
 from scanpointgenerator.plotgenerator import plot_generator  # noqa

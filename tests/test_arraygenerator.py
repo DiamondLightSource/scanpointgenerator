@@ -3,7 +3,7 @@ from collections import OrderedDict
 import unittest
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator.arraygenerator import ArrayGenerator
+from scanpointgenerator import ArrayGenerator
 
 from pkg_resources import require
 require("mock")

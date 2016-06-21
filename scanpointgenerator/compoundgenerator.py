@@ -1,8 +1,8 @@
 from collections import OrderedDict
 
-from generator import Generator
-from scanregion import ScanRegion
-from point import Point
+from scanpointgenerator import Generator
+from scanpointgenerator.scanregion import ScanRegion
+from scanpointgenerator import Point
 
 
 @Generator.register_subclass("CompoundGenerator")

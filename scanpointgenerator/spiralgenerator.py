@@ -1,8 +1,8 @@
 from collections import OrderedDict
 import math as m
 
-from generator import Generator
-from point import Point
+from scanpointgenerator import Generator
+from scanpointgenerator import Point
 
 
 @Generator.register_subclass("SpiralGenerator")

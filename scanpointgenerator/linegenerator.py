@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
-from generator import Generator
-from point import Point
+from scanpointgenerator import Generator
+from scanpointgenerator import Point
 
 
 def to_list(value):

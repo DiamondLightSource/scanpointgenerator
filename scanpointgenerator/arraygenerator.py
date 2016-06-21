@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
-from generator import Generator
-from point import Point
+from scanpointgenerator import Generator
+from scanpointgenerator import Point
 
 
 @Generator.register_subclass("ArrayGenerator")
