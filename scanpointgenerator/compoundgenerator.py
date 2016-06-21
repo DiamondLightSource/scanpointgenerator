@@ -54,8 +54,11 @@ class CompoundGenerator(Generator):
 
                 point_index = \
                     (point_num / (axis_period / axis_length)) % axis_length
-
                 loop_number = point_num / axis_period
+
+                # Floor floats to ints for indexing
+                point_index = int(point_index)
+                loop_number = int(loop_number)
                 if self.alternate_direction[gen_index] and loop_number % 2:
                     point_index = (axis_length - 1) - point_index
                     reverse = True
