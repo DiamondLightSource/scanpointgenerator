@@ -37,7 +37,7 @@ class SpiralGenerator(Generator):
         return int((radius / (self.alpha * self.beta)) ** 2)
 
     def iterator(self):
-        for i in xrange(0, self._end_point(self.radius)):
+        for i in range(0, self._end_point(self.radius)):
             p = Point()
             p.indexes = [i]
 
@@ -55,7 +55,7 @@ class SpiralGenerator(Generator):
         d = OrderedDict()
         d['type'] = "SpiralGenerator"
         d['name'] = self.name
-        d['units'] = self.position_units.values()[0]
+        d['units'] = list(self.position_units.values())[0]
         d['centre'] = self.centre
         d['radius'] = self.radius
         d['scale'] = self.scale

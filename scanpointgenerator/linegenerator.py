@@ -59,7 +59,7 @@ class LineGenerator(Generator):
 
     def iterator(self):
 
-        for i in xrange(self.num):
+        for i in range(self.num):
             point = Point()
 
             for axis in range(self.num_axes):
@@ -76,7 +76,7 @@ class LineGenerator(Generator):
         d = OrderedDict()
         d['type'] = "LineGenerator"
         d['name'] = self.name
-        d['units'] = self.position_units.values()[0]
+        d['units'] = list(self.position_units.values())[0]
         d['start'] = self.start
         d['stop'] = self.stop
         d['num'] = self.num

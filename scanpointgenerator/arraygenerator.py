@@ -34,7 +34,7 @@ class ArrayGenerator(Generator):
 
     def iterator(self):
 
-        for i in xrange(self.num):
+        for i in range(self.num):
 
             point = Point()
             for axis, coordinate in enumerate(self.points[i]):
@@ -103,7 +103,7 @@ class ArrayGenerator(Generator):
         d = OrderedDict()
         d['type'] = "ArrayGenerator"
         d['name'] = self.name
-        d['units'] = self.position_units.values()[0]
+        d['units'] = list(self.position_units.values())[0]
         d['points'] = self.points
         d['lower_bounds'] = self.lower_bounds
         d['upper_bounds'] = self.upper_bounds

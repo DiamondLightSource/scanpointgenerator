@@ -6,20 +6,14 @@ from scanpointgenerator.rectangular_roi import RectangularROI
 class InitTest(unittest.TestCase):
 
     def test_given_zero_height_then_error(self):
-        expected_error_message = "Rectangle must have some size"
 
-        with self.assertRaises(ValueError) as error:
+        with self.assertRaises(ValueError):
             RectangularROI([0.0, 0.0], 0.0, 5.0)
 
-        self.assertEqual(expected_error_message, error.exception.message)
-
     def test_given_zero_width_then_error(self):
-        expected_error_message = "Rectangle must have some size"
 
-        with self.assertRaises(ValueError) as error:
+        with self.assertRaises(ValueError):
             RectangularROI([0.0, 0.0], 5.0, 0.0)
-
-        self.assertEqual(expected_error_message, error.exception.message)
 
     def test_given_valid_params_then_set(self):
 

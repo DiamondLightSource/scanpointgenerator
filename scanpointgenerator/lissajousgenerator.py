@@ -43,7 +43,7 @@ class LissajousGenerator(Generator):
         return x, y
 
     def iterator(self):
-        for i in xrange(self.num):
+        for i in range(self.num):
             p = Point()
             p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
             p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
@@ -62,7 +62,7 @@ class LissajousGenerator(Generator):
         d = OrderedDict()
         d['type'] = "LissajousGenerator"
         d['name'] = self.name
-        d['units'] = self.position_units.values()[0]
+        d['units'] = list(self.position_units.values())[0]
         d['box'] = box
         d['num_lobes'] = self.x_freq
         d['num_points'] = self.num

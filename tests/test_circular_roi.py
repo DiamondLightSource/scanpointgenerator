@@ -6,12 +6,9 @@ from scanpointgenerator.circular_roi import CircularROI
 class InitTest(unittest.TestCase):
 
     def test_given_zero_radius_then_error(self):
-        expected_error_message = "Circle must have some size"
 
-        with self.assertRaises(ValueError) as error:
+        with self.assertRaises(ValueError):
             CircularROI([0.0, 0.0], 0.0)
-
-        self.assertEqual(expected_error_message, error.exception.message)
 
     def test_given_valid_params_then_set(self):
 

@@ -45,7 +45,7 @@ class CompoundGenerator(Generator):
 
     def iterator(self):
 
-        for point_num in xrange(self.num_points):
+        for point_num in range(self.num_points):
 
             point = Point()
             for gen_index, points in enumerate(self.point_sets):
