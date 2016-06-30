@@ -1,31 +1,33 @@
 from collections import OrderedDict
 
 from scanpointgenerator import Generator
-from scanpointgenerator.scanregion import ScanRegion
+from scanpointgenerator.excluder import Excluder
+from scanpointgenerator.mutator import Mutator
 from scanpointgenerator import Point
 
 
 @Generator.register_subclass("CompoundGenerator")
 class CompoundGenerator(Generator):
-    """Nest N generators and apply filter regions to relevant generator pairs"""
+    """Nest N generators, apply exclusion regions to relevant generator pairs
+     and apply any mutators before yielding points"""
 
-    def __init__(self, generators, regions):
+    def __init__(self, generators, excluders, mutators):
         """
         Args:
             generators(list(Generator)): List of Generators to nest
-            regions(list(ScanRegion)): List of regions to filter points by
+            excluders(list(Excluder)): List of Excluders to filter points by
+            mutators(list(Mutator)): List of Mutators to apply to each point
         """
 
         self.generators = generators
-        self.regions = regions
+        self.excluders = excluders
+        self.mutators = mutators
 
-        self.lengths = []
         self.num_points = 1
         self.periods = []
         self.alternate_direction = []
         self.point_sets = []
         for generator in self.generators:
-            self.lengths.append(generator.num)
             self.num_points *= generator.num
             self.periods.append(self.num_points)
             self.alternate_direction.append(generator.alternate_direction)
@@ -43,14 +45,20 @@ class CompoundGenerator(Generator):
         for generator in generators:
             self.index_names += generator.index_names
 
-    def iterator(self):
+    def _base_iterator(self):
+        """
+        Iterator to generate points by nesting each generator in self.generators
+
+        Yields:
+            Point: Base points
+        """
 
         for point_num in range(self.num_points):
 
             point = Point()
             for gen_index, points in enumerate(self.point_sets):
                 axis_period = self.periods[gen_index]
-                axis_length = self.lengths[gen_index]
+                axis_length = self.index_dims[gen_index]
 
                 point_index = \
                     (point_num / (axis_period / axis_length)) % axis_length
@@ -67,7 +75,7 @@ class CompoundGenerator(Generator):
 
                 current_point = self.point_sets[gen_index][point_index]
 
-                if gen_index == 0:  # If innermost, generator use bounds
+                if gen_index == 0:  # If innermost generator, use bounds
                     point.positions.update(current_point.positions)
                     if reverse:  # Swap bounds if reversing
                         point.upper.update(current_point.lower)
@@ -82,8 +90,34 @@ class CompoundGenerator(Generator):
 
                 point.indexes += current_point.indexes
 
+            yield point
+
+    def _filtered_base_iterator(self):
+        """
+        Iterator to filter out points based on Excluders
+
+        Yields:
+            Point: Filtered points
+        """
+
+        for point in self._base_iterator():
             if self.contains_point(point):
                 yield point
+
+    def iterator(self):
+        """
+        Top level iterator to mutate points and yield them
+
+        Yields:
+            Point: Mutated points
+        """
+
+        iterator = self._filtered_base_iterator()
+        for mutator in self.mutators:
+            iterator = mutator.mutate(iterator)
+
+        for point in iterator:
+            yield point
 
     def contains_point(self, point):
         """
@@ -98,12 +132,12 @@ class CompoundGenerator(Generator):
 
         contains_point = True
 
-        for region in self.regions:
-            coord_1 = point.positions[region.scannables[0]]
-            coord_2 = point.positions[region.scannables[1]]
+        for excluder in self.excluders:
+            coord_1 = point.positions[excluder.scannables[0]]
+            coord_2 = point.positions[excluder.scannables[1]]
             coordinate = [coord_1, coord_2]
 
-            if not region.roi.contains_point(coordinate):
+            if not excluder.roi.contains_point(coordinate):
                 contains_point = False
                 break
 
@@ -119,9 +153,13 @@ class CompoundGenerator(Generator):
         for generator in self.generators:
             d['generators'].append(generator.to_dict())
 
-        d['regions'] = []
-        for region in self.regions:
-            d['regions'].append(region.to_dict())
+        d['excluders'] = []
+        for excluder in self.excluders:
+            d['excluders'].append(excluder.to_dict())
+
+        d['mutators'] = []
+        for mutator in self.mutators:
+            d['mutators'].append(mutator.to_dict())
 
         return d
 
@@ -141,8 +179,12 @@ class CompoundGenerator(Generator):
         for generator in d['generators']:
             generators.append(Generator.from_dict(generator))
 
-        regions = []
-        for region in d['regions']:
-            regions.append(ScanRegion.from_dict(region))
+        excluders = []
+        for excluder in d['excluders']:
+            excluders.append(Excluder.from_dict(excluder))
 
-        return cls(generators, regions)
+        mutators = []
+        for mutator in d['mutators']:
+            mutators.append(Mutator.from_dict(mutator))
+
+        return cls(generators, excluders, mutators)

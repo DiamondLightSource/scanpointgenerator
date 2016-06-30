@@ -15,8 +15,6 @@ def to_list(value):
 class LineGenerator(Generator):
     """Generate equally spaced scan points in N dimensions"""
 
-    reverse = False
-
     def __init__(self, name, units, start, stop, num, alternate_direction=False):
         """Initialise the generator
 
@@ -80,6 +78,7 @@ class LineGenerator(Generator):
         d['start'] = self.start
         d['stop'] = self.stop
         d['num'] = self.num
+        d['alternate_direction'] = self.alternate_direction
 
         return d
 
@@ -100,5 +99,6 @@ class LineGenerator(Generator):
         start = d['start']
         stop = d['stop']
         num = d['num']
+        alternate_direction = d['alternate_direction']
 
-        return cls(name, units, start, stop, num)
+        return cls(name, units, start, stop, num, alternate_direction)

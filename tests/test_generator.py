@@ -23,7 +23,7 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
         with self.assertRaises(NotImplementedError):
             self.g.to_dict()
 
-    def test_from_dict_raises(self):
+    def test_from_dict(self):
         m = MagicMock()
         self.g._generator_lookup['TestGenerator'] = m
 

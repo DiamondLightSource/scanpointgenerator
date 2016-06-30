@@ -7,11 +7,11 @@ from scanpointgenerator import SpiralGenerator
 class SpiralGeneratorTest(unittest.TestCase):
 
     def setUp(self):
-        self.g = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 1.5)
+        self.g = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 1.5, alternate_direction=True)
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(self.g.index_dims, [6])
+        self.assertEqual(self.g.index_dims, [7])
         self.assertEqual(self.g.index_names, ["x", "y"])
 
     def test_iterator(self):
@@ -53,6 +53,7 @@ class SpiralGeneratorTest(unittest.TestCase):
         expected_dict['centre'] = [0.0, 0.0]
         expected_dict['radius'] = 1.5
         expected_dict['scale'] = 1
+        expected_dict['alternate_direction'] = True
 
         d = self.g.to_dict()
 
@@ -66,6 +67,7 @@ class SpiralGeneratorTest(unittest.TestCase):
         _dict['centre'] = [0.0, 0.0]
         _dict['radius'] = 1.5
         _dict['scale'] = 1
+        _dict['alternate_direction'] = True
 
         units_dict = OrderedDict()
         units_dict['x'] = 'mm'
