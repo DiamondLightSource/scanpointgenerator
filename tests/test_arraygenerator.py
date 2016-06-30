@@ -21,6 +21,16 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, [4])
         self.assertEqual(self.g.index_names, ["x", "y"])
 
+    def test_inconsistent_dimensions_raises(self):
+        with self.assertRaises(ValueError):
+            ArrayGenerator(["x"], "mm", [[0.0, 1.0], [2.0, 3.0]])
+        with self.assertRaises(ValueError):
+            ArrayGenerator(["x"], "mm", [[0.0], [1.0], [2.0]],
+                           lower_bounds=[[0.0, 1.0], [2.0, 3.0]])
+        with self.assertRaises(ValueError):
+            ArrayGenerator(["x"], "mm", [[0.0], [1.0], [2.0]],
+                           upper_bounds=[[0.0, 1.0], [2.0, 3.0]])
+
     def test_calculate_first_lower_bound(self):
         new_bound = self.g._calculate_lower_bound(0, 0, 0.0)
         self.assertEqual(-0.5, new_bound)
