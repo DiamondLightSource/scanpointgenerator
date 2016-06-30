@@ -8,7 +8,7 @@ from scanpointgenerator import LineGenerator
 class LineGeneratorTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.g = LineGenerator("x", "mm", 1.0, 9.0, 5)
+        self.g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate_direction=True)
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm"))
@@ -26,6 +26,41 @@ class LineGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.upper, dict(x=upper[i]))
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 4)
+
+    def test_to_dict(self):
+        expected_dict = OrderedDict()
+        expected_dict['type'] = "LineGenerator"
+        expected_dict['name'] = ['x']
+        expected_dict['units'] = 'mm'
+        expected_dict['start'] = [1.0]
+        expected_dict['stop'] = [9.0]
+        expected_dict['num'] = 5
+        expected_dict['alternate_direction'] = True
+
+        d = self.g.to_dict()
+
+        self.assertEqual(expected_dict, d)
+
+    def test_from_dict(self):
+        _dict = OrderedDict()
+        _dict['name'] = ['x']
+        _dict['units'] = 'mm'
+        _dict['start'] = [1.0]
+        _dict['stop'] = [9.0]
+        _dict['num'] = 5
+        _dict['alternate_direction'] = True
+
+        units_dict = OrderedDict()
+        units_dict['x'] = 'mm'
+
+        gen = LineGenerator.from_dict(_dict)
+
+        self.assertEqual(['x'], gen.name)
+        self.assertEqual(units_dict, gen.position_units)
+        self.assertEqual([1.0], gen.start)
+        self.assertEqual([9.0], gen.stop)
+        self.assertEqual(5, gen.num)
+        self.assertTrue(gen.alternate_direction)
 
 
 class LineGenerator2DTest(ScanPointGeneratorTest):
@@ -56,39 +91,6 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
             self.assertEqual(p.upper["x"], upper[i])
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 4)
-
-    def test_to_dict(self):
-        expected_dict = OrderedDict()
-        expected_dict['type'] = "LineGenerator"
-        expected_dict['name'] = ['x', 'y']
-        expected_dict['units'] = 'mm'
-        expected_dict['start'] = [1.0, 2.0]
-        expected_dict['stop'] = [5.0, 10.0]
-        expected_dict['num'] = 5
-
-        d = self.g.to_dict()
-
-        self.assertEqual(expected_dict, d)
-
-    def test_from_dict(self):
-        _dict = OrderedDict()
-        _dict['name'] = ['x', 'y']
-        _dict['units'] = 'mm'
-        _dict['start'] = [1.0, 2.0]
-        _dict['stop'] = [5.0, 10.0]
-        _dict['num'] = 5
-
-        units_dict = OrderedDict()
-        units_dict['x'] = 'mm'
-        units_dict['y'] = 'mm'
-
-        gen = LineGenerator.from_dict(_dict)
-
-        self.assertEqual(['x', 'y'], gen.name)
-        self.assertEqual(units_dict, gen.position_units)
-        self.assertEqual([1.0, 2.0], gen.start)
-        self.assertEqual([5.0, 10.0], gen.stop)
-        self.assertEqual(5, gen.num)
 
 if __name__ == "__main__":
     unittest.main()
