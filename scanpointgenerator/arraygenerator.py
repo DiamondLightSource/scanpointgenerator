@@ -9,8 +9,7 @@ class ArrayGenerator(Generator):
     """Generate a given n-dimensional array of points"""
 
     def __init__(self, name, units, points, lower_bounds=None, upper_bounds=None):
-        """Initialise the generator
-
+        """
         Args:
             name (list): ND list of scannable names. E.g. ["x", "y"]
             units (str): The scannable units. E.g. "mm"
@@ -23,6 +22,21 @@ class ArrayGenerator(Generator):
         self.points = points
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
+
+        for point in self.points:
+            if len(point) != len(name):
+                raise ValueError(
+                    "Dimensions of name, start and stop do not match")
+        if self.upper_bounds is not None:
+            for point in self.upper_bounds:
+                if len(point) != len(name):
+                    raise ValueError(
+                        "Dimensions of name, start and stop do not match")
+        if self.lower_bounds is not None:
+            for point in self.lower_bounds:
+                if len(point) != len(name):
+                    raise ValueError(
+                        "Dimensions of name, start and stop do not match")
 
         self.num = len(points)
 

@@ -13,18 +13,19 @@ def to_list(value):
 
 @Generator.register_subclass("LineGenerator")
 class LineGenerator(Generator):
-    """Generate equally spaced scan points in N dimensions"""
+    """Generate a line of equally spaced N-dimensional points"""
 
     def __init__(self, name, units, start, stop, num, alternate_direction=False):
-        """Initialise the generator
-
+        """
         Args:
             name (str/list(str)): The scannable name(s) E.g. "x" or ["x", "y"]
             units (str): The scannable units. E.g. "mm"
             start (float/list(float)): The first position to be generated
-            E.g. 1.0 or [1.0, 2.0]
+                E.g. 1.0 or [1.0, 2.0]
             stop (float or list(float)): The first position to be generated. E.g. 9.0
             num (int): The number of points to generate. E.g. 5
+            alternate_direction(bool): Specifier to reverse direction if
+                generator is nested
         """
 
         self.name = to_list(name)

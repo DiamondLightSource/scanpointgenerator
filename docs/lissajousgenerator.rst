@@ -10,7 +10,7 @@ Examples
 --------
 
 This example defines motors "x" and "y" with engineering units "mm" which
-will be scanned over a 3x4 lobe lissajous curve with filling a 1x1mm rectangle.
+will be scanned over a 3x4 lobe Lissajous curve with filling a 1x1mm rectangle.
 
 .. plot::
     :include-source:
