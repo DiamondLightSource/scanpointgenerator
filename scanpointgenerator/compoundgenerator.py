@@ -117,7 +117,7 @@ class CompoundGenerator(Generator):
             iterator = mutator.mutate(iterator)
 
         for point in iterator:
-                yield point
+            yield point
 
     def contains_point(self, point):
         """

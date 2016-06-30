@@ -114,6 +114,18 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                 x=xpositions[i], y=ypositions[i]))
             self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
 
+    def test_mutate_called(self):
+        mutator = MagicMock()
+        self.g.mutators = [mutator]
+        filtered = MagicMock()
+        self.g._filtered_base_iterator = MagicMock()
+        self.g._filtered_base_iterator.return_value = filtered
+
+        for _ in self.g.iterator():
+            pass
+
+        mutator.mutate.assert_called_once_with(filtered)
+
     def test_line_spiral(self):
         positions = [{'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 0.0},
                      {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 0.0},
