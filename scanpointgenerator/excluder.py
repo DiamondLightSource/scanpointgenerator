@@ -1,9 +1,9 @@
 from collections import OrderedDict
 
 
-class ScanRegion(object):
+class Excluder(object):
     """
-    A class representing a 2D region of interest within an ND scan
+    A class to remove points that lie outside of a given 2D region of interest
     """
 
     def __init__(self, roi, scannables):
@@ -48,7 +48,7 @@ class ScanRegion(object):
             d(dict): Dictionary of attributes
 
         Returns:
-            ScanRegion: New ScanRegion instance
+            Excluder: New ScanRegion instance
         """
 
         roi = d['roi'].from_dict()

@@ -4,7 +4,8 @@ from scanpointgenerator.arraygenerator import ArrayGenerator  # noqa
 from scanpointgenerator.compoundgenerator import CompoundGenerator  # noqa
 from scanpointgenerator.linegenerator import LineGenerator  # noqa
 from scanpointgenerator.lissajousgenerator import LissajousGenerator  # noqa
-from scanpointgenerator.randomoffsetgenerator import RandomOffsetGenerator  # noqa
+from scanpointgenerator.mutator import Mutator  # noqa
+from scanpointgenerator.randomoffsetmutator import RandomOffsetMutator  # noqa
 from scanpointgenerator.spiralgenerator import SpiralGenerator  # noqa
-from scanpointgenerator.scanregion import ScanRegion  # noqa
+from scanpointgenerator.excluder import Excluder  # noqa
 from scanpointgenerator.plotgenerator import plot_generator  # noqa

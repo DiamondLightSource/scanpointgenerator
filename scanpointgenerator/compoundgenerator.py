@@ -1,7 +1,8 @@
 from collections import OrderedDict
 
 from scanpointgenerator import Generator
-from scanpointgenerator.scanregion import ScanRegion
+from scanpointgenerator.excluder import Excluder
+from scanpointgenerator.mutator import Mutator
 from scanpointgenerator import Point
 
 
@@ -9,15 +10,17 @@ from scanpointgenerator import Point
 class CompoundGenerator(Generator):
     """Nest N generators and apply filter regions to relevant generator pairs"""
 
-    def __init__(self, generators, regions):
+    def __init__(self, generators, mutators, excluders):
         """
         Args:
             generators(list(Generator)): List of Generators to nest
-            regions(list(ScanRegion)): List of regions to filter points by
+            mutators(list(Mutator)): List of Processors to apply to each point
+            excluders(list(Excluder)): List of regions to filter points by
         """
 
         self.generators = generators
-        self.regions = regions
+        self.mutators = mutators
+        self.excluders = excluders
 
         self.lengths = []
         self.num_points = 1
@@ -43,7 +46,13 @@ class CompoundGenerator(Generator):
         for generator in generators:
             self.index_names += generator.index_names
 
-    def iterator(self):
+    def _base_iterator(self):
+        """
+        Iterator to generate points by nesting each generator in self.generators
+
+        Yields:
+            Point: Base points
+        """
 
         for point_num in range(self.num_points):
 
@@ -67,7 +76,7 @@ class CompoundGenerator(Generator):
 
                 current_point = self.point_sets[gen_index][point_index]
 
-                if gen_index == 0:  # If innermost, generator use bounds
+                if gen_index == 0:  # If innermost generator, use bounds
                     point.positions.update(current_point.positions)
                     if reverse:  # Swap bounds if reversing
                         point.upper.update(current_point.lower)
@@ -82,6 +91,34 @@ class CompoundGenerator(Generator):
 
                 point.indexes += current_point.indexes
 
+            yield point
+
+    def _mutated_base_iterator(self):
+        """
+        Iterator to mutate the points generated from the nest of generators
+        using mutators in self. mutators, if there are any
+
+        Yields:
+            Point: Mutated points
+        """
+
+        iterator = self._base_iterator()
+        # itertools...
+        for mutator in self.mutators:
+            iterator = mutator.mutate(iterator)
+
+        for point in iterator:
+                yield point
+
+    def iterator(self):
+        """
+        Top level iterator to filter points based on region of interest
+
+        Yields:
+            Point: Filtered points
+        """
+
+        for point in self._mutated_base_iterator():
             if self.contains_point(point):
                 yield point
 
@@ -98,7 +135,7 @@ class CompoundGenerator(Generator):
 
         contains_point = True
 
-        for region in self.regions:
+        for region in self.excluders:
             coord_1 = point.positions[region.scannables[0]]
             coord_2 = point.positions[region.scannables[1]]
             coordinate = [coord_1, coord_2]
@@ -119,8 +156,12 @@ class CompoundGenerator(Generator):
         for generator in self.generators:
             d['generators'].append(generator.to_dict())
 
+        d['mutators'] = []
+        for mutator in self.mutators:
+            d['mutators'].append(mutator.to_dict())
+
         d['regions'] = []
-        for region in self.regions:
+        for region in self.excluders:
             d['regions'].append(region.to_dict())
 
         return d
@@ -141,8 +182,12 @@ class CompoundGenerator(Generator):
         for generator in d['generators']:
             generators.append(Generator.from_dict(generator))
 
+        mutators = []
+        for mutator in d['mutators']:
+            mutators.append(Mutator.from_dict(mutator))
+
         regions = []
         for region in d['regions']:
-            regions.append(ScanRegion.from_dict(region))
+            regions.append(Excluder.from_dict(region))
 
-        return cls(generators, regions)
+        return cls(generators, mutators, regions)

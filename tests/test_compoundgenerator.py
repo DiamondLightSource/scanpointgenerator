@@ -4,7 +4,7 @@ import unittest
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
-from scanpointgenerator.scanregion import ScanRegion
+from scanpointgenerator.excluder import Excluder
 from scanpointgenerator.circular_roi import CircularROI
 
 from pkg_resources import require
@@ -18,7 +18,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
         self.y = LineGenerator("y", "mm", 2.0, 2.1, 2, False)
         self.z = LineGenerator("z", "mm", 1.0, 2.0, 2, False)
-        self.g = CompoundGenerator([self.x, self.y], [])
+        self.g = CompoundGenerator([self.x, self.y], [], [])
 
     def test_init(self):
         self.assertEqual(self.g.generators[0], self.x)
@@ -37,7 +37,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         region = MagicMock()
         region.scannables = ['x', 'y']
         region.roi = roi
-        self.g.regions = [region]
+        self.g.excluders = [region]
 
         response = self.g.contains_point(point)
 
@@ -55,7 +55,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         region = MagicMock()
         region.scannables = ['x', 'y']
         region.roi = roi
-        self.g.regions = [region]
+        self.g.excluders = [region]
 
         response = self.g.contains_point(point)
 
@@ -80,7 +80,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
 
     def test_double_nest(self):
-        self.g = CompoundGenerator([self.x, self.y, self.z], [])
+        self.g = CompoundGenerator([self.x, self.y, self.z], [], [])
 
         xpositions = [1.0, 1.1, 1.2, 1.2, 1.1, 1.0,
                       1.0, 1.1, 1.2, 1.2, 1.1, 1.0]
@@ -104,9 +104,9 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         yindexes = [0, 0, 0, 1, 1]
 
         circle = CircularROI([1.0, 2.0], 0.2)
-        scan_region = ScanRegion(circle, ['x', 'y'])
+        scan_region = Excluder(circle, ['x', 'y'])
 
-        gen = CompoundGenerator([self.x, self.y], [scan_region])
+        gen = CompoundGenerator([self.x, self.y], [], [scan_region])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, dict(
@@ -125,37 +125,45 @@ class TestSerialisation(unittest.TestCase):
         self.l2.name = ['y']
         self.l2_dict = MagicMock()
 
+        self.m1 = MagicMock()
+        self.m1_dict = MagicMock()
+
         self.r1 = MagicMock()
         self.r1_dict = MagicMock()
 
-        self.g = CompoundGenerator([self.l1, self.l2], [self.r1])
+        self.g = CompoundGenerator([self.l1, self.l2], [self.m1], [self.r1])
 
     def test_to_dict(self):
         self.l1.to_dict.return_value = self.l1_dict
         self.l2.to_dict.return_value = self.l2_dict
         self.r1.to_dict.return_value = self.r1_dict
+        self.m1.to_dict.return_value = self.m1_dict
 
         gen_list = [self.l1_dict, self.l2_dict]
-
+        mutators_list = [self.m1_dict]
         region_list = [self.r1_dict]
 
         expected_dict = OrderedDict()
         expected_dict['type'] = "CompoundGenerator"
         expected_dict['generators'] = gen_list
+        expected_dict['mutators'] = mutators_list
         expected_dict['regions'] = region_list
 
         d = self.g.to_dict()
 
         self.assertEqual(expected_dict, d)
 
-    @patch('scanpointgenerator.compoundgenerator.ScanRegion')
+    @patch('scanpointgenerator.compoundgenerator.Mutator')
+    @patch('scanpointgenerator.compoundgenerator.Excluder')
     @patch('scanpointgenerator.compoundgenerator.Generator')
-    def test_from_dict(self, gen_mock, sr_mock):
+    def test_from_dict(self, gen_mock, ex_mock, mutator_mock):
         gen_mock.from_dict.side_effect = [self.l1, self.l2]
-        sr_mock.from_dict.return_value = self.r1
+        mutator_mock.from_dict.return_value = self.m1
+        ex_mock.from_dict.return_value = self.r1
 
         _dict = OrderedDict()
         _dict['generators'] = [self.l1_dict, self.l2_dict]
+        _dict['mutators'] = [self.m1_dict]
         _dict['regions'] = [self.r1_dict]
 
         units_dict = OrderedDict()
@@ -166,7 +174,8 @@ class TestSerialisation(unittest.TestCase):
 
         self.assertEqual(gen.generators[0], self.l1)
         self.assertEqual(gen.generators[1], self.l2)
-        self.assertEqual(gen.regions[0], self.r1)
+        self.assertEqual(gen.mutators[0], self.m1)
+        self.assertEqual(gen.excluders[0], self.r1)
 
 if __name__ == "__main__":
     unittest.main()

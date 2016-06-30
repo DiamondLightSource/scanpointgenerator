@@ -2,7 +2,7 @@ from collections import OrderedDict
 import unittest
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator import RandomOffsetGenerator
+from scanpointgenerator import RandomOffsetMutator
 from scanpointgenerator import LineGenerator
 
 from pkg_resources import require
@@ -10,16 +10,15 @@ require("mock")
 from mock import patch, MagicMock
 
 
-class RandomOffsetGeneratorTest(ScanPointGeneratorTest):
+class RandomOffsetMutatorTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        line_gen = LineGenerator("x", "mm", 1.0, 5.0, 5)
-        self.g = RandomOffsetGenerator(line_gen, 1, dict(x=0.25))
+        self.line_gen = LineGenerator("x", "mm", 1.0, 5.0, 5)
+        self.m = RandomOffsetMutator(1, dict(x=0.25))
 
     def test_init(self):
-        self.assertEqual(self.g.position_units, dict(x="mm"))
-        self.assertEqual(self.g.index_dims, [5])
-        self.assertEqual(self.g.index_names, ["x"])
+        self.assertEqual(1, self.m.seed)
+        self.assertEqual(dict(x=0.25), self.m.max_offset)
 
     def test_iterator(self):
         positions = [1.0165839522345654, 1.808864087257092,
@@ -30,7 +29,7 @@ class RandomOffsetGeneratorTest(ScanPointGeneratorTest):
                  3.5288308116644336, 4.541585822642794, 5.5251014796865086]
         indexes = [0, 1, 2, 3, 4]
 
-        for i, p in enumerate(self.g.iterator()):
+        for i, p in enumerate(self.m.mutate(self.line_gen.iterator())):
             self.assertEqual(p.positions, dict(x=positions[i]))
             self.assertEqual(p.lower, dict(x=lower[i]))
             self.assertEqual(p.upper, dict(x=upper[i]))
@@ -45,38 +44,33 @@ class TestSerialisation(unittest.TestCase):
         self.l_dict = MagicMock()
         self.max_offset = dict(x=0.25)
 
-        self.g = RandomOffsetGenerator(self.l, 1, self.max_offset)
+        self.m = RandomOffsetMutator(1, self.max_offset)
 
     def test_to_dict(self):
         self.l.to_dict.return_value = self.l_dict
 
         expected_dict = OrderedDict()
-        expected_dict['type'] = "RandomOffsetGenerator"
-        expected_dict['generator'] = self.l_dict
+        expected_dict['type'] = "RandomOffsetMutator"
         expected_dict['seed'] = 1
         expected_dict['max_offset'] = self.max_offset
 
-        d = self.g.to_dict()
+        d = self.m.to_dict()
 
         self.assertEqual(expected_dict, d)
 
-    @patch('scanpointgenerator.randomoffsetgenerator.Generator')
-    def test_from_dict(self, SPG_mock):
-        SPG_mock.from_dict.return_value = self.l
+    def test_from_dict(self):
 
         _dict = OrderedDict()
-        _dict['generator'] = self.l_dict
         _dict['seed'] = 1
         _dict['max_offset'] = self.max_offset
 
         units_dict = OrderedDict()
         units_dict['x'] = 'mm'
 
-        gen = RandomOffsetGenerator.from_dict(_dict)
+        m = RandomOffsetMutator.from_dict(_dict)
 
-        self.assertEqual(gen.gen, self.l)
-        self.assertEqual(1, gen.seed)
-        self.assertEqual(self.max_offset, gen.max_offset)
+        self.assertEqual(1, m.seed)
+        self.assertEqual(self.max_offset, m.max_offset)
 
 
 if __name__ == "__main__":

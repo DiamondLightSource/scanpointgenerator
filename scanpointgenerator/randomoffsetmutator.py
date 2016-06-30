@@ -1,30 +1,24 @@
 from collections import OrderedDict
 import random
 
-from scanpointgenerator import Generator
+from scanpointgenerator import Mutator
 
 
-@Generator.register_subclass("RandomOffsetGenerator")
-class RandomOffsetGenerator(Generator):
-    """Apply a random offset to the points of an ND ScanPointGenerator"""
+class RandomOffsetMutator(Mutator):
+    """Mutator to apply a random offset to the points of an ND
+    ScanPointGenerator"""
 
-    def __init__(self, generator, seed, max_offset):
+    def __init__(self, seed, max_offset):
         """
         Args:
-            generator(Generator): ND generator to apply offset to
             seed(int): Seed for random offset generator
             max_offset(dict): ND dict of maximum allowed offset in
             generator-defined units
         """
 
-        self.gen = generator
         self.seed = seed
         self.RNG = random.Random(x=seed)
         self.max_offset = max_offset
-
-        self.position_units = self.gen.position_units
-        self.index_dims = self.gen.index_dims
-        self.index_names = self.gen.index_names
 
     def get_random_number(self):
         """
@@ -90,11 +84,21 @@ class RandomOffsetGenerator(Generator):
                 (current_point.positions[axis] + previous_point.positions[axis]) / 2
         return current_point
 
-    def iterator(self):
+    def mutate(self, iterator):
+        """
+        An iterator that takes another iterator, applies a random offset to
+        each point and then yields it
+
+        Args:
+            iterator: Iterator to mutate
+
+        Yields:
+            Point: Mutated points
+        """
 
         previous_point = current_point = None
 
-        for next_point in self.gen.iterator():
+        for next_point in iterator:
             self.apply_offset(next_point)
 
             if previous_point is not None:
@@ -125,8 +129,7 @@ class RandomOffsetGenerator(Generator):
         """Convert object attributes into a dictionary"""
 
         d = OrderedDict()
-        d['type'] = "RandomOffsetGenerator"
-        d['generator'] = self.gen.to_dict()
+        d['type'] = "RandomOffsetMutator"
         d['seed'] = self.seed
         d['max_offset'] = self.max_offset
 
@@ -135,17 +138,16 @@ class RandomOffsetGenerator(Generator):
     @classmethod
     def from_dict(cls, d):
         """
-        Create a RandomOffsetGenerator instance from a serialised dictionary
+        Create a RandomOffsetMutator instance from a serialised dictionary
 
         Args:
             d(dict): Dictionary of attributes
 
         Returns:
-            RandomOffsetGenerator: New RandomOffsetGenerator instance
+            RandomOffsetMutator: New RandomOffsetMutator instance
         """
 
-        gen = Generator.from_dict(d['generator'])
         seed = d['seed']
         max_offset = d['max_offset']
 
-        return cls(gen, seed, max_offset)
+        return cls(seed, max_offset)
