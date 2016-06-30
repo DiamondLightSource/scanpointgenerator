@@ -185,13 +185,13 @@ class TestSerialisation(unittest.TestCase):
 
         gen_list = [self.l1_dict, self.l2_dict]
         mutators_list = [self.m1_dict]
-        region_list = [self.r1_dict]
+        excluders_list = [self.r1_dict]
 
         expected_dict = OrderedDict()
         expected_dict['type'] = "CompoundGenerator"
         expected_dict['generators'] = gen_list
         expected_dict['mutators'] = mutators_list
-        expected_dict['regions'] = region_list
+        expected_dict['excluders'] = excluders_list
 
         d = self.g.to_dict()
 
@@ -208,7 +208,7 @@ class TestSerialisation(unittest.TestCase):
         _dict = OrderedDict()
         _dict['generators'] = [self.l1_dict, self.l2_dict]
         _dict['mutators'] = [self.m1_dict]
-        _dict['regions'] = [self.r1_dict]
+        _dict['excluders'] = [self.r1_dict]
 
         units_dict = OrderedDict()
         units_dict['x'] = 'mm'

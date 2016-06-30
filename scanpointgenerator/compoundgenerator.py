@@ -157,9 +157,9 @@ class CompoundGenerator(Generator):
         for mutator in self.mutators:
             d['mutators'].append(mutator.to_dict())
 
-        d['regions'] = []
-        for region in self.excluders:
-            d['regions'].append(region.to_dict())
+        d['excluders'] = []
+        for excluder in self.excluders:
+            d['excluders'].append(excluder.to_dict())
 
         return d
 
@@ -183,8 +183,8 @@ class CompoundGenerator(Generator):
         for mutator in d['mutators']:
             mutators.append(Mutator.from_dict(mutator))
 
-        regions = []
-        for region in d['regions']:
-            regions.append(Excluder.from_dict(region))
+        excluders = []
+        for excluder in d['excluders']:
+            excluders.append(Excluder.from_dict(excluder))
 
-        return cls(generators, mutators, regions)
+        return cls(generators, mutators, excluders)
