@@ -20,7 +20,47 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         self.assertEqual(1, self.m.seed)
         self.assertEqual(dict(x=0.25), self.m.max_offset)
 
-    def test_iterator(self):
+    def test_get_random_number(self):
+        number = self.m.get_random_number()
+        self.assertEqual(0.06633580893826191, number)
+        number = self.m.get_random_number()
+        self.assertEqual(0.-0.7645436509716318, number)
+        number = self.m.get_random_number()
+        self.assertEqual(0.03133451683171687, number)
+
+    @patch('scanpointgenerator.randomoffsetmutator.RandomOffsetMutator.get_random_number',
+           return_value=1.0)
+    def test_apply_offset(self, _):
+        point = MagicMock()
+        point.positions = dict(x=1.0)
+
+        point = self.m.apply_offset(point)
+
+        self.assertEqual(dict(x=1.25), point.positions)
+
+    def test_calculate_new_upper_bound(self):
+        current_point = MagicMock()
+        current_point.positions = dict(x=1.0)
+        current_point.upper = dict(x=1.1)
+        next_point = MagicMock()
+        next_point.positions = dict(x=2.0)
+
+        current_point = self.m.calculate_new_upper_bound(current_point, next_point)
+
+        self.assertEqual(dict(x=1.5), current_point.upper)
+
+    def test_calculate_new_lower_bound(self):
+        current_point = MagicMock()
+        current_point.positions = dict(x=1.0)
+        current_point.lower = dict(x=0.9)
+        previous_point = MagicMock()
+        previous_point.positions = dict(x=0.0)
+
+        current_point = self.m.calculate_new_lower_bound(current_point, previous_point)
+
+        self.assertEqual(dict(x=0.5), current_point.lower)
+
+    def test_mutate(self):
         positions = [1.0165839522345654, 1.808864087257092,
                      3.007833629207929, 4.049827994120938, 5.033343651164651]
         lower = [0.620443884723302, 1.4127240197458288,
