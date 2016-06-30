@@ -8,12 +8,13 @@ from scanpointgenerator import Point
 @Generator.register_subclass("SpiralGenerator")
 class SpiralGenerator(Generator):
 
-    def __init__(self, names, units, centre, radius, scale=1.0):
+    def __init__(self, names, units, centre, radius, scale=1.0, alternate_direction=False):
         self.name = names
         self.units = units
         self.centre = centre
         self.radius = radius
         self.scale = scale
+        self.alternate_direction = alternate_direction
 
         self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor
         self.beta = scale / (2 * m.pi)  # Radius scale factor
@@ -59,6 +60,7 @@ class SpiralGenerator(Generator):
         d['centre'] = self.centre
         d['radius'] = self.radius
         d['scale'] = self.scale
+        d['alternate_direction'] = self.alternate_direction
 
         return d
 
@@ -79,5 +81,6 @@ class SpiralGenerator(Generator):
         centre = d['centre']
         radius = d['radius']
         scale = d['scale']
+        alternate_direction = d['alternate_direction']
 
-        return cls(name, units, centre, radius, scale)
+        return cls(name, units, centre, radius, scale, alternate_direction)

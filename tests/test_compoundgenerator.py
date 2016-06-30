@@ -4,6 +4,7 @@ import unittest
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
+from scanpointgenerator import SpiralGenerator
 from scanpointgenerator.excluder import Excluder
 from scanpointgenerator.circular_roi import CircularROI
 
@@ -112,6 +113,24 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.positions, dict(
                 x=xpositions[i], y=ypositions[i]))
             self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
+
+    def test_line_spiral(self):
+        positions = [{'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 0.0},
+                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 0.0},
+                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 0.0},
+                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 2.0},
+                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 2.0},
+                     {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 2.0},
+                     {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 4.0},
+                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 4.0},
+                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 4.0}]
+
+        z = LineGenerator("z", "mm", 0.0, 4.0, 3)
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 1.0, alternate_direction=True)
+        gen = CompoundGenerator([spiral, z], [], [])
+
+        for i, p in enumerate(gen.iterator()):
+            self.assertEqual(p.positions, positions[i])
 
 
 class TestSerialisation(unittest.TestCase):

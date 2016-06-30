@@ -103,7 +103,6 @@ class CompoundGenerator(Generator):
         """
 
         iterator = self._base_iterator()
-        # itertools...
         for mutator in self.mutators:
             iterator = mutator.mutate(iterator)
 
