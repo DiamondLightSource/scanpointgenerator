@@ -101,11 +101,27 @@ def random_offset_check():
     plot_generator(gen)
 
 
-grid_check()
-grid_circle_check()
-spiral_check()
-spiral_rectangle_check()
-lissajous_check()
-lissajous_rectangle_check()
-line_2d_check()
-random_offset_check()
+def serialise_grid_check():
+
+    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
+    y = LineGenerator("y", "mm", 0.0, 3.0, 4)
+
+    gen = CompoundGenerator([x, y], [], [])
+
+    plot_generator(gen)
+
+    gen = gen.to_dict()
+    print(gen)
+    gen = CompoundGenerator.from_dict(gen)
+
+    plot_generator(gen)
+
+# grid_check()
+# grid_circle_check()
+# spiral_check()
+# spiral_rectangle_check()
+# lissajous_check()
+# lissajous_rectangle_check()
+# line_2d_check()
+# random_offset_check()
+send_grid_over_server_check()
