@@ -7,13 +7,13 @@ Let's walk through the simplest generator, :class:`LineGenerator`, and see how
 it is written.
 
 .. literalinclude:: ../scanpointgenerator/linegenerator.py
-    :lines: 1-2
+    :lines: 3-4
 
-We import the baseclass :class:`ScanPointGenerator` and the :class:`Point` class
+We import the baseclass :class:`Generator` and the :class:`Point` class
 that we will be generating instances of.
 
 .. literalinclude:: ../scanpointgenerator/linegenerator.py
-    :lines: 5-6
+    :lines: 15-16
 
 Our new subclass includes a docstring giving a short explanation of what it does
 

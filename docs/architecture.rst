@@ -6,7 +6,7 @@ baseclass provides the following API:
 
 .. module:: scanpointgenerator
 
-.. autoclass:: ScanPointGenerator
+.. autoclass:: Generator
     :members:
 
 Each point produced by the iterator represents a scan point, with the following
@@ -20,8 +20,8 @@ Using the API
 
 You would use a generator in a step scan like this::
 
-    >>> for point in generator.positions():
-    >>>     for mname, mpos in point.positions.items():
+    >>> for point in generator.iterator():
+    >>>     for mname, mpos in point.positions():
     >>>         motors[mname].move(mpos)
     >>>     det.write_data_to_index(point.indexes)
 

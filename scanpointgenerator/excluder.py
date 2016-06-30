@@ -7,6 +7,11 @@ class Excluder(object):
     """
 
     def __init__(self, roi, scannables):
+        """
+        Args:
+            roi(ROI): Region of interest to filter points by
+            scannables(list): List of two scannables to filter points by
+        """
 
         self.roi = roi
         self.scannables = scannables

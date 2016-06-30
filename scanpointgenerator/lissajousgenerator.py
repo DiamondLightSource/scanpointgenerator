@@ -7,8 +7,21 @@ from scanpointgenerator import Point
 
 @Generator.register_subclass("LissajousGenerator")
 class LissajousGenerator(Generator):
+    """Generate the points of a Lissajous curve"""
 
     def __init__(self, names, units, box, num_lobes, num_points=None):
+        """
+        Args:
+            names (list(str)): The scannable names e.g. ["x", "y"]
+            units (str): The scannable units e.g. "mm"
+            box(dict): Dictionary of centre, width and height representing
+                box to fill with points
+            num_lobes(int): Number of x-direction lobes for curve; will
+                have num_lobes+1 y-direction lobes
+            num_points(int): The number of points to fill the Lissajous
+                curve. Default is 100 * num_lobes
+        """
+
         self.name = names
         self.units = units
 

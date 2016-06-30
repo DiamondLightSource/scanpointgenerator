@@ -7,8 +7,23 @@ from scanpointgenerator import Point
 
 @Generator.register_subclass("SpiralGenerator")
 class SpiralGenerator(Generator):
+    """Generate the points of an Archimedean spiral"""
 
     def __init__(self, names, units, centre, radius, scale=1.0, alternate_direction=False):
+        """
+        Args:
+            names (list(str)): The scannable names e.g. ["x", "y"]
+            units (str): The scannable units e.g. "mm"
+            centre(list): List of two coordinates of centre point of spiral
+            radius(float): Radius of spiral
+            scale(float): Rate at which spiral expands; higher scale gives
+                fewer points for same radius
+            alternate_direction(bool): Specifier to reverse direction if
+                generator is nested
+
+        Returns:
+
+        """
         self.name = names
         self.units = units
         self.centre = centre
