@@ -29,7 +29,7 @@ def grid_circle_check():
     circle = CircularROI([2.0, 1.0], 2.0)
     excluder = Excluder(circle, ['x', 'y'])
 
-    gen = CompoundGenerator([x, y], [], [scan_region])
+    gen = CompoundGenerator([x, y], [], [excluder])
 
     plot_generator(gen, circle)
 
@@ -46,7 +46,7 @@ def spiral_rectangle_check():
     rectangle = RectangularROI([0.0, 0.0], 10.0, 10.0)
     excluder = Excluder(rectangle, ['x', 'y'])
 
-    gen = CompoundGenerator([spiral], [], [scan_region])
+    gen = CompoundGenerator([spiral], [], [excluder])
 
     plot_generator(gen, rectangle)
 
@@ -66,7 +66,7 @@ def lissajous_rectangle_check():
     rectangle = RectangularROI([0.0, 0.0], 0.8, 0.8)
     excluder = Excluder(rectangle, ['x', 'y'])
 
-    gen = CompoundGenerator([lissajous], [], [scan_region])
+    gen = CompoundGenerator([lissajous], [], [excluder])
 
     plot_generator(gen)
 
@@ -108,4 +108,4 @@ spiral_rectangle_check()
 lissajous_check()
 lissajous_rectangle_check()
 line_2d_check()
-# random_offset_check()
+random_offset_check()
