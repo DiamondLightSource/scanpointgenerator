@@ -5,6 +5,7 @@ from test_util import ScanPointGeneratorTest
 from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
 from scanpointgenerator import SpiralGenerator
+from scanpointgenerator import LissajousGenerator
 from scanpointgenerator.excluder import Excluder
 from scanpointgenerator.circular_roi import CircularROI
 
@@ -25,7 +26,6 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.generators[0], self.x)
         self.assertEqual(self.g.generators[1], self.y)
         self.assertEqual(self.g.num_points, 6)
-        self.assertEqual(self.g.lengths, [3, 2])
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [3, 2])
         self.assertEqual(self.g.index_names, ["x", "y"])
@@ -128,6 +128,31 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
         spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 1.0, alternate_direction=True)
         gen = CompoundGenerator([spiral, z], [], [])
+
+        for i, p in enumerate(gen.iterator()):
+            self.assertEqual(p.positions, positions[i])
+
+    def test_line_lissajous(self):
+        positions = [{'y': 0.0, 'x': 0.5, 'z': 0.0},
+                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 0.0},
+                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 0.0},
+                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 0.0},
+                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 0.0},
+                     {'y': 0.0, 'x': 0.5, 'z': 2.0},
+                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 2.0},
+                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 2.0},
+                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 2.0},
+                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 2.0},
+                     {'y': 0.0, 'x': 0.5, 'z': 4.0},
+                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 4.0},
+                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 4.0},
+                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 4.0},
+                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 4.0}]
+
+        z = LineGenerator("z", "mm", 0.0, 4.0, 3)
+        box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
+        lissajous = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
+        gen = CompoundGenerator([lissajous, z], [], [])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])

@@ -22,13 +22,11 @@ class CompoundGenerator(Generator):
         self.mutators = mutators
         self.excluders = excluders
 
-        self.lengths = []
         self.num_points = 1
         self.periods = []
         self.alternate_direction = []
         self.point_sets = []
         for generator in self.generators:
-            self.lengths.append(generator.num)
             self.num_points *= generator.num
             self.periods.append(self.num_points)
             self.alternate_direction.append(generator.alternate_direction)
@@ -59,7 +57,7 @@ class CompoundGenerator(Generator):
             point = Point()
             for gen_index, points in enumerate(self.point_sets):
                 axis_period = self.periods[gen_index]
-                axis_length = self.lengths[gen_index]
+                axis_length = self.index_dims[gen_index]
 
                 point_index = \
                     (point_num / (axis_period / axis_length)) % axis_length

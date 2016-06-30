@@ -11,7 +11,7 @@ class SpiralGeneratorTest(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(self.g.index_dims, [6])
+        self.assertEqual(self.g.index_dims, [7])
         self.assertEqual(self.g.index_names, ["x", "y"])
 
     def test_iterator(self):
