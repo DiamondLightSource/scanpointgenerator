@@ -107,7 +107,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         circle = CircularROI([1.0, 2.0], 0.2)
         scan_region = Excluder(circle, ['x', 'y'])
 
-        gen = CompoundGenerator([self.x, self.y], [], [scan_region])
+        gen = CompoundGenerator([self.x, self.y], [scan_region], [])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, dict(
@@ -172,26 +172,26 @@ class TestSerialisation(unittest.TestCase):
         self.m1 = MagicMock()
         self.m1_dict = MagicMock()
 
-        self.r1 = MagicMock()
-        self.r1_dict = MagicMock()
+        self.e1 = MagicMock()
+        self.e1_dict = MagicMock()
 
-        self.g = CompoundGenerator([self.l1, self.l2], [self.m1], [self.r1])
+        self.g = CompoundGenerator([self.l1, self.l2], [self.e1], [self.m1])
 
     def test_to_dict(self):
         self.l1.to_dict.return_value = self.l1_dict
         self.l2.to_dict.return_value = self.l2_dict
-        self.r1.to_dict.return_value = self.r1_dict
+        self.e1.to_dict.return_value = self.e1_dict
         self.m1.to_dict.return_value = self.m1_dict
 
         gen_list = [self.l1_dict, self.l2_dict]
         mutators_list = [self.m1_dict]
-        excluders_list = [self.r1_dict]
+        excluders_list = [self.e1_dict]
 
         expected_dict = OrderedDict()
         expected_dict['type'] = "CompoundGenerator"
         expected_dict['generators'] = gen_list
-        expected_dict['mutators'] = mutators_list
         expected_dict['excluders'] = excluders_list
+        expected_dict['mutators'] = mutators_list
 
         d = self.g.to_dict()
 
@@ -203,12 +203,12 @@ class TestSerialisation(unittest.TestCase):
     def test_from_dict(self, gen_mock, ex_mock, mutator_mock):
         gen_mock.from_dict.side_effect = [self.l1, self.l2]
         mutator_mock.from_dict.return_value = self.m1
-        ex_mock.from_dict.return_value = self.r1
+        ex_mock.from_dict.return_value = self.e1
 
         _dict = OrderedDict()
         _dict['generators'] = [self.l1_dict, self.l2_dict]
+        _dict['excluders'] = [self.e1_dict]
         _dict['mutators'] = [self.m1_dict]
-        _dict['excluders'] = [self.r1_dict]
 
         units_dict = OrderedDict()
         units_dict['x'] = 'mm'
@@ -219,7 +219,7 @@ class TestSerialisation(unittest.TestCase):
         self.assertEqual(gen.generators[0], self.l1)
         self.assertEqual(gen.generators[1], self.l2)
         self.assertEqual(gen.mutators[0], self.m1)
-        self.assertEqual(gen.excluders[0], self.r1)
+        self.assertEqual(gen.excluders[0], self.e1)
 
 if __name__ == "__main__":
     unittest.main()

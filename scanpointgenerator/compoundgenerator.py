@@ -8,19 +8,20 @@ from scanpointgenerator import Point
 
 @Generator.register_subclass("CompoundGenerator")
 class CompoundGenerator(Generator):
-    """Nest N generators and apply filter regions to relevant generator pairs"""
+    """Nest N generators, apply exclusion regions to relevant generator pairs
+     and apply any mutators before yielding points"""
 
-    def __init__(self, generators, mutators, excluders):
+    def __init__(self, generators, excluders, mutators):
         """
         Args:
             generators(list(Generator)): List of Generators to nest
-            mutators(list(Mutator)): List of Processors to apply to each point
-            excluders(list(Excluder)): List of regions to filter points by
+            excluders(list(Excluder)): List of Excluders to filter points by
+            mutators(list(Mutator)): List of Mutators to apply to each point
         """
 
         self.generators = generators
-        self.mutators = mutators
         self.excluders = excluders
+        self.mutators = mutators
 
         self.num_points = 1
         self.periods = []
@@ -91,32 +92,31 @@ class CompoundGenerator(Generator):
 
             yield point
 
-    def _mutated_base_iterator(self):
+    def _filtered_base_iterator(self):
         """
-        Iterator to mutate the points generated from the nest of generators
-        using mutators in self. mutators, if there are any
-
-        Yields:
-            Point: Mutated points
-        """
-
-        iterator = self._base_iterator()
-        for mutator in self.mutators:
-            iterator = mutator.mutate(iterator)
-
-        for point in iterator:
-                yield point
-
-    def iterator(self):
-        """
-        Top level iterator to filter points based on region of interest
+        Iterator to filter out points based on Excluders
 
         Yields:
             Point: Filtered points
         """
 
-        for point in self._mutated_base_iterator():
+        for point in self._base_iterator():
             if self.contains_point(point):
+                yield point
+
+    def iterator(self):
+        """
+        Top level iterator to mutate points and yield them
+
+        Yields:
+            Point: Mutated points
+        """
+
+        iterator = self._filtered_base_iterator()
+        for mutator in self.mutators:
+            iterator = mutator.mutate(iterator)
+
+        for point in iterator:
                 yield point
 
     def contains_point(self, point):
@@ -132,12 +132,12 @@ class CompoundGenerator(Generator):
 
         contains_point = True
 
-        for region in self.excluders:
-            coord_1 = point.positions[region.scannables[0]]
-            coord_2 = point.positions[region.scannables[1]]
+        for excluder in self.excluders:
+            coord_1 = point.positions[excluder.scannables[0]]
+            coord_2 = point.positions[excluder.scannables[1]]
             coordinate = [coord_1, coord_2]
 
-            if not region.roi.contains_point(coordinate):
+            if not excluder.roi.contains_point(coordinate):
                 contains_point = False
                 break
 
@@ -153,13 +153,13 @@ class CompoundGenerator(Generator):
         for generator in self.generators:
             d['generators'].append(generator.to_dict())
 
-        d['mutators'] = []
-        for mutator in self.mutators:
-            d['mutators'].append(mutator.to_dict())
-
         d['excluders'] = []
         for excluder in self.excluders:
             d['excluders'].append(excluder.to_dict())
+
+        d['mutators'] = []
+        for mutator in self.mutators:
+            d['mutators'].append(mutator.to_dict())
 
         return d
 
@@ -179,12 +179,12 @@ class CompoundGenerator(Generator):
         for generator in d['generators']:
             generators.append(Generator.from_dict(generator))
 
-        mutators = []
-        for mutator in d['mutators']:
-            mutators.append(Mutator.from_dict(mutator))
-
         excluders = []
         for excluder in d['excluders']:
             excluders.append(Excluder.from_dict(excluder))
 
-        return cls(generators, mutators, excluders)
+        mutators = []
+        for mutator in d['mutators']:
+            mutators.append(Mutator.from_dict(mutator))
+
+        return cls(generators, excluders, mutators)
