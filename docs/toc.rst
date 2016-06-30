@@ -7,7 +7,12 @@ Table of Contents
    index
    architecture
    linegenerator
-   nestedgenerator
+   spiralgenerator
+   lissajousgenerator
+   arraygenerator
+   compoundgenerator
+   excluders
+   mutators
    writing
    contributing
    release_notes
