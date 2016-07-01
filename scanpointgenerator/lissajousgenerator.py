@@ -19,7 +19,7 @@ class LissajousGenerator(Generator):
             num_lobes(int): Number of x-direction lobes for curve; will
                 have num_lobes+1 y-direction lobes
             num_points(int): The number of points to fill the Lissajous
-                curve. Default is 100 * num_lobes
+                curve. Default is 250 * num_lobes
         """
 
         self.name = names
@@ -38,7 +38,7 @@ class LissajousGenerator(Generator):
         # at centre for odd and at right edge for even
         self.phase_diff = m.pi/2 * (num_lobes % 2)
         if num_points is None:
-            self.num = num_lobes * 100
+            self.num = num_lobes * 250
         self.increment = 2*m.pi/self.num
 
         self.position_units = {names[0]: units, names[1]: units}
