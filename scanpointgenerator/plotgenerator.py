@@ -1,13 +1,14 @@
 MARKER_SIZE = 10
 
 
-def plot_generator(gen, roi=None):
+def plot_generator(gen, excluder=None, show_indexes=True):
     from matplotlib.patches import Rectangle, Circle
     import matplotlib.pyplot as plt
     import numpy as np
     from scipy import interpolate
 
-    if roi is not None:
+    if excluder is not None:
+        roi = excluder.roi
         overlay = plt.subplot(111, aspect='equal')
         if roi.name == "Rectangle":
             lower_left = (roi.centre[0] - roi.width/2, roi.centre[1] - roi.height/2)
@@ -95,9 +96,10 @@ def plot_generator(gen, roi=None):
                  textcoords='offset points')
 
     # And the indexes
-    for i, x, y in zip(capi, capx, capy):
-        plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
-                     textcoords='offset points')
-    indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
-    plt.title("Dataset: [%s]" % (", ".join(indexes)))
+    if show_indexes:
+        for i, x, y in zip(capi, capx, capy):
+            plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
+                         textcoords='offset points')
+        indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
+        plt.title("Dataset: [%s]" % (", ".join(indexes)))
     plt.show()
