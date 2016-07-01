@@ -34,9 +34,22 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         point = MagicMock()
         point.positions = dict(x=1.0)
 
-        self.m.apply_offset(point)
+        response = self.m.apply_offset(point)
 
+        self.assertTrue(response)
         self.assertEqual(dict(x=1.25), point.positions)
+
+    @patch('scanpointgenerator.randomoffsetmutator.RandomOffsetMutator.get_random_number',
+           return_value=1.0)
+    def test_apply_offset_unchanged(self, _):
+        point = MagicMock()
+        point.positions = dict(x=1.0)
+        self.m.max_offset = dict(x=0.0)
+
+        response = self.m.apply_offset(point)
+
+        self.assertFalse(response)
+        self.assertEqual(dict(x=1.0), point.positions)
 
     def test_calculate_new_upper_bound(self):
         current_point = MagicMock()
