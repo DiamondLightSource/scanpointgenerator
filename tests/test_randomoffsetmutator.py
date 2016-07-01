@@ -34,7 +34,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         point = MagicMock()
         point.positions = dict(x=1.0)
 
-        point = self.m.apply_offset(point)
+        self.m.apply_offset(point)
 
         self.assertEqual(dict(x=1.25), point.positions)
 
