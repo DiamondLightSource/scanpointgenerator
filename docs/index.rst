@@ -27,6 +27,13 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 1
+   :caption: Usage
+
+   creating
+   serialisation
+
+.. toctree::
+   :maxdepth: 1
    :caption: Development
 
    writing
