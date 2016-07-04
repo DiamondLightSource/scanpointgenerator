@@ -1,7 +1,7 @@
 from collections import OrderedDict
-import random
 
 from scanpointgenerator import Mutator
+from scanpointgenerator import random
 
 
 class RandomOffsetMutator(Mutator):
@@ -17,7 +17,7 @@ class RandomOffsetMutator(Mutator):
         """
 
         self.seed = seed
-        self.RNG = random.Random(x=seed)
+        self.RNG = random.Random(seed)
         self.max_offset = max_offset
 
     def get_random_number(self):
@@ -29,7 +29,7 @@ class RandomOffsetMutator(Mutator):
         """
         random_number = 2.0
         while abs(random_number) > 1.0:
-            random_number = self.RNG.gauss(0.0, 1.0)
+            random_number = self.RNG.random()
 
         return random_number
 
