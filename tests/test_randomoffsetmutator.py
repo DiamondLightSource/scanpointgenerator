@@ -22,11 +22,11 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
 
     def test_get_random_number(self):
         number = self.m.get_random_number()
-        self.assertEqual(0.06633580893826191, number)
+        self.assertEqual(0.48590197099999966, number)
         number = self.m.get_random_number()
-        self.assertEqual(0.-0.7645436509716318, number)
+        self.assertEqual(0.3167828240000006, number)
         number = self.m.get_random_number()
-        self.assertEqual(0.03133451683171687, number)
+        self.assertEqual(-0.7892260970000002, number)
 
     @patch('scanpointgenerator.randomoffsetmutator.RandomOffsetMutator.get_random_number',
            return_value=1.0)
@@ -34,9 +34,22 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         point = MagicMock()
         point.positions = dict(x=1.0)
 
-        point = self.m.apply_offset(point)
+        response = self.m.apply_offset(point)
 
+        self.assertTrue(response)
         self.assertEqual(dict(x=1.25), point.positions)
+
+    @patch('scanpointgenerator.randomoffsetmutator.RandomOffsetMutator.get_random_number',
+           return_value=1.0)
+    def test_apply_offset_unchanged(self, _):
+        point = MagicMock()
+        point.positions = dict(x=1.0)
+        self.m.max_offset = dict(x=0.0)
+
+        response = self.m.apply_offset(point)
+
+        self.assertFalse(response)
+        self.assertEqual(dict(x=1.0), point.positions)
 
     def test_calculate_new_upper_bound(self):
         current_point = MagicMock()
@@ -61,18 +74,18 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         self.assertEqual(dict(x=0.5), current_point.lower)
 
     def test_mutate(self):
-        positions = [1.0165839522345654, 1.808864087257092,
-                     3.007833629207929, 4.049827994120938, 5.033343651164651]
-        lower = [0.620443884723302, 1.4127240197458288,
-                 2.4083488582325105, 3.5288308116644336, 4.541585822642794]
-        upper = [1.4127240197458288, 2.4083488582325105,
-                 3.5288308116644336, 4.541585822642794, 5.5251014796865086]
+        positions = [1.12147549275, 2.079195706,
+                     2.80269347575, 3.908258751, 5.23701473025]
+        lower = [0.6426153861245, 1.600335599375,
+                 2.440944590875, 3.355476113375, 4.572636740625]
+        upper = [1.600335599375, 2.440944590875,
+                 3.355476113375, 4.572636740625, 5.901392719875]
         indexes = [0, 1, 2, 3, 4]
 
         for i, p in enumerate(self.m.mutate(self.line_gen.iterator())):
-            self.assertEqual(p.positions, dict(x=positions[i]))
-            self.assertEqual(p.lower, dict(x=lower[i]))
-            self.assertEqual(p.upper, dict(x=upper[i]))
+            self.assertAlmostEqual(p.positions['x'], positions[i], places=10)
+            self.assertAlmostEqual(p.lower['x'], lower[i], places=10)
+            self.assertAlmostEqual(p.upper['x'], upper[i], places=10)
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 4)
 

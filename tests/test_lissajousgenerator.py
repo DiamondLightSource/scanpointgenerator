@@ -12,7 +12,7 @@ class LissajousGeneratorTest(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(self.g.index_dims, [100])
+        self.assertEqual(self.g.index_dims, [250])
         self.assertEqual(self.g.index_names, ["x", "y"])
 
     def test_iterator(self):
@@ -68,7 +68,7 @@ class LissajousGeneratorTest(unittest.TestCase):
         expected_dict['units'] = 'mm'
         expected_dict['box'] = box
         expected_dict['num_lobes'] = 1
-        expected_dict['num_points'] = 100
+        expected_dict['num_points'] = 250
 
         d = self.g.to_dict()
 
@@ -85,7 +85,7 @@ class LissajousGeneratorTest(unittest.TestCase):
         _dict['units'] = 'mm'
         _dict['box'] = box
         _dict['num_lobes'] = 5
-        _dict['num_points'] = 100
+        _dict['num_points'] = 250
 
         units_dict = OrderedDict()
         units_dict['x'] = 'mm'
@@ -99,4 +99,4 @@ class LissajousGeneratorTest(unittest.TestCase):
         self.assertEqual(0.5, gen.x_max)
         self.assertEqual(1.0, gen.y_max)
         self.assertEqual([0.0, 0.0], gen.centre)
-        self.assertEqual(100, gen.num)
+        self.assertEqual(250, gen.num)

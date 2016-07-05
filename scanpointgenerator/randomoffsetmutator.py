@@ -1,7 +1,7 @@
 from collections import OrderedDict
-import random
 
 from scanpointgenerator import Mutator
+from scanpointgenerator import random
 
 
 class RandomOffsetMutator(Mutator):
@@ -17,7 +17,7 @@ class RandomOffsetMutator(Mutator):
         """
 
         self.seed = seed
-        self.RNG = random.Random(x=seed)
+        self.RNG = random.Random(seed)
         self.max_offset = max_offset
 
     def get_random_number(self):
@@ -29,7 +29,7 @@ class RandomOffsetMutator(Mutator):
         """
         random_number = 2.0
         while abs(random_number) > 1.0:
-            random_number = self.RNG.gauss(0.0, 1.0)
+            random_number = self.RNG.random()
 
         return random_number
 
@@ -41,12 +41,15 @@ class RandomOffsetMutator(Mutator):
             point(Point): Point to apply random offset to
 
         Returns:
-            Point: Point with offset applied to its coordinates
+            bool: Whether point was changed
         """
         for axis in point.positions.keys():
-            random_number = self.get_random_number()
-            point.positions[axis] += random_number * self.max_offset[axis]
-        return point
+            if self.max_offset[axis] == 0.0:
+                return False
+            else:
+                random_offset = self.get_random_number() * self.max_offset[axis]
+                point.positions[axis] += random_offset
+        return True
 
     @staticmethod
     def calculate_new_upper_bound(current_point, next_point):
@@ -97,32 +100,36 @@ class RandomOffsetMutator(Mutator):
         """
 
         previous_point = current_point = None
+        changed = False
 
         for next_point in iterator:
-            self.apply_offset(next_point)
+            changed = self.apply_offset(next_point)
 
             if previous_point is not None:
-                self.calculate_new_upper_bound(current_point, next_point)
-                self.calculate_new_lower_bound(current_point, previous_point)
+                if changed:
+                    self.calculate_new_upper_bound(current_point, next_point)
+                    self.calculate_new_lower_bound(current_point, previous_point)
                 yield current_point
             elif current_point is not None:
                 # For first point calculate upper bound and extrapolate lower bound
-                self.calculate_new_upper_bound(current_point, next_point)
-                for axis in current_point.positions.keys():
-                    position = current_point.positions[axis]
-                    upper = current_point.upper[axis]
-                    current_point.lower[axis] = position - (upper - position)
+                if changed:
+                    self.calculate_new_upper_bound(current_point, next_point)
+                    for axis in current_point.positions.keys():
+                        position = current_point.positions[axis]
+                        upper = current_point.upper[axis]
+                        current_point.lower[axis] = position - (upper - position)
                 yield current_point
 
             previous_point = current_point
             current_point = next_point
 
         # For final point calculate lower bound and extrapolate upper bound
-        self.calculate_new_lower_bound(current_point, previous_point)
-        for axis in current_point.positions.keys():
-            position = current_point.positions[axis]
-            lower = current_point.lower[axis]
-            current_point.upper[axis] = position + (position - lower)
+        if changed:
+            self.calculate_new_lower_bound(current_point, previous_point)
+            for axis in current_point.positions.keys():
+                position = current_point.positions[axis]
+                lower = current_point.lower[axis]
+                current_point.upper[axis] = position + (position - lower)
         yield current_point
 
     def to_dict(self):

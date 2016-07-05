@@ -25,7 +25,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
     def test_init(self):
         self.assertEqual(self.g.generators[0], self.x)
         self.assertEqual(self.g.generators[1], self.y)
-        self.assertEqual(self.g.num_points, 6)
+        self.assertEqual(self.g.num, 6)
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [3, 2])
         self.assertEqual(self.g.index_names, ["x", "y"])

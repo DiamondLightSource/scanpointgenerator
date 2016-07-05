@@ -23,13 +23,13 @@ class CompoundGenerator(Generator):
         self.excluders = excluders
         self.mutators = mutators
 
-        self.num_points = 1
+        self.num = 1
         self.periods = []
         self.alternate_direction = []
         self.point_sets = []
         for generator in self.generators:
-            self.num_points *= generator.num
-            self.periods.append(self.num_points)
+            self.num *= generator.num
+            self.periods.append(self.num)
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
 
@@ -53,7 +53,7 @@ class CompoundGenerator(Generator):
             Point: Base points
         """
 
-        for point_num in range(self.num_points):
+        for point_num in range(self.num):
 
             point = Point()
             for gen_index, points in enumerate(self.point_sets):
@@ -73,7 +73,7 @@ class CompoundGenerator(Generator):
                 else:
                     reverse = False
 
-                current_point = self.point_sets[gen_index][point_index]
+                current_point = points[point_index]
 
                 if gen_index == 0:  # If innermost generator, use bounds
                     point.positions.update(current_point.positions)
