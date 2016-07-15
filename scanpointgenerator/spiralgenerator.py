@@ -20,9 +20,6 @@ class SpiralGenerator(Generator):
                 fewer points for same radius
             alternate_direction(bool): Specifier to reverse direction if
                 generator is nested
-
-        Returns:
-
         """
         self.name = names
         self.units = units
@@ -33,7 +30,7 @@ class SpiralGenerator(Generator):
 
         self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor
         self.beta = scale / (2 * m.pi)  # Radius scale factor
-        self.num = self._end_point(self.radius)
+        self.num = self._end_point(self.radius) + 1
 
         self.position_units = {names[0]: units, names[1]: units}
         self.index_dims = [self._end_point(self.radius)]
@@ -53,7 +50,7 @@ class SpiralGenerator(Generator):
         return int((radius / (self.alpha * self.beta)) ** 2)
 
     def iterator(self):
-        for i in range(0, self._end_point(self.radius)):
+        for i in range(0, self._end_point(self.radius) + 1):
             p = Point()
             p.indexes = [i]
 
