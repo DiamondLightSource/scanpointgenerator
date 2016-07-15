@@ -41,6 +41,13 @@ class CompoundGenerator(Generator):
         for generator in generators:
             self.index_dims += generator.index_dims
 
+        if self.excluders:  # Calculate number of remaining points and flatten
+                            # index dimensions
+            remaining_points = 0
+            for _ in self._filtered_base_iterator():
+                remaining_points += 1
+            self.index_dims = [remaining_points]
+
         self.index_names = []
         for generator in generators:
             self.index_names += generator.index_names
@@ -58,7 +65,7 @@ class CompoundGenerator(Generator):
             point = Point()
             for gen_index, points in enumerate(self.point_sets):
                 axis_period = self.periods[gen_index]
-                axis_length = self.index_dims[gen_index]
+                axis_length = len(points)
 
                 point_index = \
                     (point_num / (axis_period / axis_length)) % axis_length
@@ -116,8 +123,15 @@ class CompoundGenerator(Generator):
         for mutator in self.mutators:
             iterator = mutator.mutate(iterator)
 
-        for point in iterator:
-            yield point
+        if self.excluders:
+            point_index = 0
+            for point in iterator:
+                point.indexes = [point_index]
+                point_index += 1
+                yield point
+        else:
+            for point in iterator:
+                yield point
 
     def contains_point(self, point):
         """

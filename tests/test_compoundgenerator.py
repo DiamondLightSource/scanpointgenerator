@@ -101,18 +101,17 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
     def test_iterator_with_region(self):
         xpositions = [1.0, 1.1, 1.2, 1.1, 1.0]
         ypositions = [2.0, 2.0, 2.0, 2.1, 2.1]
-        xindexes = [0, 1, 2, 1, 0]
-        yindexes = [0, 0, 0, 1, 1]
+        indexes = [0, 1, 2, 3, 4]
 
         circle = CircularROI([1.0, 2.0], 0.2)
-        scan_region = Excluder(circle, ['x', 'y'])
+        excluder = Excluder(circle, ['x', 'y'])
 
-        gen = CompoundGenerator([self.x, self.y], [scan_region], [])
+        gen = CompoundGenerator([self.x, self.y], [excluder], [])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, dict(
                 x=xpositions[i], y=ypositions[i]))
-            self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
+            self.assertEqual(p.indexes, [indexes[i]])
 
     def test_mutate_called(self):
         mutator = MagicMock()
@@ -135,10 +134,11 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                      {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 2.0},
                      {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 4.0},
                      {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 4.0},
-                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 4.0}]
+                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 4.0},
+                     {}]
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 1.0, alternate_direction=True)
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate_direction=True)
         gen = CompoundGenerator([spiral, z], [], [])
 
         for i, p in enumerate(gen.iterator()):
@@ -170,6 +170,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.positions, positions[i])
 
 
+@patch('scanpointgenerator.compoundgenerator.CompoundGenerator._base_iterator')
 class TestSerialisation(unittest.TestCase):
 
     def setUp(self):
@@ -187,9 +188,9 @@ class TestSerialisation(unittest.TestCase):
         self.e1 = MagicMock()
         self.e1_dict = MagicMock()
 
+    def test_to_dict(self, _):
         self.g = CompoundGenerator([self.l1, self.l2], [self.e1], [self.m1])
 
-    def test_to_dict(self):
         self.l1.to_dict.return_value = self.l1_dict
         self.l2.to_dict.return_value = self.l2_dict
         self.e1.to_dict.return_value = self.e1_dict
@@ -212,7 +213,9 @@ class TestSerialisation(unittest.TestCase):
     @patch('scanpointgenerator.compoundgenerator.Mutator')
     @patch('scanpointgenerator.compoundgenerator.Excluder')
     @patch('scanpointgenerator.compoundgenerator.Generator')
-    def test_from_dict(self, gen_mock, ex_mock, mutator_mock):
+    def test_from_dict(self, gen_mock, ex_mock, mutator_mock, _):
+        self.g = CompoundGenerator([self.l1, self.l2], [self.e1], [self.m1])
+
         gen_mock.from_dict.side_effect = [self.l1, self.l2]
         mutator_mock.from_dict.return_value = self.m1
         ex_mock.from_dict.return_value = self.e1
