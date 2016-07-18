@@ -35,12 +35,14 @@ A spiral scan at each point of a line scan with alternating direction
     line = LineGenerator("z", "mm", 0.0, 20.0, 3)
     spiral = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 1.2,
                              alternate_direction=True)
-    gen = CompoundGenerator([spiral, line], [], [])
+    gen = CompoundGenerator([line, spiral], [], [])
 
     for point in gen.iterator():
         for axis, value in point.positions.items():
             point.positions[axis] = round(value, 3)
         print(point.positions)
+
+::
 
     {'y': -0.321, 'x': 0.237, 'z': 0.0}
     {'y': -0.25, 'x': -0.644, 'z': 0.0}
@@ -55,7 +57,7 @@ A spiral scan at each point of a line scan with alternating direction
     {'y': 0.695, 'x': -0.56, 'z': 20.0}
     {'y': 0.992, 'x': 0.361, 'z': 20.0}
 
-Three nested line scans with an excludor operating on the innermost and
+Three nested line scans with an excluder operating on the innermost and
 outermost axes
 
 .. plot::
@@ -69,10 +71,12 @@ outermost axes
     line2 = LineGenerator("y", "mm", 0.0, 1.0, 2)
     line3 = LineGenerator("z", "mm", 0.0, 1.0, 2)
     circle = Excluder(CircularROI([1.0, 1.0], 1.0), ["x", "z"])
-    gen = CompoundGenerator([line1, line2, line3], [circle], [])
+    gen = CompoundGenerator([line3, line2, line1], [circle], [])
 
     for point in gen.iterator():
         print(point.positions)
+
+::
 
     {'y': 0.0, 'x': 1.0, 'z': 0.0}
     {'y': 0.0, 'x': 1.0, 'z': 1.0}

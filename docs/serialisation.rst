@@ -56,7 +56,7 @@ As an example, here is a simple snake scan.
 
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
-    gen = CompoundGenerator([x, y], [], [])
+    gen = CompoundGenerator([y, x], [], [])
 
     plot_generator(gen)
 
@@ -70,7 +70,7 @@ It is the same after being serialised and deserialised.
 
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
-    gen = CompoundGenerator([x, y], [], [])
+    gen = CompoundGenerator([y, x], [], [])
 
     gen_dict = gen.to_dict()
     new_gen = CompoundGenerator.from_dict(gen_dict)

@@ -24,7 +24,7 @@ Here we use a CircularROI to filter the points of a snake scan
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
     circle = Excluder(CircularROI([2.0, 1.0], 2.0), ["x", "y"])
-    gen = CompoundGenerator([x, y], [], [])
+    gen = CompoundGenerator([y, x], [], [])
     plot_generator(gen, circle)
 
 And with the excluder applied
@@ -40,5 +40,5 @@ And with the excluder applied
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
     circle = Excluder(CircularROI([2.0, 1.0], 2.0), ["x", "y"])
     excluder = Excluder(circle, ['x', 'y'])
-    gen = CompoundGenerator([x, y], [circle], [])
+    gen = CompoundGenerator([y, x], [circle], [])
     plot_generator(gen, circle)
