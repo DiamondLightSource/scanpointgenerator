@@ -20,7 +20,7 @@ line scan inside it with 5 points.
 
     xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=False)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
-    gen = CompoundGenerator([xs, ys], [], [])
+    gen = CompoundGenerator([ys, xs], [], [])
     plot_generator(gen)
 
 
@@ -38,5 +38,5 @@ be run in reverse to give a snake scan.
 
     xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=True)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
-    gen = CompoundGenerator([xs, ys], [], [])
+    gen = CompoundGenerator([ys, xs], [], [])
     plot_generator(gen)

@@ -17,7 +17,7 @@ def grid_check():
 
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
-    gen = CompoundGenerator([x, y], [], [])
+    gen = CompoundGenerator([y, x], [], [])
 
     plot_generator(gen)
 
@@ -27,7 +27,7 @@ def grid_circle_check():
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
     circle = Excluder(CircularROI([2.0, 1.0], 2.0), ['x', 'y'])
-    gen = CompoundGenerator([x, y], [circle], [])
+    gen = CompoundGenerator([y, x], [circle], [])
 
     plot_generator(gen, circle)
 
@@ -82,19 +82,19 @@ def random_offset_check():
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
     mutator = RandomOffsetMutator(2, dict(x=0.25, y=0.25))
 
-    gen = CompoundGenerator([x, y], [], [mutator])
+    gen = CompoundGenerator([y, x], [], [mutator])
 
     plot_generator(gen)
 
-    gen = CompoundGenerator([x, y], [], [mutator, mutator])
+    gen = CompoundGenerator([y, x], [], [mutator, mutator])
 
     plot_generator(gen)
 
-    gen = CompoundGenerator([x, y], [], [mutator, mutator, mutator])
+    gen = CompoundGenerator([y, x], [], [mutator, mutator, mutator])
 
     plot_generator(gen)
 
-    gen = CompoundGenerator([x, y], [], [mutator, mutator, mutator, mutator, mutator])
+    gen = CompoundGenerator([y, x], [], [mutator, mutator, mutator, mutator, mutator])
 
     plot_generator(gen)
 
@@ -104,7 +104,7 @@ def serialise_grid_check():
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
 
-    gen = CompoundGenerator([x, y], [], [])
+    gen = CompoundGenerator([y, x], [], [])
 
     plot_generator(gen)
 

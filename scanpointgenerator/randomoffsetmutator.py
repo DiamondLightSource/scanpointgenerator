@@ -43,49 +43,34 @@ class RandomOffsetMutator(Mutator):
         Returns:
             bool: Whether point was changed
         """
+
+        changed = False
         for axis in point.positions.keys():
             if self.max_offset[axis] == 0.0:
-                return False
+                pass
             else:
                 random_offset = self.get_random_number() * self.max_offset[axis]
                 point.positions[axis] += random_offset
-        return True
+                changed = True
+                
+        return changed
 
     @staticmethod
-    def calculate_new_upper_bound(current_point, next_point):
+    def calculate_new_bounds(current_point, next_point):
         """
-        Calculate upper bound for current point based on next point
+        Take two adjacent points and recalculate their shared bound
 
         Args:
-            next_point(Point): Next point to calculate bound with
-            current_point(Point): Current point to add bound to
-
-        Returns:
-            Point: Current point with new upper bound
+            next_point(Point): Next point
+            current_point(Point): Current point
         """
 
         for axis in current_point.positions.keys():
-            current_point.upper[axis] = \
-                (current_point.positions[axis] + next_point.positions[axis]) / 2
-        return current_point
+            new_bound = (current_point.positions[axis] +
+                         next_point.positions[axis]) / 2
 
-    @staticmethod
-    def calculate_new_lower_bound(current_point, previous_point):
-        """
-        Calculate lower bound for current point based on previous point
-
-        Args:
-            previous_point(Point): Previous point to calculate bound with
-            current_point(Point): Current point to add bound to
-
-        Returns:
-            Point: Current point with new lower bound
-        """
-
-        for axis in current_point.positions.keys():
-            current_point.lower[axis] = \
-                (current_point.positions[axis] + previous_point.positions[axis]) / 2
-        return current_point
+            current_point.upper[axis] = new_bound
+            next_point.lower[axis] = new_bound
 
     def mutate(self, iterator):
         """
@@ -99,38 +84,23 @@ class RandomOffsetMutator(Mutator):
             Point: Mutated points
         """
 
-        previous_point = current_point = None
-        changed = False
+        next_point = current_point = None
 
         for next_point in iterator:
             changed = self.apply_offset(next_point)
 
-            if previous_point is not None:
+            if current_point is not None:
                 if changed:
-                    self.calculate_new_upper_bound(current_point, next_point)
-                    self.calculate_new_lower_bound(current_point, previous_point)
-                yield current_point
-            elif current_point is not None:
-                # For first point calculate upper bound and extrapolate lower bound
-                if changed:
-                    self.calculate_new_upper_bound(current_point, next_point)
-                    for axis in current_point.positions.keys():
-                        position = current_point.positions[axis]
-                        upper = current_point.upper[axis]
-                        current_point.lower[axis] = position - (upper - position)
+                    # If point wasn't changed don't update bounds
+                    if next_point.lower == current_point.upper:
+                        # If leaving and re-entering ROI don't update bounds
+                        self.calculate_new_bounds(current_point, next_point)
+
                 yield current_point
 
-            previous_point = current_point
             current_point = next_point
 
-        # For final point calculate lower bound and extrapolate upper bound
-        if changed:
-            self.calculate_new_lower_bound(current_point, previous_point)
-            for axis in current_point.positions.keys():
-                position = current_point.positions[axis]
-                lower = current_point.lower[axis]
-                current_point.upper[axis] = position + (position - lower)
-        yield current_point
+        yield next_point
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

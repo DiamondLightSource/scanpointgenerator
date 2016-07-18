@@ -4,6 +4,7 @@ import unittest
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator import RandomOffsetMutator
 from scanpointgenerator import LineGenerator
+from scanpointgenerator import Point
 
 from pkg_resources import require
 require("mock")
@@ -51,35 +52,25 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         self.assertFalse(response)
         self.assertEqual(dict(x=1.0), point.positions)
 
-    def test_calculate_new_upper_bound(self):
-        current_point = MagicMock()
+    def test_calculate_new_bounds(self):
+        current_point = Point()
         current_point.positions = dict(x=1.0)
         current_point.upper = dict(x=1.1)
-        next_point = MagicMock()
+        next_point = Point()
         next_point.positions = dict(x=2.0)
 
-        current_point = self.m.calculate_new_upper_bound(current_point, next_point)
+        self.m.calculate_new_bounds(current_point, next_point)
 
         self.assertEqual(dict(x=1.5), current_point.upper)
-
-    def test_calculate_new_lower_bound(self):
-        current_point = MagicMock()
-        current_point.positions = dict(x=1.0)
-        current_point.lower = dict(x=0.9)
-        previous_point = MagicMock()
-        previous_point.positions = dict(x=0.0)
-
-        current_point = self.m.calculate_new_lower_bound(current_point, previous_point)
-
-        self.assertEqual(dict(x=0.5), current_point.lower)
+        self.assertEqual(dict(x=1.5), next_point.lower)
 
     def test_mutate(self):
         positions = [1.12147549275, 2.079195706,
                      2.80269347575, 3.908258751, 5.23701473025]
-        lower = [0.6426153861245, 1.600335599375,
+        lower = [0.5, 1.600335599375,
                  2.440944590875, 3.355476113375, 4.572636740625]
         upper = [1.600335599375, 2.440944590875,
-                 3.355476113375, 4.572636740625, 5.901392719875]
+                 3.355476113375, 4.572636740625, 5.5]
         indexes = [0, 1, 2, 3, 4]
 
         for i, p in enumerate(self.m.mutate(self.line_gen.iterator())):

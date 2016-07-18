@@ -20,15 +20,15 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
         self.y = LineGenerator("y", "mm", 2.0, 2.1, 2, False)
         self.z = LineGenerator("z", "mm", 1.0, 2.0, 2, False)
-        self.g = CompoundGenerator([self.x, self.y], [], [])
+        self.g = CompoundGenerator([self.y, self.x], [], [])
 
     def test_init(self):
-        self.assertEqual(self.g.generators[0], self.x)
-        self.assertEqual(self.g.generators[1], self.y)
+        self.assertEqual(self.g.generators[0], self.y)
+        self.assertEqual(self.g.generators[1], self.x)
         self.assertEqual(self.g.num, 6)
-        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(self.g.index_dims, [3, 2])
-        self.assertEqual(self.g.index_names, ["x", "y"])
+        self.assertEqual(self.g.position_units, dict(y="mm", x="mm"))
+        self.assertEqual(self.g.index_dims, [2, 3])
+        self.assertEqual(self.g.index_names, ["y", "x"])
 
     def test_contains_point_true(self):
         point = MagicMock()
@@ -81,7 +81,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
 
     def test_double_nest(self):
-        self.g = CompoundGenerator([self.x, self.y, self.z], [], [])
+        self.g = CompoundGenerator([self.z, self.y, self.x], [], [])
 
         xpositions = [1.0, 1.1, 1.2, 1.2, 1.1, 1.0,
                       1.0, 1.1, 1.2, 1.2, 1.1, 1.0]
@@ -106,7 +106,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         circle = CircularROI([1.0, 2.0], 0.2)
         excluder = Excluder(circle, ['x', 'y'])
 
-        gen = CompoundGenerator([self.x, self.y], [excluder], [])
+        gen = CompoundGenerator([self.y, self.x], [excluder], [])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, dict(
@@ -139,7 +139,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
         spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate_direction=True)
-        gen = CompoundGenerator([spiral, z], [], [])
+        gen = CompoundGenerator([z, spiral], [], [])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])
@@ -164,7 +164,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
         box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
         lissajous = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
-        gen = CompoundGenerator([lissajous, z], [], [])
+        gen = CompoundGenerator([z, lissajous], [], [])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])
@@ -189,14 +189,14 @@ class TestSerialisation(unittest.TestCase):
         self.e1_dict = MagicMock()
 
     def test_to_dict(self, _):
-        self.g = CompoundGenerator([self.l1, self.l2], [self.e1], [self.m1])
+        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1])
 
         self.l1.to_dict.return_value = self.l1_dict
         self.l2.to_dict.return_value = self.l2_dict
         self.e1.to_dict.return_value = self.e1_dict
         self.m1.to_dict.return_value = self.m1_dict
 
-        gen_list = [self.l1_dict, self.l2_dict]
+        gen_list = [self.l2_dict, self.l1_dict]
         mutators_list = [self.m1_dict]
         excluders_list = [self.e1_dict]
 
@@ -214,9 +214,9 @@ class TestSerialisation(unittest.TestCase):
     @patch('scanpointgenerator.compoundgenerator.Excluder')
     @patch('scanpointgenerator.compoundgenerator.Generator')
     def test_from_dict(self, gen_mock, ex_mock, mutator_mock, _):
-        self.g = CompoundGenerator([self.l1, self.l2], [self.e1], [self.m1])
+        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1])
 
-        gen_mock.from_dict.side_effect = [self.l1, self.l2]
+        gen_mock.from_dict.side_effect = [self.l2, self.l1]
         mutator_mock.from_dict.return_value = self.m1
         ex_mock.from_dict.return_value = self.e1
 
@@ -231,8 +231,8 @@ class TestSerialisation(unittest.TestCase):
 
         gen = CompoundGenerator.from_dict(_dict)
 
-        self.assertEqual(gen.generators[0], self.l1)
-        self.assertEqual(gen.generators[1], self.l2)
+        self.assertEqual(gen.generators[0], self.l2)
+        self.assertEqual(gen.generators[1], self.l1)
         self.assertEqual(gen.mutators[0], self.m1)
         self.assertEqual(gen.excluders[0], self.e1)
 

@@ -27,7 +27,8 @@ class CompoundGenerator(Generator):
         self.periods = []
         self.alternate_direction = []
         self.point_sets = []
-        for generator in self.generators:
+        for generator in self.generators[::-1]:
+            # Reverse so self.periods is correct and iterator is simpler
             self.num *= generator.num
             self.periods.append(self.num)
             self.alternate_direction.append(generator.alternate_direction)
@@ -38,8 +39,8 @@ class CompoundGenerator(Generator):
             self.position_units.update(generator.position_units)
 
         self.index_dims = []
-        for generator in generators:
-            self.index_dims += generator.index_dims
+        for self.generator in self.generators:
+            self.index_dims += self.generator.index_dims
 
         if self.excluders:  # Calculate number of remaining points and flatten
                             # index dimensions
@@ -49,8 +50,8 @@ class CompoundGenerator(Generator):
             self.index_dims = [remaining_points]
 
         self.index_names = []
-        for generator in generators:
-            self.index_names += generator.index_names
+        for self.generator in self.generators:
+            self.index_names += self.generator.index_names
 
     def _base_iterator(self):
         """
@@ -66,6 +67,8 @@ class CompoundGenerator(Generator):
             for gen_index, points in enumerate(self.point_sets):
                 axis_period = self.periods[gen_index]
                 axis_length = len(points)
+                # Can't use index_dims in case they have been flattened
+                # by an excluder
 
                 point_index = \
                     (point_num / (axis_period / axis_length)) % axis_length
