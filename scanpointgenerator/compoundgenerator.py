@@ -138,13 +138,13 @@ class CompoundGenerator(Generator):
 
     def contains_point(self, point):
         """
-        Filter a Point through all ScanRegions
+        Filter a Point through all Excluders
 
         Args:
             point(Point): Point to check
 
         Returns:
-            bool: Whether point is contained by all ScanRegions
+            bool: Whether point is contained by all Excluders
         """
 
         contains_point = True
