@@ -11,12 +11,22 @@ class ArrayGenerator(Generator):
     def __init__(self, name, units, points, lower_bounds=None, upper_bounds=None):
         """
         Args:
-            name (list): ND list of scannable names. E.g. ["x", "y"]
+            name (str/list): ND list of scannable names e.g. "x" or ["x", "y"]
             units (str): The scannable units. E.g. "mm"
             points (list): List of ND lists of coordinates
+                e.g. [1.0, 2.0, 3.0] or [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
             lower_bounds (list): List of ND lists of lower bound coordinates
             upper_bounds (list): List of ND lists of upper bound coordinates
         """
+
+        if not isinstance(name, list):
+            name = [name]
+        if not isinstance(points[0], list):
+            points = [[point] for point in points]
+            if upper_bounds is not None:
+                upper_bounds = [[point] for point in upper_bounds]
+            if lower_bounds is not None:
+                lower_bounds = [[point] for point in lower_bounds]
 
         self.name = name
         self.points = points
