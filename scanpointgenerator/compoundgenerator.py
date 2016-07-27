@@ -27,12 +27,12 @@ class CompoundGenerator(Generator):
         self.periods = []
         self.alternate_direction = []
         self.point_sets = []
-        for generator in self.generators[::-1]:
-            # Reverse so self.periods is correct and iterator is simpler
-            self.num *= generator.num
-            self.periods.append(self.num)
+        for generator in self.generators:
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
+        for generator in self.generators[::-1]:
+            self.num *= generator.num
+            self.periods.insert(0, self.num)
 
         self.position_units = generators[0].position_units.copy()
         for generator in generators[1:]:
@@ -85,7 +85,8 @@ class CompoundGenerator(Generator):
 
                 current_point = points[point_index]
 
-                if gen_index == 0:  # If innermost generator, use bounds
+                # If innermost generator, use bounds
+                if gen_index == len(self.point_sets) - 1:
                     point.positions.update(current_point.positions)
                     if reverse:  # Swap bounds if reversing
                         point.upper.update(current_point.lower)

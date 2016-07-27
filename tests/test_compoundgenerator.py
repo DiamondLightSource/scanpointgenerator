@@ -78,7 +78,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.upper['x'], xupper[i])
             self.assertEqual(p.lower['x'], xlower[i])
             self.assertEqual(p.positions, dict(x=xpositions[i], y=ypositions[i]))
-            self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
+            self.assertEqual(p.indexes, [yindexes[i], xindexes[i]])
 
     def test_double_nest(self):
         self.g = CompoundGenerator([self.z, self.y, self.x], [], [])
@@ -96,7 +96,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         for i, p in enumerate(self.g.iterator()):
             self.assertEqual(p.positions, dict(
                 x=xpositions[i], y=ypositions[i], z=zpositions[i]))
-            self.assertEqual(p.indexes, [xindexes[i], yindexes[i], zindexes[i]])
+            self.assertEqual(p.indexes, [zindexes[i], yindexes[i], xindexes[i]])
 
     def test_iterator_with_region(self):
         xpositions = [1.0, 1.1, 1.2, 1.1, 1.0]
