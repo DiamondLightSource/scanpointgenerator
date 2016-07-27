@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 
 from compat import range_
 
@@ -30,11 +31,16 @@ class CompoundGenerator(Generator):
         self.alternate_direction = []
         self.point_sets = []
         for generator in self.generators:
+            logging.debug("Generator passed to Compound init")
+            logging.debug(generator.to_dict())
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
         for generator in self.generators[::-1]:
             self.num *= generator.num
             self.periods.insert(0, self.num)
+
+        logging.debug("CompoundGenerator periods")
+        logging.debug(self.periods)
 
         self.position_units = generators[0].position_units.copy()
         for generator in generators[1:]:
@@ -105,6 +111,9 @@ class CompoundGenerator(Generator):
                     point.lower.update(current_point.positions)
 
                 point.indexes += current_point.indexes
+
+                logging.debug("Current point positions and indexes")
+                logging.debug([current_point.positions, current_point.indexes])
 
             yield point
 
