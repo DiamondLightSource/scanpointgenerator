@@ -1,6 +1,8 @@
 from collections import OrderedDict
 import math as m
 
+from compat import range_
+
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
@@ -50,7 +52,7 @@ class SpiralGenerator(Generator):
         return int((radius / (self.alpha * self.beta)) ** 2)
 
     def iterator(self):
-        for i in range(0, self._end_point(self.radius) + 1):
+        for i in range_(0, self._end_point(self.radius) + 1):
             p = Point()
             p.indexes = [i]
 

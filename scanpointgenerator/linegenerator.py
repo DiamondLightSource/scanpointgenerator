@@ -1,5 +1,7 @@
 from collections import OrderedDict
 
+from compat import range_
+
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
@@ -39,12 +41,15 @@ class LineGenerator(Generator):
                 "Dimensions of name, start and stop do not match")
 
         self.num = num
-        self.num_axes = len(name)
+        self.num_axes = len(self.name)
 
         self.step = []
-        for axis in range(len(self.start)):
-            self.step.append(
-                (self.stop[axis] - self.start[axis])/(self.num - 1))
+        if self.num < 2:
+            self.step = [0]*len(self.start)
+        else:
+            for axis in range_(len(self.start)):
+                self.step.append(
+                    (self.stop[axis] - self.start[axis])/(self.num - 1))
 
         self.position_units = OrderedDict()
         for dimension in self.name:
@@ -58,10 +63,10 @@ class LineGenerator(Generator):
 
     def iterator(self):
 
-        for i in range(self.num):
+        for i in range_(self.num):
             point = Point()
 
-            for axis in range(self.num_axes):
+            for axis in range_(self.num_axes):
                 point.positions[self.name[axis]] = self._calc(i, axis)
                 point.lower[self.name[axis]] = self._calc(i - 0.5, axis)
                 point.upper[self.name[axis]] = self._calc(i + 0.5, axis)

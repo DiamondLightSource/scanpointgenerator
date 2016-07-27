@@ -1,5 +1,7 @@
 from collections import OrderedDict
 
+from compat import range_
+
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
@@ -34,17 +36,17 @@ class ArrayGenerator(Generator):
         self.lower_bounds = lower_bounds
 
         for point in self.points:
-            if len(point) != len(name):
+            if len(point) != len(self.name):
                 raise ValueError(
                     "Dimensions of name, start and stop do not match")
         if self.upper_bounds is not None:
             for point in self.upper_bounds:
-                if len(point) != len(name):
+                if len(point) != len(self.name):
                     raise ValueError(
                         "Dimensions of name, start and stop do not match")
         if self.lower_bounds is not None:
             for point in self.lower_bounds:
-                if len(point) != len(name):
+                if len(point) != len(self.name):
                     raise ValueError(
                         "Dimensions of name, start and stop do not match")
 
@@ -58,7 +60,7 @@ class ArrayGenerator(Generator):
 
     def iterator(self):
 
-        for i in range(self.num):
+        for i in range_(self.num):
 
             point = Point()
             for axis, coordinate in enumerate(self.points[i]):

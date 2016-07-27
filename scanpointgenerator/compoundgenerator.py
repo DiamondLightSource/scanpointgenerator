@@ -1,5 +1,7 @@
 from collections import OrderedDict
 
+from compat import range_
+
 from scanpointgenerator import Generator
 from scanpointgenerator.excluder import Excluder
 from scanpointgenerator.mutator import Mutator
@@ -61,7 +63,7 @@ class CompoundGenerator(Generator):
             Point: Base points
         """
 
-        for point_num in range(self.num):
+        for point_num in range_(self.num):
 
             point = Point()
             for gen_index, points in enumerate(self.point_sets):

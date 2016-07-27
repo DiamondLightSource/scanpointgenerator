@@ -1,6 +1,8 @@
 from collections import OrderedDict
 import math as m
 
+from compat import range_
+
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
@@ -56,7 +58,7 @@ class LissajousGenerator(Generator):
         return x, y
 
     def iterator(self):
-        for i in range(self.num):
+        for i in range_(self.num):
             p = Point()
             p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
             p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
