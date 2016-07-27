@@ -55,6 +55,9 @@ class CompoundGenerator(Generator):
         for self.generator in self.generators:
             self.index_names += self.generator.index_names
 
+        if len(self.index_names) != len(set(self.index_names)):
+            raise ValueError("Axis names cannot be duplicated; names was %s" % self.index_names)
+
     def _base_iterator(self):
         """
         Iterator to generate points by nesting each generator in self.generators

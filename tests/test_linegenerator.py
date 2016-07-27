@@ -73,6 +73,10 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, [5])
         self.assertEqual(self.g.index_names, ["x", "y"])
 
+    def test_duplicate_name_raises(self):
+        with self.assertRaises(ValueError):
+            LineGenerator(["x", "x"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+
     def test_given_inconsistent_dims_then_raise_error(self):
 
         with self.assertRaises(ValueError):

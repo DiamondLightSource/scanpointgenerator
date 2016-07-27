@@ -24,6 +24,9 @@ class LissajousGenerator(Generator):
                 curve. Default is 250 * num_lobes
         """
 
+        if len(names) != len(set(names)):
+            raise ValueError("Axis names cannot be duplicated; names was %s" % names)
+
         self.name = names
         self.units = units
 

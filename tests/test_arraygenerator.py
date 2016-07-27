@@ -21,6 +21,10 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, [4])
         self.assertEqual(self.g.index_names, ["x", "y"])
 
+    def test_duplicate_name_raises(self):
+        with self.assertRaises(ValueError):
+            ArrayGenerator(["x", "x"], "mm", [1.0])
+
     def test_init_with_simple_name_and_points(self):
         g = ArrayGenerator("x", "mm", [1.0, 2.0, 3.0],
                                       [0.5, 1.5, 2.5],

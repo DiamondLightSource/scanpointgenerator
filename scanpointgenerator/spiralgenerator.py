@@ -23,6 +23,10 @@ class SpiralGenerator(Generator):
             alternate_direction(bool): Specifier to reverse direction if
                 generator is nested
         """
+
+        if len(names) != len(set(names)):
+            raise ValueError("Axis names cannot be duplicated; names was %s" % names)
+
         self.name = names
         self.units = units
         self.centre = centre

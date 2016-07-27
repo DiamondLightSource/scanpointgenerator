@@ -10,10 +10,10 @@ from scanpointgenerator import Point
 class ArrayGenerator(Generator):
     """Generate a given n-dimensional array of points"""
 
-    def __init__(self, name, units, points, lower_bounds=None, upper_bounds=None):
+    def __init__(self, names, units, points, lower_bounds=None, upper_bounds=None):
         """
         Args:
-            name (str/list): ND list of scannable names e.g. "x" or ["x", "y"]
+            names (str/list): ND list of scannable names e.g. "x" or ["x", "y"]
             units (str): The scannable units. E.g. "mm"
             points (list): List of ND lists of coordinates
                 e.g. [1.0, 2.0, 3.0] or [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
@@ -21,8 +21,8 @@ class ArrayGenerator(Generator):
             upper_bounds (list): List of ND lists of upper bound coordinates
         """
 
-        if not isinstance(name, list):
-            name = [name]
+        if not isinstance(names, list):
+            names = [names]
         if not isinstance(points[0], list):
             points = [[point] for point in points]
             if upper_bounds is not None:
@@ -30,7 +30,10 @@ class ArrayGenerator(Generator):
             if lower_bounds is not None:
                 lower_bounds = [[point] for point in lower_bounds]
 
-        self.name = name
+        if len(names) != len(set(names)):
+            raise ValueError("Axis names cannot be duplicated; names was %s" % names)
+
+        self.name = names
         self.points = points
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
@@ -56,7 +59,7 @@ class ArrayGenerator(Generator):
         for dimension in self.name:
             self.position_units[dimension] = units
         self.index_dims = [self.num]
-        self.index_names = list(name)
+        self.index_names = list(names)
 
     def iterator(self):
 
