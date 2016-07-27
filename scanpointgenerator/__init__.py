@@ -9,3 +9,4 @@ from scanpointgenerator.randomoffsetmutator import RandomOffsetMutator  # noqa
 from scanpointgenerator.spiralgenerator import SpiralGenerator  # noqa
 from scanpointgenerator.excluder import Excluder  # noqa
 from scanpointgenerator.plotgenerator import plot_generator  # noqa
+from scanpointgenerator.compat import range_  # noqa

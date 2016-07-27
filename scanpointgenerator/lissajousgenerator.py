@@ -1,8 +1,7 @@
 from collections import OrderedDict
 import math as m
 
-from compat import range_
-
+from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 

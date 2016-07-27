@@ -1,12 +1,11 @@
 from collections import OrderedDict
 import logging
 
-from compat import range_
-
+from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
+from scanpointgenerator import Point
 from scanpointgenerator.excluder import Excluder
 from scanpointgenerator.mutator import Mutator
-from scanpointgenerator import Point
 
 
 @Generator.register_subclass("CompoundGenerator")

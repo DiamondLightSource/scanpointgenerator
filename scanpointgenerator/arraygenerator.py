@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
-from compat import range_
-
+from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
@@ -30,7 +29,7 @@ class ArrayGenerator(Generator):
             if lower_bounds is not None:
                 lower_bounds = [[point] for point in lower_bounds]
 
-        if len(names) != len(set(names)):
+        if len(self.names) != len(set(self.names)):
             raise ValueError("Axis names cannot be duplicated; names was %s" % names)
 
         self.name = names
