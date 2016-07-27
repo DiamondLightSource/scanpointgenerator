@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+
 class Point(object):
     """Contains information about for each scan point
 
@@ -13,7 +16,7 @@ class Point(object):
     """
 
     def __init__(self):
-        self.positions = {}
-        self.lower = {}
-        self.upper = {}
+        self.positions = OrderedDict()
+        self.lower = OrderedDict()
+        self.upper = OrderedDict()
         self.indexes = []
