@@ -58,13 +58,13 @@ class LineGenerator(Generator):
             self.axes = [self.name]
         else:
             self.axes = []
-            for index, dimension in enumerate(self.start):
+            for index in range(len(self.start)):
 
                 axis = self.name + "_"
                 if index < 3:
                     axis += self.axis_labels[index]
                 else:
-                    axis += str(index)
+                    axis += str(index+1)
 
                 self.position_units[axis] = units
                 self.axes.append(axis)

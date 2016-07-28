@@ -78,6 +78,14 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
         with self.assertRaises(ValueError):
             LineGenerator("x", "mm", [1.0], [5.0, 10.0], 5)
 
+    def test_numbered_axes_names_generated(self):
+        l = LineGenerator("5DScan", "mm", [0.0]*5, [10.0]*5, 5)
+        self.assertEqual(l.axes, ["5DScan_X", "5DScan_Y", "5DScan_Z", "5DScan_4", "5DScan_5"])
+
+    def test_give_one_point_then_step_zero(self):
+        l = LineGenerator("5DScan", "mm", [0.0]*5, [10.0]*5, 1)
+        self.assertEqual(l.step, [0]*5)
+
     def test_iterator(self):
         x_positions = [1.0, 2.0, 3.0, 4.0, 5.0]
         y_positions = [2.0, 4.0, 6.0, 8.0, 10.0]
