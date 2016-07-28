@@ -10,10 +10,10 @@ from scanpointgenerator import Point
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
-    def __init__(self, names, units, box, num_lobes, num_points=None):
+    def __init__(self, name, units, box, num_lobes, num_points=None):
         """
         Args:
-            names (list(str)): The scannable names e.g. ["x", "y"]
+            name (str): Name defining curve e.g. "XYLissajous"
             units (str): The scannable units e.g. "mm"
             box(dict): Dictionary of centre, width and height representing
                 box to fill with points
@@ -23,10 +23,7 @@ class LissajousGenerator(Generator):
                 curve. Default is 250 * num_lobes
         """
 
-        if len(names) != len(set(names)):
-            raise ValueError("Axis names cannot be duplicated; names was %s" % names)
-
-        self.name = names
+        self.name = name
         self.units = units
 
         num_lobes = int(num_lobes)
@@ -45,9 +42,13 @@ class LissajousGenerator(Generator):
             self.num = num_lobes * 250
         self.increment = 2*m.pi/self.num
 
-        self.position_units = {names[0]: units, names[1]: units}
+        self.axes = [self.name + "_X", self.name + "_Y"]
+        self.position_units = OrderedDict()
+        for axis in self.axes:
+            self.position_units[axis] = units
+
         self.index_dims = [self.num]
-        self.index_names = names
+        self.index_names = [self.name]
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""
@@ -62,9 +63,10 @@ class LissajousGenerator(Generator):
     def iterator(self):
         for i in range_(self.num):
             p = Point()
-            p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
-            p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
-            p.upper[self.name[0]], p.upper[self.name[1]] = self._calc(i + 0.5)
+            p.positions[self.axes[0]], p.positions[self.axes[1]] = \
+                self._calc(i)
+            p.lower[self.axes[0]], p.lower[self.axes[1]] = self._calc(i - 0.5)
+            p.upper[self.axes[0]], p.upper[self.axes[1]] = self._calc(i + 0.5)
             p.indexes = [i]
             yield p
 
