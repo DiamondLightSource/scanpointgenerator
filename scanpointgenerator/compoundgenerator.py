@@ -46,8 +46,8 @@ class CompoundGenerator(Generator):
             self.position_units.update(generator.position_units)
 
         self.index_dims = []
-        for self.generator in self.generators:
-            self.index_dims += self.generator.index_dims
+        for generator in self.generators:
+            self.index_dims += generator.index_dims
 
         if self.excluders:  # Calculate number of remaining points and flatten
                             # index dimensions
@@ -58,12 +58,12 @@ class CompoundGenerator(Generator):
             self.index_dims = [remaining_points]
 
         self.index_names = []
-        for self.generator in self.generators:
-            self.index_names += self.generator.index_names
+        for generator in self.generators:
+            self.index_names += generator.index_names
 
         self.axes = []
-        for self.generator in self.generators:
-            self.axes += self.generator.axes
+        for generator in self.generators:
+            self.axes += generator.axes
 
         if len(self.index_names) != len(set(self.index_names)):
             raise ValueError("Axis names cannot be duplicated; names was %s" % self.index_names)
