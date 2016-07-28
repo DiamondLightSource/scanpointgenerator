@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
@@ -11,30 +12,44 @@ class ArrayGenerator(Generator):
     def __init__(self, name, units, points, lower_bounds=None, upper_bounds=None):
         """
         Args:
-            name (list): ND list of scannable names. E.g. ["x", "y"]
+            name (str/list(str)): ND list of scannable names
+                e.g. "x" or ["x", "y"]
             units (str): The scannable units. E.g. "mm"
             points (list): List of ND lists of coordinates
+                e.g. [1.0, 2.0, 3.0] or [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
             lower_bounds (list): List of ND lists of lower bound coordinates
             upper_bounds (list): List of ND lists of upper bound coordinates
         """
+
+        if not isinstance(name, list):
+            name = [name]
+        if not isinstance(points[0], list):
+            points = [[point] for point in points]
+            if upper_bounds is not None:
+                upper_bounds = [[point] for point in upper_bounds]
+            if lower_bounds is not None:
+                lower_bounds = [[point] for point in lower_bounds]
 
         self.name = name
         self.points = points
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
 
+        if len(self.name) != len(set(self.name)):
+            raise ValueError("Axis names cannot be duplicated; names was %s" % name)
+
         for point in self.points:
-            if len(point) != len(name):
+            if len(point) != len(self.name):
                 raise ValueError(
                     "Dimensions of name, start and stop do not match")
         if self.upper_bounds is not None:
             for point in self.upper_bounds:
-                if len(point) != len(name):
+                if len(point) != len(self.name):
                     raise ValueError(
                         "Dimensions of name, start and stop do not match")
         if self.lower_bounds is not None:
             for point in self.lower_bounds:
-                if len(point) != len(name):
+                if len(point) != len(self.name):
                     raise ValueError(
                         "Dimensions of name, start and stop do not match")
 
@@ -44,11 +59,11 @@ class ArrayGenerator(Generator):
         for dimension in self.name:
             self.position_units[dimension] = units
         self.index_dims = [self.num]
-        self.index_names = list(name)
+        self.index_names = self.name
 
     def iterator(self):
 
-        for i in range(self.num):
+        for i in range_(self.num):
 
             point = Point()
             for axis, coordinate in enumerate(self.points[i]):

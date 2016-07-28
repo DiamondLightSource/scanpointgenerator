@@ -30,6 +30,12 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, [2, 3])
         self.assertEqual(self.g.index_names, ["y", "x"])
 
+    def test_duplicate_name_raises(self):
+        x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
+        y = LineGenerator("x", "mm", 2.0, 2.1, 2, False)
+        with self.assertRaises(ValueError):
+            CompoundGenerator([y, x], [], [])
+
     def test_contains_point_true(self):
         point = MagicMock()
         point.positions.__getitem__.side_effect = [1.0, 2.0]
@@ -78,7 +84,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.upper['x'], xupper[i])
             self.assertEqual(p.lower['x'], xlower[i])
             self.assertEqual(p.positions, dict(x=xpositions[i], y=ypositions[i]))
-            self.assertEqual(p.indexes, [xindexes[i], yindexes[i]])
+            self.assertEqual(p.indexes, [yindexes[i], xindexes[i]])
 
     def test_double_nest(self):
         self.g = CompoundGenerator([self.z, self.y, self.x], [], [])
@@ -96,7 +102,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         for i, p in enumerate(self.g.iterator()):
             self.assertEqual(p.positions, dict(
                 x=xpositions[i], y=ypositions[i], z=zpositions[i]))
-            self.assertEqual(p.indexes, [xindexes[i], yindexes[i], zindexes[i]])
+            self.assertEqual(p.indexes, [zindexes[i], yindexes[i], xindexes[i]])
 
     def test_iterator_with_region(self):
         xpositions = [1.0, 1.1, 1.2, 1.1, 1.0]
@@ -126,44 +132,64 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         mutator.mutate.assert_called_once_with(filtered)
 
     def test_line_spiral(self):
-        positions = [{'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 0.0},
-                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 0.0},
-                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 0.0},
-                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 2.0},
-                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 2.0},
-                     {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 2.0},
-                     {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 4.0},
-                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 4.0},
-                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 4.0},
-                     {}]
+        positions = [{'XYSpiral_Y': -0.3211855677650875,
+                      'XYSpiral_X': 0.23663214944574582, 'z': 0.0},
+                     {'XYSpiral_Y': -0.25037538922751695,
+                      'XYSpiral_X': -0.6440318266552169, 'z': 0.0},
+                     {'XYSpiral_Y': 0.6946549630820702,
+                      'XYSpiral_X': -0.5596688286164636, 'z': 0.0},
+                     {'XYSpiral_Y': 0.6946549630820702,
+                      'XYSpiral_X': -0.5596688286164636, 'z': 2.0},
+                     {'XYSpiral_Y': -0.25037538922751695,
+                      'XYSpiral_X': -0.6440318266552169, 'z': 2.0},
+                     {'XYSpiral_Y': -0.3211855677650875,
+                      'XYSpiral_X': 0.23663214944574582, 'z': 2.0},
+                     {'XYSpiral_Y': -0.3211855677650875,
+                      'XYSpiral_X': 0.23663214944574582, 'z': 4.0},
+                     {'XYSpiral_Y': -0.25037538922751695,
+                      'XYSpiral_X': -0.6440318266552169, 'z': 4.0},
+                     {'XYSpiral_Y': 0.6946549630820702,
+                      'XYSpiral_X': -0.5596688286164636, 'z': 4.0}]
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate_direction=True)
+        spiral = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 0.8, alternate_direction=True)
         gen = CompoundGenerator([z, spiral], [], [])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])
 
     def test_line_lissajous(self):
-        positions = [{'y': 0.0, 'x': 0.5, 'z': 0.0},
-                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 0.0},
-                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 0.0},
-                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 0.0},
-                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 0.0},
-                     {'y': 0.0, 'x': 0.5, 'z': 2.0},
-                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 2.0},
-                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 2.0},
-                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 2.0},
-                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 2.0},
-                     {'y': 0.0, 'x': 0.5, 'z': 4.0},
-                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 4.0},
-                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 4.0},
-                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 4.0},
-                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 4.0}]
+        positions = [{'XYLissajous_Y': 0.0, 'XYLissajous_X': 0.5, 'z': 0.0},
+                     {'XYLissajous_Y': 0.2938926261462366,
+                      'XYLissajous_X': 0.15450849718747375, 'z': 0.0},
+                     {'XYLissajous_Y': -0.4755282581475768,
+                      'XYLissajous_X': -0.40450849718747367, 'z': 0.0},
+                     {'XYLissajous_Y': 0.47552825814757677,
+                      'XYLissajous_X': -0.4045084971874738, 'z': 0.0},
+                     {'XYLissajous_Y': -0.2938926261462364,
+                      'XYLissajous_X': 0.1545084971874736, 'z': 0.0},
+                     {'XYLissajous_Y': 0.0, 'XYLissajous_X': 0.5, 'z': 2.0},
+                     {'XYLissajous_Y': 0.2938926261462366,
+                      'XYLissajous_X': 0.15450849718747375, 'z': 2.0},
+                     {'XYLissajous_Y': -0.4755282581475768,
+                      'XYLissajous_X': -0.40450849718747367, 'z': 2.0},
+                     {'XYLissajous_Y': 0.47552825814757677,
+                      'XYLissajous_X': -0.4045084971874738, 'z': 2.0},
+                     {'XYLissajous_Y': -0.2938926261462364,
+                      'XYLissajous_X': 0.1545084971874736, 'z': 2.0},
+                     {'XYLissajous_Y': 0.0, 'XYLissajous_X': 0.5, 'z': 4.0},
+                     {'XYLissajous_Y': 0.2938926261462366,
+                      'XYLissajous_X': 0.15450849718747375, 'z': 4.0},
+                     {'XYLissajous_Y': -0.4755282581475768,
+                      'XYLissajous_X': -0.40450849718747367, 'z': 4.0},
+                     {'XYLissajous_Y': 0.47552825814757677,
+                      'XYLissajous_X': -0.4045084971874738, 'z': 4.0},
+                     {'XYLissajous_Y': -0.2938926261462364,
+                      'XYLissajous_X': 0.1545084971874736, 'z': 4.0}]
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
         box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        lissajous = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
+        lissajous = LissajousGenerator("XYLissajous", "mm", box, 1, num_points=5)
         gen = CompoundGenerator([z, lissajous], [], [])
 
         for i, p in enumerate(gen.iterator()):

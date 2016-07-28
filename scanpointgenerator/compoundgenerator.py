@@ -1,9 +1,11 @@
 from collections import OrderedDict
+import logging
 
+from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
+from scanpointgenerator import Point
 from scanpointgenerator.excluder import Excluder
 from scanpointgenerator.mutator import Mutator
-from scanpointgenerator import Point
 
 
 @Generator.register_subclass("CompoundGenerator")
@@ -27,12 +29,17 @@ class CompoundGenerator(Generator):
         self.periods = []
         self.alternate_direction = []
         self.point_sets = []
-        for generator in self.generators[::-1]:
-            # Reverse so self.periods is correct and iterator is simpler
-            self.num *= generator.num
-            self.periods.append(self.num)
+        for generator in self.generators:
+            logging.debug("Generator passed to Compound init")
+            logging.debug(generator.to_dict())
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
+        for generator in self.generators[::-1]:
+            self.num *= generator.num
+            self.periods.insert(0, self.num)
+
+        logging.debug("CompoundGenerator periods")
+        logging.debug(self.periods)
 
         self.position_units = generators[0].position_units.copy()
         for generator in generators[1:]:
@@ -46,12 +53,16 @@ class CompoundGenerator(Generator):
                             # index dimensions
             remaining_points = 0
             for _ in self._filtered_base_iterator():
+                # TODO: Faster with enumerate()?
                 remaining_points += 1
             self.index_dims = [remaining_points]
 
         self.index_names = []
         for self.generator in self.generators:
             self.index_names += self.generator.index_names
+
+        if len(self.index_names) != len(set(self.index_names)):
+            raise ValueError("Axis names cannot be duplicated; names was %s" % self.index_names)
 
     def _base_iterator(self):
         """
@@ -61,7 +72,7 @@ class CompoundGenerator(Generator):
             Point: Base points
         """
 
-        for point_num in range(self.num):
+        for point_num in range_(self.num):
 
             point = Point()
             for gen_index, points in enumerate(self.point_sets):
@@ -85,7 +96,8 @@ class CompoundGenerator(Generator):
 
                 current_point = points[point_index]
 
-                if gen_index == 0:  # If innermost generator, use bounds
+                # If innermost generator, use bounds
+                if gen_index == len(self.point_sets) - 1:
                     point.positions.update(current_point.positions)
                     if reverse:  # Swap bounds if reversing
                         point.upper.update(current_point.lower)
@@ -99,6 +111,9 @@ class CompoundGenerator(Generator):
                     point.lower.update(current_point.positions)
 
                 point.indexes += current_point.indexes
+
+                logging.debug("Current point positions and indexes")
+                logging.debug([current_point.positions, current_point.indexes])
 
             yield point
 
@@ -138,13 +153,13 @@ class CompoundGenerator(Generator):
 
     def contains_point(self, point):
         """
-        Filter a Point through all ScanRegions
+        Filter a Point through all Excluders
 
         Args:
             point(Point): Point to check
 
         Returns:
-            bool: Whether point is contained by all ScanRegions
+            bool: Whether point is contained by all Excluders
         """
 
         contains_point = True

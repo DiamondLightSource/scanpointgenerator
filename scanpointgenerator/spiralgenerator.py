@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import math as m
 
+from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
@@ -9,10 +10,10 @@ from scanpointgenerator import Point
 class SpiralGenerator(Generator):
     """Generate the points of an Archimedean spiral"""
 
-    def __init__(self, names, units, centre, radius, scale=1.0, alternate_direction=False):
+    def __init__(self, name, units, centre, radius, scale=1.0, alternate_direction=False):
         """
         Args:
-            names (list(str)): The scannable names e.g. ["x", "y"]
+            name (str): Name defining spiral e.g. "XYSpiral"
             units (str): The scannable units e.g. "mm"
             centre(list): List of two coordinates of centre point of spiral
             radius(float): Radius of spiral
@@ -21,7 +22,8 @@ class SpiralGenerator(Generator):
             alternate_direction(bool): Specifier to reverse direction if
                 generator is nested
         """
-        self.name = names
+
+        self.name = name
         self.units = units
         self.centre = centre
         self.radius = radius
@@ -32,9 +34,13 @@ class SpiralGenerator(Generator):
         self.beta = scale / (2 * m.pi)  # Radius scale factor
         self.num = self._end_point(self.radius) + 1
 
-        self.position_units = {names[0]: units, names[1]: units}
+        self.axes = [self.name + "_X", self.name + "_Y"]
+        self.position_units = OrderedDict()
+        for axis in self.axes:
+            self.position_units[axis] = units
+
         self.index_dims = [self._end_point(self.radius)]
-        self.index_names = names
+        self.index_names = [self.name]
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""
@@ -50,15 +56,15 @@ class SpiralGenerator(Generator):
         return int((radius / (self.alpha * self.beta)) ** 2)
 
     def iterator(self):
-        for i in range(0, self._end_point(self.radius) + 1):
+        for i in range_(0, self._end_point(self.radius) + 1):
             p = Point()
             p.indexes = [i]
 
             i += 0.5  # Offset so lower bound of first point is not less than 0
 
-            p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
-            p.upper[self.name[0]], p.upper[self.name[1]] = self._calc(i + 0.5)
-            p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
+            p.positions[self.axes[0]], p.positions[self.axes[1]] = self._calc(i)
+            p.upper[self.axes[0]], p.upper[self.axes[1]] = self._calc(i + 0.5)
+            p.lower[self.axes[0]], p.lower[self.axes[1]] = self._calc(i - 0.5)
 
             yield p
 
