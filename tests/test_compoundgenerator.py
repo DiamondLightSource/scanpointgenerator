@@ -30,6 +30,10 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, [2, 3])
         self.assertEqual(self.g.index_names, ["y", "x"])
 
+    def test_given_compound_raise_error(self):
+        with self.assertRaises(TypeError):
+            CompoundGenerator([self.g], [], [])
+
     def test_duplicate_name_raises(self):
         x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
         y = LineGenerator("x", "mm", 2.0, 2.1, 2, False)
