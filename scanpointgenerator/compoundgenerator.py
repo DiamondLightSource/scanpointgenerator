@@ -53,6 +53,7 @@ class CompoundGenerator(Generator):
                             # index dimensions
             remaining_points = 0
             for _ in self._filtered_base_iterator():
+                # TODO: Faster with enumerate()?
                 remaining_points += 1
             self.index_dims = [remaining_points]
 
