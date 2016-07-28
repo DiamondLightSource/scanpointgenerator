@@ -1,6 +1,12 @@
 MARKER_SIZE = 10
 
 
+def find_axis(axes, axis_specifier):
+    for axis in axes:
+        if axis[-1].upper() == axis_specifier.upper():
+            return axis
+
+
 def plot_generator(gen, excluder=None, show_indexes=True):
     from matplotlib.patches import Rectangle, Circle
     import matplotlib.pyplot as plt
@@ -24,8 +30,13 @@ def plot_generator(gen, excluder=None, show_indexes=True):
     starts = []
     for point in gen.iterator():
         # If lower is different from last then include it
-        xlower = point.lower["x"]
-        ylower = point.lower.get("y", 0)
+        x_name = find_axis(gen.axes[::-1], 'x')
+        if len(gen.axes) > 1:
+            y_name = find_axis(gen.axes[::-1], 'y')
+        else:
+            y_name = ""
+        xlower = point.lower[x_name]
+        ylower = point.lower.get(y_name, 0)
         if len(x) == 0 or x[-1] != xlower or y[-1] != ylower:
             if len(x) != 0:
                 # add in a tiny fractional distance
@@ -48,8 +59,8 @@ def plot_generator(gen, excluder=None, show_indexes=True):
             x.append(xlower)
             y.append(ylower)
         # Add in capture points
-        xpos = point.positions["x"]
-        ypos = point.positions.get("y", 0)
+        xpos = point.positions[x_name]
+        ypos = point.positions.get(y_name, 0)
         x.append(xpos)
         y.append(ypos)
         capx.append(xpos)
@@ -57,13 +68,13 @@ def plot_generator(gen, excluder=None, show_indexes=True):
         capi.append(point.indexes)
         # And upper point
         starts.append(len(x))
-        x.append(point.upper["x"])
-        y.append(point.upper.get("y", 0))
+        x.append(point.upper[x_name])
+        y.append(point.upper.get(y_name, 0))
 
     # # Plot labels
-    plt.xlabel("X (%s)" % gen.position_units["x"])
-    if "y" in gen.position_units:
-        plt.ylabel("Y (%s)" % gen.position_units["y"])
+    plt.xlabel("X (%s)" % gen.position_units[x_name])
+    if y_name in gen.position_units:
+        plt.ylabel("Y (%s)" % gen.position_units[y_name])
     else:
         plt.tick_params(left='off', labelleft='off')
 

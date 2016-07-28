@@ -18,8 +18,8 @@ own bounds.
 
     from scanpointgenerator import ArrayGenerator, plot_generator
 
-    points = [[0.0], [2.0], [3.0], [5.0], [7.0], [8.0]]
-    array = ArrayGenerator(["x"], "mm", points)
+    points = [0.0, 2.0, 3.0, 5.0, 7.0, 8.0]
+    array = ArrayGenerator("x", "mm", points)
     plot_generator(array)
 
 And a 2D scan.

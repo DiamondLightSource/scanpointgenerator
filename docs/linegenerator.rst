@@ -29,5 +29,5 @@ LineGenerator is N dimensional; just pass in ND lists for name, start and stop.
 
     from scanpointgenerator import LineGenerator, plot_generator
 
-    gen = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+    gen = LineGenerator("XYLine", "mm", [1.0, 2.0], [5.0, 10.0], 5)
     plot_generator(gen)

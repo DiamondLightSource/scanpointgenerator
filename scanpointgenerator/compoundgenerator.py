@@ -61,6 +61,10 @@ class CompoundGenerator(Generator):
         for self.generator in self.generators:
             self.index_names += self.generator.index_names
 
+        self.axes = []
+        for self.generator in self.generators:
+            self.axes += self.generator.axes
+
         if len(self.index_names) != len(set(self.index_names)):
             raise ValueError("Axis names cannot be duplicated; names was %s" % self.index_names)
 

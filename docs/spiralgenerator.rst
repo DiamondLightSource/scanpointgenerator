@@ -17,7 +17,7 @@ will be scanned in a spiral filling a circle of radius 5mm.
 
     from scanpointgenerator import SpiralGenerator, plot_generator
 
-    gen = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 5.0)
+    gen = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 5.0)
     plot_generator(gen)
 
 In this example the spiral is scaled to be more sparse.
@@ -27,5 +27,5 @@ In this example the spiral is scaled to be more sparse.
 
     from scanpointgenerator import SpiralGenerator, plot_generator
 
-    gen = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 5.0, scale=2.0)
+    gen = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 5.0, scale=2.0)
     plot_generator(gen)
