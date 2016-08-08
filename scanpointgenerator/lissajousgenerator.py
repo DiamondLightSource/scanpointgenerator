@@ -42,7 +42,7 @@ class LissajousGenerator(Generator):
             self.num = num_lobes * 250
         self.increment = 2*m.pi/self.num
 
-        self.position_units = {names[0]: units, names[1]: units}
+        self.position_units = {self.names[0]: units, self.names[1]: units}
         self.index_dims = [self.num]
         gen_name = "Lissajous"
         for axis_name in self.names[::-1]:
@@ -68,6 +68,7 @@ class LissajousGenerator(Generator):
             p.lower[self.names[0]], p.lower[self.names[1]] = self._calc(i - 0.5)
             p.upper[self.names[0]], p.upper[self.names[1]] = self._calc(i + 0.5)
             p.indexes = [i]
+
             yield p
 
     def to_dict(self):

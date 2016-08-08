@@ -25,10 +25,10 @@ class CompoundGenerator(Generator):
         self.excluders = excluders
         self.mutators = mutators
 
-        self.num = 1
-        self.periods = []
         self.alternate_direction = []
         self.point_sets = []
+        self.index_dims = []
+        self.index_names = []
         self.axes = []
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
@@ -41,6 +41,12 @@ class CompoundGenerator(Generator):
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
             self.axes += generator.axes
+
+            self.index_dims += generator.index_dims
+            self.index_names += generator.index_names
+
+        self.num = 1
+        self.periods = []
         for generator in self.generators[::-1]:
             self.num *= generator.num
             self.periods.insert(0, self.num)
@@ -52,10 +58,6 @@ class CompoundGenerator(Generator):
         for generator in generators[1:]:
             self.position_units.update(generator.position_units)
 
-        self.index_dims = []
-        for self.generator in self.generators:
-            self.index_dims += self.generator.index_dims
-
         if self.excluders:  # Calculate number of remaining points and flatten
                             # index dimensions
             remaining_points = 0
@@ -63,10 +65,6 @@ class CompoundGenerator(Generator):
                 # TODO: Faster with enumerate()?
                 remaining_points += 1
             self.index_dims = [remaining_points]
-
-        self.index_names = []
-        for self.generator in self.generators:
-            self.index_names += self.generator.index_names
 
         if len(self.index_names) != len(set(self.index_names)):
             raise ValueError("Axis names cannot be duplicated; names was %s" % self.index_names)
