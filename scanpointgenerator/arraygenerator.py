@@ -36,7 +36,8 @@ class ArrayGenerator(Generator):
         self.lower_bounds = lower_bounds
 
         if len(self.name) != len(set(self.name)):
-            raise ValueError("Axis names cannot be duplicated; given %s" % name)
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             name)
 
         for point in self.points:
             if len(point) != len(self.name):

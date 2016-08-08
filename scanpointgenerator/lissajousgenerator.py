@@ -26,6 +26,10 @@ class LissajousGenerator(Generator):
         self.names = names
         self.units = units
 
+        if len(self.names) != len(set(self.names)):
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             names)
+
         num_lobes = int(num_lobes)
 
         self.x_freq = num_lobes

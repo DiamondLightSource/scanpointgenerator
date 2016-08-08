@@ -31,6 +31,10 @@ class SpiralGenerator(Generator):
         self.scale = scale
         self.alternate_direction = alternate_direction
 
+        if len(self.names) != len(set(self.names)):
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             names)
+
         self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor
         self.beta = scale / (2 * m.pi)  # Radius scale factor
         self.num = self._end_point(self.radius) + 1

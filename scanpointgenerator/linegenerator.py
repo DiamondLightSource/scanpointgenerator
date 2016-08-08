@@ -36,7 +36,8 @@ class LineGenerator(Generator):
         self.alternate_direction = alternate_direction
 
         if len(self.name) != len(set(self.name)):
-            raise ValueError("Axis names cannot be duplicated; name was %s" % name)
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             name)
 
         if len(self.name) != len(self.start) or \
            len(self.name) != len(self.stop):
