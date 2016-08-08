@@ -30,8 +30,8 @@ class LineGeneratorTest(ScanPointGeneratorTest):
     def test_to_dict(self):
         expected_dict = OrderedDict()
         expected_dict['type'] = "LineGenerator"
-        expected_dict['name'] = ['x']
-        expected_dict['units'] = 'mm'
+        expected_dict['name'] = ["x"]
+        expected_dict['units'] = "mm"
         expected_dict['start'] = [1.0]
         expected_dict['stop'] = [9.0]
         expected_dict['num'] = 5
@@ -43,19 +43,19 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
     def test_from_dict(self):
         _dict = OrderedDict()
-        _dict['name'] = ['x']
-        _dict['units'] = 'mm'
+        _dict['name'] = ["x"]
+        _dict['units'] = "mm"
         _dict['start'] = [1.0]
         _dict['stop'] = [9.0]
         _dict['num'] = 5
         _dict['alternate_direction'] = True
 
         units_dict = OrderedDict()
-        units_dict['x'] = 'mm'
+        units_dict['x'] = "mm"
 
         gen = LineGenerator.from_dict(_dict)
 
-        self.assertEqual(['x'], gen.name)
+        self.assertEqual(["x"], gen.name)
         self.assertEqual(units_dict, gen.position_units)
         self.assertEqual([1.0], gen.start)
         self.assertEqual([9.0], gen.stop)
@@ -71,16 +71,16 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [5])
-        self.assertEqual(self.g.index_names, ["x", "y"])
-
-    def test_duplicate_name_raises(self):
-        with self.assertRaises(ValueError):
-            LineGenerator(["x", "x"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+        self.assertEqual(self.g.index_names, ["x_y_Line"])
 
     def test_given_inconsistent_dims_then_raise_error(self):
 
         with self.assertRaises(ValueError):
-            LineGenerator(["x"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+            LineGenerator("x", "mm", [1.0], [5.0, 10.0], 5)
+
+    def test_give_one_point_then_step_zero(self):
+        l = LineGenerator(["1", "2", "3", "4", "5"], "mm", [0.0]*5, [10.0]*5, 1)
+        self.assertEqual(l.step, [0]*5)
 
     def test_iterator(self):
         x_positions = [1.0, 2.0, 3.0, 4.0, 5.0]

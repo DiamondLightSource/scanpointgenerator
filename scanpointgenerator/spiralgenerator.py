@@ -10,7 +10,8 @@ from scanpointgenerator import Point
 class SpiralGenerator(Generator):
     """Generate the points of an Archimedean spiral"""
 
-    def __init__(self, names, units, centre, radius, scale=1.0, alternate_direction=False):
+    def __init__(self, names, units, centre, radius, scale=1.0,
+                 alternate_direction=False):
         """
         Args:
             names (list(str)): The scannable names e.g. ["x", "y"]
@@ -23,10 +24,7 @@ class SpiralGenerator(Generator):
                 generator is nested
         """
 
-        if len(names) != len(set(names)):
-            raise ValueError("Axis names cannot be duplicated; names was %s" % names)
-
-        self.name = names
+        self.names = names
         self.units = units
         self.centre = centre
         self.radius = radius
@@ -39,7 +37,10 @@ class SpiralGenerator(Generator):
 
         self.position_units = {names[0]: units, names[1]: units}
         self.index_dims = [self._end_point(self.radius)]
-        self.index_names = names
+        gen_name = "Spiral"
+        for axis_name in self.names[::-1]:
+            gen_name = axis_name + "_" + gen_name
+        self.index_names = [gen_name]
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""
@@ -61,9 +62,9 @@ class SpiralGenerator(Generator):
 
             i += 0.5  # Offset so lower bound of first point is not less than 0
 
-            p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
-            p.upper[self.name[0]], p.upper[self.name[1]] = self._calc(i + 0.5)
-            p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
+            p.positions[self.names[0]], p.positions[self.names[1]] = self._calc(i)
+            p.upper[self.names[0]], p.upper[self.names[1]] = self._calc(i + 0.5)
+            p.lower[self.names[0]], p.lower[self.names[1]] = self._calc(i - 0.5)
 
             yield p
 
@@ -72,7 +73,7 @@ class SpiralGenerator(Generator):
 
         d = OrderedDict()
         d['type'] = "SpiralGenerator"
-        d['name'] = self.name
+        d['names'] = self.names
         d['units'] = list(self.position_units.values())[0]
         d['centre'] = self.centre
         d['radius'] = self.radius
@@ -93,11 +94,11 @@ class SpiralGenerator(Generator):
             SpiralGenerator: New SpiralGenerator instance
         """
 
-        name = d['name']
+        names = d['names']
         units = d['units']
         centre = d['centre']
         radius = d['radius']
         scale = d['scale']
         alternate_direction = d['alternate_direction']
 
-        return cls(name, units, centre, radius, scale, alternate_direction)
+        return cls(names, units, centre, radius, scale, alternate_direction)

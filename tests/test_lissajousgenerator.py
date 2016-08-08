@@ -8,16 +8,13 @@ class LissajousGeneratorTest(unittest.TestCase):
 
     def setUp(self):
         self.bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        self.g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1)
+        self.g = LissajousGenerator(["x", "y"], "mm", self.bounding_box, 1)
 
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [250])
-        self.assertEqual(self.g.index_names, ["x", "y"])
-
-    def test_duplicate_name_raises(self):
-        with self.assertRaises(ValueError):
-            LissajousGenerator(['x', 'x'], "mm", self.bounding_box, 1)
+        self.assertEqual(self.g.index_names, ["x_y_Lissajous"])
+        self.assertEqual(self.g.names, ["x", "y"])
 
     def test_iterator(self):
         g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1, num_points=10)
@@ -68,8 +65,8 @@ class LissajousGeneratorTest(unittest.TestCase):
         box['width'] = 1.0
         box['height'] = 1.0
 
-        expected_dict['name'] = ['x', 'y']
-        expected_dict['units'] = 'mm'
+        expected_dict['names'] = ["x", "y"]
+        expected_dict['units'] = "mm"
         expected_dict['box'] = box
         expected_dict['num_lobes'] = 1
         expected_dict['num_points'] = 250
@@ -85,19 +82,20 @@ class LissajousGeneratorTest(unittest.TestCase):
         box['height'] = 2.0
 
         _dict = OrderedDict()
-        _dict['name'] = ['x', 'y']
-        _dict['units'] = 'mm'
+        _dict['names'] = ["x", "y"]
+        _dict['units'] = "mm"
         _dict['box'] = box
         _dict['num_lobes'] = 5
         _dict['num_points'] = 250
 
         units_dict = OrderedDict()
-        units_dict['x'] = 'mm'
-        units_dict['y'] = 'mm'
+        units_dict['x'] = "mm"
+        units_dict['y'] = "mm"
 
         gen = LissajousGenerator.from_dict(_dict)
 
-        self.assertEqual(['x', 'y'], gen.name)
+        self.assertEqual(["x", "y"], gen.names)
+        self.assertEqual(["x_y_Lissajous"], gen.index_names)
         self.assertEqual(units_dict, gen.position_units)
         self.assertEqual(5, gen.x_freq)
         self.assertEqual(0.5, gen.x_max)

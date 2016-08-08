@@ -12,11 +12,7 @@ class SpiralGeneratorTest(unittest.TestCase):
     def test_init(self):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [6])
-        self.assertEqual(self.g.index_names, ["x", "y"])
-
-    def test_duplicate_name_raises(self):
-        with self.assertRaises(ValueError):
-            SpiralGenerator(['x', 'x'], "mm", [0.0, 0.0], 1.4, alternate_direction=True)
+        self.assertEqual(self.g.index_names, ["x_y_Spiral"])
 
     def test_iterator(self):
         positions = [{'y': -0.3211855677650875, 'x': 0.23663214944574582},
@@ -52,7 +48,7 @@ class SpiralGeneratorTest(unittest.TestCase):
     def test_to_dict(self):
         expected_dict = OrderedDict()
         expected_dict['type'] = "SpiralGenerator"
-        expected_dict['name'] = ['x', 'y']
+        expected_dict['names'] = ['x', 'y']
         expected_dict['units'] = 'mm'
         expected_dict['centre'] = [0.0, 0.0]
         expected_dict['radius'] = 1.4
@@ -66,20 +62,21 @@ class SpiralGeneratorTest(unittest.TestCase):
     def test_from_dict(self):
         _dict = OrderedDict()
         _dict['type'] = "SpiralGenerator"
-        _dict['name'] = ['x', 'y']
-        _dict['units'] = 'mm'
+        _dict['names'] = ["x", "y"]
+        _dict['units'] = "mm"
         _dict['centre'] = [0.0, 0.0]
         _dict['radius'] = 1.4
         _dict['scale'] = 1
         _dict['alternate_direction'] = True
 
         units_dict = OrderedDict()
-        units_dict['x'] = 'mm'
-        units_dict['y'] = 'mm'
+        units_dict['x'] = "mm"
+        units_dict['y'] = "mm"
 
         gen = SpiralGenerator.from_dict(_dict)
 
-        self.assertEqual(['x', 'y'], gen.name)
+        self.assertEqual(["x", "y"], gen.names)
+        self.assertEqual(["x_y_Spiral"], gen.index_names)
         self.assertEqual(units_dict, gen.position_units)
         self.assertEqual([0.0, 0.0], gen.centre)
         self.assertEqual(1.4, gen.radius)

@@ -23,10 +23,7 @@ class LissajousGenerator(Generator):
                 curve. Default is 250 * num_lobes
         """
 
-        if len(names) != len(set(names)):
-            raise ValueError("Axis names cannot be duplicated; names was %s" % names)
-
-        self.name = names
+        self.names = names
         self.units = units
 
         num_lobes = int(num_lobes)
@@ -47,7 +44,10 @@ class LissajousGenerator(Generator):
 
         self.position_units = {names[0]: units, names[1]: units}
         self.index_dims = [self.num]
-        self.index_names = names
+        gen_name = "Lissajous"
+        for axis_name in self.names[::-1]:
+            gen_name = axis_name + "_" + gen_name
+        self.index_names = [gen_name]
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""
@@ -62,9 +62,9 @@ class LissajousGenerator(Generator):
     def iterator(self):
         for i in range_(self.num):
             p = Point()
-            p.positions[self.name[0]], p.positions[self.name[1]] = self._calc(i)
-            p.lower[self.name[0]], p.lower[self.name[1]] = self._calc(i - 0.5)
-            p.upper[self.name[0]], p.upper[self.name[1]] = self._calc(i + 0.5)
+            p.positions[self.names[0]], p.positions[self.names[1]] = self._calc(i)
+            p.lower[self.names[0]], p.lower[self.names[1]] = self._calc(i - 0.5)
+            p.upper[self.names[0]], p.upper[self.names[1]] = self._calc(i + 0.5)
             p.indexes = [i]
             yield p
 
@@ -78,7 +78,7 @@ class LissajousGenerator(Generator):
 
         d = OrderedDict()
         d['type'] = "LissajousGenerator"
-        d['name'] = self.name
+        d['names'] = self.names
         d['units'] = list(self.position_units.values())[0]
         d['box'] = box
         d['num_lobes'] = self.x_freq
@@ -98,10 +98,10 @@ class LissajousGenerator(Generator):
             LissajousGenerator: New LissajousGenerator instance
         """
 
-        name = d['name']
+        names = d['names']
         units = d['units']
         box = d['box']
         num_lobes = d['num_lobes']
         num_points = d['num_points']
 
-        return cls(name, units, box, num_lobes, num_points)
+        return cls(names, units, box, num_lobes, num_points)
