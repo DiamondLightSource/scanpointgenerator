@@ -40,9 +40,10 @@ class CompoundGenerator(Generator):
 
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
+            self.axes += generator.axes
+
             self.index_dims += generator.index_dims
             self.index_names += generator.index_names
-            self.axes += generator.axes
 
         self.num = 1
         self.periods = []
@@ -65,8 +66,9 @@ class CompoundGenerator(Generator):
                 remaining_points += 1
             self.index_dims = [remaining_points]
 
-        if len(self.index_names) != len(set(self.index_names)):
-            raise ValueError("Axis names cannot be duplicated; names was %s" % self.index_names)
+        if len(self.axes) != len(set(self.axes)):
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             self.index_names)
 
     def _base_iterator(self):
         """

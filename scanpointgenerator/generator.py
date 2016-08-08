@@ -11,6 +11,8 @@ class Generator(object):
             scans but will be shorter for things like spiral scans. E.g. [15]
         index_names (list): List of the str dimension names for the dataset.
             This will have the same length as the index_dims. E.g. ["spiral_i"]
+        axes (list): List of scannable names, used in GDA to reconstruct Point
+            in CompoundGenerators
     """
     alternate_direction = False
     position_units = None
@@ -18,6 +20,7 @@ class Generator(object):
     index_names = None
     # Lookup table for generator subclasses
     _generator_lookup = {}
+    axes = []
 
     def iterator(self):
         """An iterator yielding positions at each scan point

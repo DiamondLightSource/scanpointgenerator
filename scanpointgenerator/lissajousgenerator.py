@@ -10,10 +10,10 @@ from scanpointgenerator import Point
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
-    def __init__(self, name, units, box, num_lobes, num_points=None):
+    def __init__(self, names, units, box, num_lobes, num_points=None):
         """
         Args:
-            name (str): Name defining curve e.g. "XYLissajous"
+            names (list(str)): The scannable names e.g. ["x", "y"]
             units (str): The scannable units e.g. "mm"
             box(dict): Dictionary of centre, width and height representing
                 box to fill with points
@@ -23,8 +23,12 @@ class LissajousGenerator(Generator):
                 curve. Default is 250 * num_lobes
         """
 
-        self.name = name
+        self.names = names
         self.units = units
+
+        if len(self.names) != len(set(self.names)):
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             names)
 
         num_lobes = int(num_lobes)
 
@@ -42,13 +46,14 @@ class LissajousGenerator(Generator):
             self.num = num_lobes * 250
         self.increment = 2*m.pi/self.num
 
-        self.axes = [self.name + "_X", self.name + "_Y"]
-        self.position_units = OrderedDict()
-        for axis in self.axes:
-            self.position_units[axis] = units
-
+        self.position_units = {self.names[0]: units, self.names[1]: units}
         self.index_dims = [self.num]
-        self.index_names = [self.name]
+        gen_name = "Lissajous"
+        for axis_name in self.names[::-1]:
+            gen_name = axis_name + "_" + gen_name
+        self.index_names = [gen_name]
+
+        self.axes = self.names  # For GDA
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""
@@ -63,11 +68,11 @@ class LissajousGenerator(Generator):
     def iterator(self):
         for i in range_(self.num):
             p = Point()
-            p.positions[self.axes[0]], p.positions[self.axes[1]] = \
-                self._calc(i)
-            p.lower[self.axes[0]], p.lower[self.axes[1]] = self._calc(i - 0.5)
-            p.upper[self.axes[0]], p.upper[self.axes[1]] = self._calc(i + 0.5)
+            p.positions[self.names[0]], p.positions[self.names[1]] = self._calc(i)
+            p.lower[self.names[0]], p.lower[self.names[1]] = self._calc(i - 0.5)
+            p.upper[self.names[0]], p.upper[self.names[1]] = self._calc(i + 0.5)
             p.indexes = [i]
+
             yield p
 
     def to_dict(self):
@@ -80,7 +85,7 @@ class LissajousGenerator(Generator):
 
         d = OrderedDict()
         d['type'] = "LissajousGenerator"
-        d['name'] = self.name
+        d['names'] = self.names
         d['units'] = list(self.position_units.values())[0]
         d['box'] = box
         d['num_lobes'] = self.x_freq
@@ -100,10 +105,10 @@ class LissajousGenerator(Generator):
             LissajousGenerator: New LissajousGenerator instance
         """
 
-        name = d['name']
+        names = d['names']
         units = d['units']
         box = d['box']
         num_lobes = d['num_lobes']
         num_points = d['num_points']
 
-        return cls(name, units, box, num_lobes, num_points)
+        return cls(names, units, box, num_lobes, num_points)

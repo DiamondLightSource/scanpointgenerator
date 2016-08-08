@@ -16,12 +16,10 @@ def to_list(value):
 class LineGenerator(Generator):
     """Generate a line of equally spaced N-dimensional points"""
 
-    axis_labels = ["X", "Y", "Z"]
-
     def __init__(self, name, units, start, stop, num, alternate_direction=False):
         """
         Args:
-            name (str): The scannable name E.g. "x" or "XYLine"
+            name (str/list(str)): The scannable name(s) E.g. "x" or ["x", "y"]
             units (str): The scannable units. E.g. "mm"
             start (float/list(float)): The first position to be generated.
                 e.g. 1.0 or [1.0, 2.0]
@@ -32,17 +30,22 @@ class LineGenerator(Generator):
                 generator is nested
         """
 
-        self.name = name
+        self.name = to_list(name)
         self.start = to_list(start)
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
 
-        if len(self.start) != len(self.stop):
+        if len(self.name) != len(set(self.name)):
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             name)
+
+        if len(self.name) != len(self.start) or \
+           len(self.name) != len(self.stop):
             raise ValueError(
-                "Dimensions of start and stop do not match")
+                "Dimensions of name, start and stop do not match")
 
         self.num = num
-        self.num_axes = len(self.start)
+        self.num_axes = len(self.name)
 
         self.step = []
         if self.num < 2:
@@ -53,24 +56,19 @@ class LineGenerator(Generator):
                     (self.stop[axis] - self.start[axis])/(self.num - 1))
 
         self.position_units = OrderedDict()
-        if len(self.start) == 1:
-            self.position_units[self.name] = units
-            self.axes = [self.name]
-        else:
-            self.axes = []
-            for index in range(len(self.start)):
-
-                axis = self.name + "_"
-                if index < 3:
-                    axis += self.axis_labels[index]
-                else:
-                    axis += str(index+1)
-
-                self.position_units[axis] = units
-                self.axes.append(axis)
-
+        for dimension in self.name:
+            self.position_units[dimension] = units
         self.index_dims = [self.num]
-        self.index_names = [self.name]
+
+        if len(self.name) > 1:
+            gen_name = "Line"
+            for axis_name in self.name[::-1]:
+                gen_name = axis_name + "_" + gen_name
+            self.index_names = [gen_name]
+        else:
+            self.index_names = self.name
+
+        self.axes = self.name  # For GDA
 
     def _calc(self, i, axis_index):
         """Calculate the position for a given index"""
@@ -81,10 +79,10 @@ class LineGenerator(Generator):
         for i in range_(self.num):
             point = Point()
 
-            for axis_index, axis in enumerate(self.axes):
-                point.positions[axis] = self._calc(i, axis_index)
-                point.lower[axis] = self._calc(i - 0.5, axis_index)
-                point.upper[axis] = self._calc(i + 0.5, axis_index)
+            for axis_index in range_(self.num_axes):
+                point.positions[self.name[axis_index]] = self._calc(i, axis_index)
+                point.lower[self.name[axis_index]] = self._calc(i - 0.5, axis_index)
+                point.upper[self.name[axis_index]] = self._calc(i + 0.5, axis_index)
 
             point.indexes = [i]
             yield point

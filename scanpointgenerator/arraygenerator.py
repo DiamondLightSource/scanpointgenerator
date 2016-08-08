@@ -31,13 +31,13 @@ class ArrayGenerator(Generator):
                 lower_bounds = [[point] for point in lower_bounds]
 
         self.name = name
-        self.axes = self.name
         self.points = points
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
 
         if len(self.name) != len(set(self.name)):
-            raise ValueError("Axis names cannot be duplicated; given %s" % name)
+            raise ValueError("Axis names cannot be duplicated; given %s" %
+                             name)
 
         for point in self.points:
             if len(point) != len(self.name):
@@ -61,6 +61,8 @@ class ArrayGenerator(Generator):
             self.position_units[dimension] = units
         self.index_dims = [self.num]
         self.index_names = self.name
+
+        self.axes = self.name  # For GDA
 
     def iterator(self):
 

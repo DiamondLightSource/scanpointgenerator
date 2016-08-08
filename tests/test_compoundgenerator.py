@@ -29,6 +29,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.position_units, dict(y="mm", x="mm"))
         self.assertEqual(self.g.index_dims, [2, 3])
         self.assertEqual(self.g.index_names, ["y", "x"])
+        self.assertEqual(self.g.axes, ["y", "x"])
 
     def test_given_compound_raise_error(self):
         with self.assertRaises(TypeError):
@@ -92,6 +93,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_double_nest(self):
         self.g = CompoundGenerator([self.z, self.y, self.x], [], [])
+        self.assertEqual(self.g.axes, ["z", "y", "x"])
 
         xpositions = [1.0, 1.1, 1.2, 1.2, 1.1, 1.0,
                       1.0, 1.1, 1.2, 1.2, 1.1, 1.0]
@@ -136,65 +138,49 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         mutator.mutate.assert_called_once_with(filtered)
 
     def test_line_spiral(self):
-        positions = [{'XYSpiral_Y': -0.3211855677650875,
-                      'XYSpiral_X': 0.23663214944574582, 'z': 0.0},
-                     {'XYSpiral_Y': -0.25037538922751695,
-                      'XYSpiral_X': -0.6440318266552169, 'z': 0.0},
-                     {'XYSpiral_Y': 0.6946549630820702,
-                      'XYSpiral_X': -0.5596688286164636, 'z': 0.0},
-                     {'XYSpiral_Y': 0.6946549630820702,
-                      'XYSpiral_X': -0.5596688286164636, 'z': 2.0},
-                     {'XYSpiral_Y': -0.25037538922751695,
-                      'XYSpiral_X': -0.6440318266552169, 'z': 2.0},
-                     {'XYSpiral_Y': -0.3211855677650875,
-                      'XYSpiral_X': 0.23663214944574582, 'z': 2.0},
-                     {'XYSpiral_Y': -0.3211855677650875,
-                      'XYSpiral_X': 0.23663214944574582, 'z': 4.0},
-                     {'XYSpiral_Y': -0.25037538922751695,
-                      'XYSpiral_X': -0.6440318266552169, 'z': 4.0},
-                     {'XYSpiral_Y': 0.6946549630820702,
-                      'XYSpiral_X': -0.5596688286164636, 'z': 4.0}]
+        positions = [{'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 0.0},
+                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 0.0},
+                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 0.0},
+                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 2.0},
+                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 2.0},
+                     {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 2.0},
+                     {'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 4.0},
+                     {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 4.0},
+                     {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 4.0},
+                     {}]
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
-        spiral = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 0.8, alternate_direction=True)
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate_direction=True)
         gen = CompoundGenerator([z, spiral], [], [])
+
+        self.assertEqual(gen.axes, ["z", "x", "y"])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])
 
     def test_line_lissajous(self):
-        positions = [{'XYLissajous_Y': 0.0, 'XYLissajous_X': 0.5, 'z': 0.0},
-                     {'XYLissajous_Y': 0.2938926261462366,
-                      'XYLissajous_X': 0.15450849718747375, 'z': 0.0},
-                     {'XYLissajous_Y': -0.4755282581475768,
-                      'XYLissajous_X': -0.40450849718747367, 'z': 0.0},
-                     {'XYLissajous_Y': 0.47552825814757677,
-                      'XYLissajous_X': -0.4045084971874738, 'z': 0.0},
-                     {'XYLissajous_Y': -0.2938926261462364,
-                      'XYLissajous_X': 0.1545084971874736, 'z': 0.0},
-                     {'XYLissajous_Y': 0.0, 'XYLissajous_X': 0.5, 'z': 2.0},
-                     {'XYLissajous_Y': 0.2938926261462366,
-                      'XYLissajous_X': 0.15450849718747375, 'z': 2.0},
-                     {'XYLissajous_Y': -0.4755282581475768,
-                      'XYLissajous_X': -0.40450849718747367, 'z': 2.0},
-                     {'XYLissajous_Y': 0.47552825814757677,
-                      'XYLissajous_X': -0.4045084971874738, 'z': 2.0},
-                     {'XYLissajous_Y': -0.2938926261462364,
-                      'XYLissajous_X': 0.1545084971874736, 'z': 2.0},
-                     {'XYLissajous_Y': 0.0, 'XYLissajous_X': 0.5, 'z': 4.0},
-                     {'XYLissajous_Y': 0.2938926261462366,
-                      'XYLissajous_X': 0.15450849718747375, 'z': 4.0},
-                     {'XYLissajous_Y': -0.4755282581475768,
-                      'XYLissajous_X': -0.40450849718747367, 'z': 4.0},
-                     {'XYLissajous_Y': 0.47552825814757677,
-                      'XYLissajous_X': -0.4045084971874738, 'z': 4.0},
-                     {'XYLissajous_Y': -0.2938926261462364,
-                      'XYLissajous_X': 0.1545084971874736, 'z': 4.0}]
+        positions = [{'y': 0.0, 'x': 0.5, 'z': 0.0},
+                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 0.0},
+                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 0.0},
+                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 0.0},
+                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 0.0},
+                     {'y': 0.0, 'x': 0.5, 'z': 2.0},
+                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 2.0},
+                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 2.0},
+                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 2.0},
+                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 2.0},
+                     {'y': 0.0, 'x': 0.5, 'z': 4.0},
+                     {'y': 0.2938926261462366, 'x': 0.15450849718747375, 'z': 4.0},
+                     {'y': -0.4755282581475768, 'x': -0.40450849718747367, 'z': 4.0},
+                     {'y': 0.47552825814757677, 'x': -0.4045084971874738, 'z': 4.0},
+                     {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 4.0}]
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
         box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        lissajous = LissajousGenerator("XYLissajous", "mm", box, 1, num_points=5)
+        lissajous = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
         gen = CompoundGenerator([z, lissajous], [], [])
+
+        self.assertEqual(gen.axes, ["z", "x", "y"])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])

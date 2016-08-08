@@ -16,10 +16,10 @@ points in the y direction
     CompoundGenerator, Excluder, RandomOffsetMutator, plot_generator
     from scanpointgenerator.rectangular_roi import RectangularROI
 
-    spiral = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 10.0,
+    spiral = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 10.0,
                              alternate_direction=True)
-    rectangle = Excluder(RectangularROI([1.0, 1.0], 8.0, 8.0), ["XYSpiral_X", "XYSpiral_Y"])
-    mutator = RandomOffsetMutator(2, dict(XYSpiral_X=0.0, XYSpiral_Y=0.25))
+    rectangle = Excluder(RectangularROI([1.0, 1.0], 8.0, 8.0), ["x", "y"])
+    mutator = RandomOffsetMutator(2, dict(x=0.0, y=0.25))
     gen = CompoundGenerator([spiral], [rectangle], [mutator])
 
     plot_generator(gen, rectangle)
@@ -33,7 +33,7 @@ A spiral scan at each point of a line scan with alternating direction
     CompoundGenerator
 
     line = LineGenerator("z", "mm", 0.0, 20.0, 3)
-    spiral = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 1.2,
+    spiral = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 1.2,
                              alternate_direction=True)
     gen = CompoundGenerator([line, spiral], [], [])
 

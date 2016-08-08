@@ -34,7 +34,7 @@ def grid_circle_check():
 
 def spiral_check():
 
-    spiral = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 10.0)
+    spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 10.0)
     gen = CompoundGenerator([spiral], [], [])
 
     plot_generator(gen)
@@ -42,8 +42,8 @@ def spiral_check():
 
 def spiral_rectangle_check():
 
-    spiral = SpiralGenerator("XYSpiral", "mm", [0.0, 0.0], 10.0)
-    rectangle = Excluder(RectangularROI([0.0, 0.0], 10.0, 10.0), ["XYSpiral_X", "XYSpiral_Y"])
+    spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 10.0)
+    rectangle = Excluder(RectangularROI([0.0, 0.0], 10.0, 10.0), ['x', 'y'])
     gen = CompoundGenerator([spiral], [rectangle], [])
 
     plot_generator(gen, rectangle)
@@ -52,7 +52,7 @@ def spiral_rectangle_check():
 def lissajous_check():
 
     bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-    lissajous = LissajousGenerator("XYLissajous", "mm", bounding_box, 2)
+    lissajous = LissajousGenerator(['x', 'y'], "mm", bounding_box, 2)
     gen = CompoundGenerator([lissajous], [], [])
 
     plot_generator(gen)
@@ -61,8 +61,8 @@ def lissajous_check():
 def lissajous_rectangle_check():
 
     bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-    lissajous = LissajousGenerator("XYLissajous", "mm", bounding_box, 2)
-    rectangle = Excluder(RectangularROI([0.0, 0.0], 0.8, 0.8), ["XYLissajous_X", "XYLissajous_Y"])
+    lissajous = LissajousGenerator(['x', 'y'], "mm", bounding_box, 2)
+    rectangle = Excluder(RectangularROI([0.0, 0.0], 0.8, 0.8), ['x', 'y'])
     gen = CompoundGenerator([lissajous], [rectangle], [])
 
     plot_generator(gen, rectangle)
@@ -70,7 +70,7 @@ def lissajous_rectangle_check():
 
 def line_2d_check():
 
-    line = LineGenerator("XYLine", "mm", [1.0, 2.0], [5.0, 10.0], 5)
+    line = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
     gen = CompoundGenerator([line], [], [])
 
     plot_generator(gen)
