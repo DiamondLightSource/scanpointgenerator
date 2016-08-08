@@ -9,7 +9,7 @@ is as follows::
         generators: [
             {
                 type: LineGenerator
-                name: x
+                name: y
                 units: mm
                 start: 0.0
                 stop: 1.0
@@ -18,7 +18,7 @@ is as follows::
             },
             {
                 type: LineGenerator
-                name: y
+                name: x
                 units: mm
                 start: 0.0
                 stop: 5.0
@@ -27,12 +27,14 @@ is as follows::
             }
         ],
         excluders: [
-            roi: {
-                type: CircularROI
-                centre: [0.0, 0.0]
-                radius: 0.5
+            {
+                roi: {
+                    type: CircularROI
+                    centre: [0.0, 0.0]
+                    radius: 0.5
+                }
+                scannables: ['x', 'y']
             }
-            scannables: ['x', 'y']
         ],
         mutators: [
             {
