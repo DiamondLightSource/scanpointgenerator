@@ -29,6 +29,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.position_units, dict(y="mm", x="mm"))
         self.assertEqual(self.g.index_dims, [2, 3])
         self.assertEqual(self.g.index_names, ["y", "x"])
+        self.assertEqual(self.g.axes, ["y", "x"])
 
     def test_duplicate_name_raises(self):
         x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
@@ -88,6 +89,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_double_nest(self):
         self.g = CompoundGenerator([self.z, self.y, self.x], [], [])
+        self.assertEqual(self.g.axes, ["z", "y", "x"])
 
         xpositions = [1.0, 1.1, 1.2, 1.2, 1.1, 1.0,
                       1.0, 1.1, 1.2, 1.2, 1.1, 1.0]
@@ -147,6 +149,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate_direction=True)
         gen = CompoundGenerator([z, spiral], [], [])
 
+        self.assertEqual(gen.axes, ["z", "x", "y"])
+
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])
 
@@ -171,6 +175,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
         lissajous = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
         gen = CompoundGenerator([z, lissajous], [], [])
+        
+        self.assertEqual(gen.axes, ["z", "x", "y"])
 
         for i, p in enumerate(gen.iterator()):
             self.assertEqual(p.positions, positions[i])

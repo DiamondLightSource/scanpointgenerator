@@ -29,11 +29,13 @@ class CompoundGenerator(Generator):
         self.periods = []
         self.alternate_direction = []
         self.point_sets = []
+        self.axes = []
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
+            self.axes += generator.axes
         for generator in self.generators[::-1]:
             self.num *= generator.num
             self.periods.insert(0, self.num)

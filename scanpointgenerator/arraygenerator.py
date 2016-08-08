@@ -61,6 +61,8 @@ class ArrayGenerator(Generator):
         self.index_dims = [self.num]
         self.index_names = self.name
 
+        self.axes = self.name  # For GDA
+
     def iterator(self):
 
         for i in range_(self.num):

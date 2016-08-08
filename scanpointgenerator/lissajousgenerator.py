@@ -49,6 +49,8 @@ class LissajousGenerator(Generator):
             gen_name = axis_name + "_" + gen_name
         self.index_names = [gen_name]
 
+        self.axes = self.names  # For GDA
+
     def _calc(self, i):
         """Calculate the coordinate for a given index"""
         x = self.centre[0] + \

@@ -14,7 +14,7 @@ class LissajousGeneratorTest(unittest.TestCase):
         self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [250])
         self.assertEqual(self.g.index_names, ["x_y_Lissajous"])
-        self.assertEqual(self.g.names, ["x", "y"])
+        self.assertEqual(self.g.axes, ["x", "y"])
 
     def test_iterator(self):
         g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1, num_points=10)

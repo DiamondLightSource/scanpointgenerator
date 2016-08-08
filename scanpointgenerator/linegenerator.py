@@ -69,6 +69,8 @@ class LineGenerator(Generator):
             self.position_units[dimension] = units
         self.index_dims = [self.num]
 
+        self.axes = self.name  # For GDA
+
     def _calc(self, i, axis_index):
         """Calculate the position for a given index"""
         return self.start[axis_index] + i * self.step[axis_index]
