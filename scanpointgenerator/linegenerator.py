@@ -30,17 +30,7 @@ class LineGenerator(Generator):
                 generator is nested
         """
 
-        if isinstance(name, list):
-            self.name = name
-
-            gen_name = "Line"
-            for axis_name in self.name[::-1]:
-                gen_name = axis_name + "_" + gen_name
-            self.index_names = [gen_name]
-        else:
-            self.name = [name]
-            self.index_names = [name]
-
+        self.name = to_list(name)
         self.start = to_list(start)
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
@@ -68,6 +58,14 @@ class LineGenerator(Generator):
         for dimension in self.name:
             self.position_units[dimension] = units
         self.index_dims = [self.num]
+
+        if len(self.name) > 1:
+            gen_name = "Line"
+            for axis_name in self.name[::-1]:
+                gen_name = axis_name + "_" + gen_name
+            self.index_names = [gen_name]
+        else:
+            self.index_names = self.name
 
         self.axes = self.name  # For GDA
 
