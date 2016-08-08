@@ -33,6 +33,11 @@ class CompoundGenerator(Generator):
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
+
+            if isinstance(generator, self.__class__):
+                raise TypeError("CompoundGenerators cannot be nested, nest"
+                                "its constituent parts instead")
+
             self.alternate_direction.append(generator.alternate_direction)
             self.point_sets.append(list(generator.iterator()))
             self.axes += generator.axes

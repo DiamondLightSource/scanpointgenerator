@@ -31,6 +31,10 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_names, ["y", "x"])
         self.assertEqual(self.g.axes, ["y", "x"])
 
+    def test_given_compound_raise_error(self):
+        with self.assertRaises(TypeError):
+            CompoundGenerator([self.g], [], [])
+
     def test_duplicate_name_raises(self):
         x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
         y = LineGenerator("x", "mm", 2.0, 2.1, 2, False)
@@ -175,7 +179,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
         lissajous = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
         gen = CompoundGenerator([z, lissajous], [], [])
-        
+
         self.assertEqual(gen.axes, ["z", "x", "y"])
 
         for i, p in enumerate(gen.iterator()):
