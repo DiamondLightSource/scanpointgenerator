@@ -28,6 +28,10 @@ class LineGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 4)
 
+    def test_duplicate_name_raises(self):
+        with self.assertRaises(ValueError):
+            LineGenerator(["x", "x"], "mm", 0.0, 1.0, 5)
+
     def test_to_dict(self):
         expected_dict = OrderedDict()
         expected_dict['type'] = "LineGenerator"

@@ -15,6 +15,10 @@ class SpiralGeneratorTest(unittest.TestCase):
         self.assertEqual(self.g.index_names, ["x_y_Spiral"])
         self.assertEqual(self.g.axes, ["x", "y"])
 
+    def test_duplicate_name_raises(self):
+        with self.assertRaises(ValueError):
+            SpiralGenerator(["x", "x"], "mm", [0.0, 0.0], 1.0)
+
     def test_iterator(self):
         positions = [{'y': -0.3211855677650875, 'x': 0.23663214944574582},
                      {'y': -0.25037538922751695, 'x': -0.6440318266552169},

@@ -16,6 +16,10 @@ class LissajousGeneratorTest(unittest.TestCase):
         self.assertEqual(self.g.index_names, ["x_y_Lissajous"])
         self.assertEqual(self.g.axes, ["x", "y"])
 
+    def test_duplicate_name_raises(self):
+        with self.assertRaises(ValueError):
+            LissajousGenerator(["x", "x"], "mm", dict(), 1)
+
     def test_iterator(self):
         g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1, num_points=10)
         positions = [{'y': 0.0, 'x': 0.5},
