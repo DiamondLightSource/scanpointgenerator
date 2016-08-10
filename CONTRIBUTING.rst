@@ -73,3 +73,4 @@ Before a new release, please go through the following checklist:
 
     make publish
 
+* Run 'update_source_only_repo.sh' from the repository root
