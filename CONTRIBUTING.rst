@@ -72,5 +72,3 @@ Before a new release, please go through the following checklist:
 * Upload to pypi::
 
     make publish
-
-* Run 'update_source_only_repo.sh' from the repository root

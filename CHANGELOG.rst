@@ -3,7 +3,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-`1-0`_ - 2016-06-20
+`1-1`_ - 2016-08-16
+-------------------
+Added:
+
+- Small tweaks for GDA and script to push changes to daq-eclipse on release
+
+`1-0`_ - 2016-07-18
 -------------------
 Added:
 
