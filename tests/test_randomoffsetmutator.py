@@ -87,14 +87,14 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
 
         mutator = RandomOffsetMutator(1, ["y", "x"], dict(x=0.25, y=0.25))
         gen = CompoundGenerator([line1, line2], [], [mutator])
-        p = gen.iterator().next()
+        p = next(gen.iterator())
         self.assertAlmostEqual(p.positions['x'], 1.0791957060000001, places=10)
         self.assertAlmostEqual(p.positions['y'], 2.12147549275, places=10)
 
         # Swap order of axes in mutator; should swap offsets applied to x and y
         mutator = RandomOffsetMutator(1, ["x", "y"], dict(x=0.25, y=0.25))
         gen = CompoundGenerator([line1, line2], [], [mutator])
-        p = gen.iterator().next()
+        p = next(gen.iterator())
         self.assertAlmostEqual(p.positions['x'], 1.12147549275, places=10)
         self.assertAlmostEqual(p.positions['y'], 2.0791957060000001, places=10)
 
