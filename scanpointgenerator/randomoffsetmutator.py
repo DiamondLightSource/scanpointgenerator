@@ -8,16 +8,19 @@ class RandomOffsetMutator(Mutator):
     """Mutator to apply a random offset to the points of an ND
     ScanPointGenerator"""
 
-    def __init__(self, seed, max_offset):
+    def __init__(self, seed, axes, max_offset):
         """
         Args:
             seed(int): Seed for random offset generator
+            axes(list): Axes to apply random offsets to, in the order the
+            offsets should be applied
             max_offset(dict): ND dict of maximum allowed offset in
             generator-defined units
         """
 
         self.seed = seed
         self.RNG = random.Random(seed)
+        self.axes = axes
         self.max_offset = max_offset
 
     def get_random_number(self):
@@ -45,11 +48,12 @@ class RandomOffsetMutator(Mutator):
         """
 
         changed = False
-        for axis in point.positions.keys():
-            if self.max_offset[axis] == 0.0:
+        for axis in self.axes:
+            offset = self.max_offset[axis]
+            if offset == 0.0:
                 pass
             else:
-                random_offset = self.get_random_number() * self.max_offset[axis]
+                random_offset = self.get_random_number() * offset
                 point.positions[axis] += random_offset
                 changed = True
                 
@@ -108,6 +112,7 @@ class RandomOffsetMutator(Mutator):
         d = OrderedDict()
         d['type'] = "RandomOffsetMutator"
         d['seed'] = self.seed
+        d['axes'] = self.axes
         d['max_offset'] = self.max_offset
 
         return d
@@ -125,6 +130,7 @@ class RandomOffsetMutator(Mutator):
         """
 
         seed = d['seed']
+        axes = d['axes']
         max_offset = d['max_offset']
 
-        return cls(seed, max_offset)
+        return cls(seed, axes, max_offset)

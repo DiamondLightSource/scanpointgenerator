@@ -4,6 +4,7 @@ import unittest
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator import RandomOffsetMutator
 from scanpointgenerator import LineGenerator
+from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import Point
 
 from pkg_resources import require
@@ -15,7 +16,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
 
     def setUp(self):
         self.line_gen = LineGenerator("x", "mm", 1.0, 5.0, 5)
-        self.m = RandomOffsetMutator(1, dict(x=0.25))
+        self.m = RandomOffsetMutator(1, ["x"], dict(x=0.25))
 
     def test_init(self):
         self.assertEqual(1, self.m.seed)
@@ -80,6 +81,23 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 4)
 
+    def test_order_of_offsets(self):
+        line1 = LineGenerator("y", "mm", 2.0, 10.0, 5)
+        line2 = LineGenerator("x", "mm", 1.0, 5.0, 5)
+
+        mutator = RandomOffsetMutator(1, ["y", "x"], dict(x=0.25, y=0.25))
+        gen = CompoundGenerator([line1, line2], [], [mutator])
+        p = gen.iterator().next()
+        self.assertAlmostEqual(p.positions['x'], 1.0791957060000001, places=10)
+        self.assertAlmostEqual(p.positions['y'], 2.12147549275, places=10)
+
+        # Swap order of axes in mutator; should swap offsets applied to x and y
+        mutator = RandomOffsetMutator(1, ["x", "y"], dict(x=0.25, y=0.25))
+        gen = CompoundGenerator([line1, line2], [], [mutator])
+        p = gen.iterator().next()
+        self.assertAlmostEqual(p.positions['x'], 1.12147549275, places=10)
+        self.assertAlmostEqual(p.positions['y'], 2.0791957060000001, places=10)
+
 
 class TestSerialisation(unittest.TestCase):
 
@@ -88,7 +106,7 @@ class TestSerialisation(unittest.TestCase):
         self.l_dict = MagicMock()
         self.max_offset = dict(x=0.25)
 
-        self.m = RandomOffsetMutator(1, self.max_offset)
+        self.m = RandomOffsetMutator(1, ["x"], self.max_offset)
 
     def test_to_dict(self):
         self.l.to_dict.return_value = self.l_dict
@@ -96,6 +114,7 @@ class TestSerialisation(unittest.TestCase):
         expected_dict = OrderedDict()
         expected_dict['type'] = "RandomOffsetMutator"
         expected_dict['seed'] = 1
+        expected_dict['axes'] = ["x"]
         expected_dict['max_offset'] = self.max_offset
 
         d = self.m.to_dict()
@@ -106,6 +125,7 @@ class TestSerialisation(unittest.TestCase):
 
         _dict = OrderedDict()
         _dict['seed'] = 1
+        _dict['axes'] = ["x"]
         _dict['max_offset'] = self.max_offset
 
         units_dict = OrderedDict()
