@@ -1,4 +1,3 @@
-from collections import OrderedDict
 
 
 class Point(object):
@@ -16,7 +15,7 @@ class Point(object):
     """
 
     def __init__(self):
-        self.positions = OrderedDict()
-        self.lower = OrderedDict()
-        self.upper = OrderedDict()
+        self.positions = {}
+        self.lower = {}
+        self.upper = {}
         self.indexes = []
