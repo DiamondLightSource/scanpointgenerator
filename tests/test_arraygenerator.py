@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import unittest
 
 from test_util import ScanPointGeneratorTest
@@ -99,7 +97,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.indexes, [indexes[i]])
 
     def test_to_dict(self):
-        expected_dict = OrderedDict()
+        expected_dict = dict()
         expected_dict['type'] = "ArrayGenerator"
         expected_dict['name'] = ['x', 'y']
         expected_dict['units'] = 'mm'
@@ -113,14 +111,14 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
     def test_from_dict(self):
         points = [[0.0, 0.0], [1.0, 5.0], [2.0, 10.0], [3.0, 15.0]]
-        _dict = OrderedDict()
+        _dict = dict()
         _dict['name'] = ['x', 'y']
         _dict['units'] = 'mm'
         _dict['points'] = points
         _dict['lower_bounds'] = None
         _dict['upper_bounds'] = None
 
-        units_dict = OrderedDict()
+        units_dict = dict()
         units_dict['x'] = 'mm'
         units_dict['y'] = 'mm'
 

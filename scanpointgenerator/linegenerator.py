@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
@@ -55,7 +53,7 @@ class LineGenerator(Generator):
                 self.step.append(
                     (self.stop[axis] - self.start[axis])/(self.num - 1))
 
-        self.position_units = OrderedDict()
+        self.position_units = dict()
         for dimension in self.name:
             self.position_units[dimension] = units
         self.index_dims = [self.num]
@@ -90,7 +88,7 @@ class LineGenerator(Generator):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        d = OrderedDict()
+        d = dict()
         d['type'] = "LineGenerator"
         d['name'] = self.name
         d['units'] = list(self.position_units.values())[0]

@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import unittest
 
 from test_util import ScanPointGeneratorTest
@@ -111,7 +110,7 @@ class TestSerialisation(unittest.TestCase):
     def test_to_dict(self):
         self.l.to_dict.return_value = self.l_dict
 
-        expected_dict = OrderedDict()
+        expected_dict = dict()
         expected_dict['type'] = "RandomOffsetMutator"
         expected_dict['seed'] = 1
         expected_dict['axes'] = ["x"]
@@ -123,12 +122,12 @@ class TestSerialisation(unittest.TestCase):
 
     def test_from_dict(self):
 
-        _dict = OrderedDict()
+        _dict = dict()
         _dict['seed'] = 1
         _dict['axes'] = ["x"]
         _dict['max_offset'] = self.max_offset
 
-        units_dict = OrderedDict()
+        units_dict = dict()
         units_dict['x'] = 'mm'
 
         m = RandomOffsetMutator.from_dict(_dict)

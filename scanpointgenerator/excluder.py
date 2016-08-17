@@ -1,4 +1,3 @@
-from collections import OrderedDict
 
 
 class Excluder(object):
@@ -38,7 +37,7 @@ class Excluder(object):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        d = OrderedDict()
+        d = dict()
         d['roi'] = self.roi.to_dict()
         d['scannables'] = self.scannables
 

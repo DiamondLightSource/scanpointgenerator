@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
 from scanpointgenerator import Point
@@ -132,7 +130,7 @@ class ArrayGenerator(Generator):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        d = OrderedDict()
+        d = dict()
         d['type'] = "ArrayGenerator"
         d['name'] = self.name
         d['units'] = list(self.position_units.values())[0]

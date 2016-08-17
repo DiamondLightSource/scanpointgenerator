@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import unittest
 
 from test_util import ScanPointGeneratorTest
@@ -216,7 +215,7 @@ class TestSerialisation(unittest.TestCase):
         mutators_list = [self.m1_dict]
         excluders_list = [self.e1_dict]
 
-        expected_dict = OrderedDict()
+        expected_dict = dict()
         expected_dict['type'] = "CompoundGenerator"
         expected_dict['generators'] = gen_list
         expected_dict['excluders'] = excluders_list
@@ -236,12 +235,12 @@ class TestSerialisation(unittest.TestCase):
         mutator_mock.from_dict.return_value = self.m1
         ex_mock.from_dict.return_value = self.e1
 
-        _dict = OrderedDict()
+        _dict = dict()
         _dict['generators'] = [self.l1_dict, self.l2_dict]
         _dict['excluders'] = [self.e1_dict]
         _dict['mutators'] = [self.m1_dict]
 
-        units_dict = OrderedDict()
+        units_dict = dict()
         units_dict['x'] = 'mm'
         units_dict['y'] = 'mm'
 

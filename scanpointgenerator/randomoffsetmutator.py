@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from scanpointgenerator import Mutator
 from scanpointgenerator import random
 
@@ -109,7 +107,7 @@ class RandomOffsetMutator(Mutator):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        d = OrderedDict()
+        d = dict()
         d['type'] = "RandomOffsetMutator"
         d['seed'] = self.seed
         d['axes'] = self.axes

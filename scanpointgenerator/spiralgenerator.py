@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import math as m
 
 from scanpointgenerator.compat import range_
@@ -77,7 +76,7 @@ class SpiralGenerator(Generator):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        d = OrderedDict()
+        d = dict()
         d['type'] = "SpiralGenerator"
         d['names'] = self.names
         d['units'] = list(self.position_units.values())[0]

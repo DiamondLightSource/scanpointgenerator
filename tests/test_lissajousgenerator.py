@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import unittest
 
 from scanpointgenerator import LissajousGenerator
@@ -62,8 +61,8 @@ class LissajousGeneratorTest(unittest.TestCase):
         self.assertEqual(i, 9)
 
     def test_to_dict(self):
-        expected_dict = OrderedDict()
-        box = OrderedDict()
+        expected_dict = dict()
+        box = dict()
         expected_dict['type'] = "LissajousGenerator"
         box['centre'] = [0.0, 0.0]
         box['width'] = 1.0
@@ -80,19 +79,19 @@ class LissajousGeneratorTest(unittest.TestCase):
         self.assertEqual(expected_dict, d)
 
     def test_from_dict(self):
-        box = OrderedDict()
+        box = dict()
         box['centre'] = [0.0, 0.0]
         box['width'] = 1.0
         box['height'] = 2.0
 
-        _dict = OrderedDict()
+        _dict = dict()
         _dict['names'] = ["x", "y"]
         _dict['units'] = "mm"
         _dict['box'] = box
         _dict['num_lobes'] = 5
         _dict['num_points'] = 250
 
-        units_dict = OrderedDict()
+        units_dict = dict()
         units_dict['x'] = "mm"
         units_dict['y'] = "mm"
 
