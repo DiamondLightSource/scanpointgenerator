@@ -17,7 +17,7 @@ git commit -m "Update scanpointgenerator to version $VER" &&
 git push origin spg-release-$VER
 
 echo "" &&
-echo "\nUpdate successful"
+echo "Update successful"
 
 rm -rf /tmp/scanpointgenerator
 rm -rf /tmp/daq-eclipse
