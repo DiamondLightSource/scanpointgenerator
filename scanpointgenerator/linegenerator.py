@@ -70,19 +70,19 @@ class LineGenerator(Generator):
 
         self.axes = self.name  # For GDA
 
-    def _calc(self, i, axis_index):
-        """Calculate the position for a given index"""
-        return self.start[axis_index] + i * self.step[axis_index]
-
     def iterator(self):
 
         for i in range_(self.num):
             point = Point()
 
             for axis_index in range_(self.num_axes):
-                point.positions[self.name[axis_index]] = self._calc(i, axis_index)
-                point.lower[self.name[axis_index]] = self._calc(i - 0.5, axis_index)
-                point.upper[self.name[axis_index]] = self._calc(i + 0.5, axis_index)
+                axis_name = self.name[axis_index]
+                start = self.start[axis_index]
+                step = self.step[axis_index]
+
+                point.positions[axis_name] = start + i * step
+                point.lower[axis_name] = start + (i - 0.5) * step
+                point.upper[axis_name] = start + (i + 0.5) * step
 
             point.indexes = [i]
             yield point
