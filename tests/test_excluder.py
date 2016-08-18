@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import unittest
 
 from scanpointgenerator.excluder import Excluder
@@ -20,7 +19,7 @@ class ExcluderTest(unittest.TestCase):
         self.assertEqual(self.e.scannables, self.scannables)
 
     def test_contains_point(self):
-        d = OrderedDict()
+        d = dict()
         d['x'] = 1.0
         d['y'] = 2.0
 
@@ -40,7 +39,7 @@ class TestSerialisation(unittest.TestCase):
     def test_to_dict(self):
         self.r1.to_dict.return_value = self.r1_dict
 
-        expected_dict = OrderedDict()
+        expected_dict = dict()
         expected_dict['roi'] = self.r1_dict
         expected_dict['scannables'] = ['x', 'y']
 
@@ -51,7 +50,7 @@ class TestSerialisation(unittest.TestCase):
     def test_from_dict(self):
         self.r1_dict.from_dict.return_value = self.r1
 
-        _dict = OrderedDict()
+        _dict = dict()
         _dict['roi'] = self.r1_dict
         _dict['scannables'] = ['x', 'y']
 

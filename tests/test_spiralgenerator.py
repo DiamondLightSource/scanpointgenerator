@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import unittest
 
 from scanpointgenerator import SpiralGenerator
@@ -51,7 +50,7 @@ class SpiralGeneratorTest(unittest.TestCase):
         self.assertEqual(i, 6)
 
     def test_to_dict(self):
-        expected_dict = OrderedDict()
+        expected_dict = dict()
         expected_dict['type'] = "SpiralGenerator"
         expected_dict['names'] = ['x', 'y']
         expected_dict['units'] = 'mm'
@@ -65,7 +64,7 @@ class SpiralGeneratorTest(unittest.TestCase):
         self.assertEqual(expected_dict, d)
 
     def test_from_dict(self):
-        _dict = OrderedDict()
+        _dict = dict()
         _dict['type'] = "SpiralGenerator"
         _dict['names'] = ["x", "y"]
         _dict['units'] = "mm"
@@ -74,7 +73,7 @@ class SpiralGeneratorTest(unittest.TestCase):
         _dict['scale'] = 1
         _dict['alternate_direction'] = True
 
-        units_dict = OrderedDict()
+        units_dict = dict()
         units_dict['x'] = "mm"
         units_dict['y'] = "mm"
 

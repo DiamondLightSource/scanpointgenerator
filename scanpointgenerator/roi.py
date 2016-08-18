@@ -15,9 +15,7 @@ class ROI(object):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        from collections import OrderedDict
-
-        d = OrderedDict()
+        d = dict()
         d['type'] = "ROI"
         d['name'] = self.name
         d['centre'] = self.centre

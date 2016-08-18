@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import math as m
 
 from scanpointgenerator.compat import range_
@@ -78,12 +77,12 @@ class LissajousGenerator(Generator):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        box = OrderedDict()
+        box = dict()
         box['centre'] = self.centre
         box['width'] = self.x_max * 2
         box['height'] = self.y_max * 2
 
-        d = OrderedDict()
+        d = dict()
         d['type'] = "LissajousGenerator"
         d['names'] = self.names
         d['units'] = list(self.position_units.values())[0]
