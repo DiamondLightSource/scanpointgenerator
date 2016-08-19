@@ -19,7 +19,7 @@ points in the y direction
     spiral = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 10.0,
                              alternate_direction=True)
     rectangle = Excluder(RectangularROI([1.0, 1.0], 8.0, 8.0), ["x", "y"])
-    mutator = RandomOffsetMutator(2, dict(x=0.0, y=0.25))
+    mutator = RandomOffsetMutator(2, ["x", "y"], dict(x=0.0, y=0.25))
     gen = CompoundGenerator([spiral], [rectangle], [mutator])
 
     plot_generator(gen, rectangle)

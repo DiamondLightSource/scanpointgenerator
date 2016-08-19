@@ -34,6 +34,6 @@ And with the random offset
 
     xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=True)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
-    random_offset = RandomOffsetMutator(seed=1, max_offset=dict(x=0.05, y=0.05))
+    random_offset = RandomOffsetMutator(seed=1, axes = ["x", "y"], max_offset=dict(x=0.05, y=0.05))
     gen = CompoundGenerator([ys, xs], [], [random_offset])
     plot_generator(gen)
