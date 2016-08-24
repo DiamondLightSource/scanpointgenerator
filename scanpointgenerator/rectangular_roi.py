@@ -1,10 +1,11 @@
 from scanpointgenerator.roi import ROI
 
 
+@ROI.register_subclass("scanpointgenerator:roi/RectangularROI:1.0")
 class RectangularROI(ROI):
 
     def __init__(self, centre, width, height):
-        super(RectangularROI, self).__init__("Rectangle", centre)
+        super(RectangularROI, self).__init__(centre)
 
         if 0.0 in [height, width]:
             raise ValueError("Rectangle must have some size")

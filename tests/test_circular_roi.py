@@ -1,5 +1,6 @@
 import unittest
 
+from test_util import ScanPointGeneratorTest
 from scanpointgenerator.circular_roi import CircularROI
 
 
@@ -18,7 +19,6 @@ class InitTest(unittest.TestCase):
 
         circle = CircularROI([x_centre, y_centre], radius)
 
-        self.assertEqual(circle.name, "Circle")
         self.assertEqual(circle.radius, radius)
         self.assertEqual(circle.centre[0], x_centre)
         self.assertEqual(circle.centre[1], y_centre)
@@ -38,3 +38,6 @@ class ContainsPointTest(unittest.TestCase):
         self.point = [9.0, 11.0]
 
         self.assertFalse(self.Circle.contains_point(self.point))
+
+if __name__ == "__main__":
+    unittest.main()
