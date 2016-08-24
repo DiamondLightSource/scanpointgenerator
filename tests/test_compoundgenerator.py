@@ -216,7 +216,7 @@ class TestSerialisation(unittest.TestCase):
         excluders_list = [self.e1_dict]
 
         expected_dict = dict()
-        expected_dict['type'] = "CompoundGenerator"
+        expected_dict['typeid'] = "scanpointgenerator:generator/CompoundGenerator:1.0"
         expected_dict['generators'] = gen_list
         expected_dict['excluders'] = excluders_list
         expected_dict['mutators'] = mutators_list

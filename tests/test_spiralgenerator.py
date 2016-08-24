@@ -1,5 +1,6 @@
 import unittest
 
+from test_util import ScanPointGeneratorTest
 from scanpointgenerator import SpiralGenerator
 
 
@@ -51,7 +52,7 @@ class SpiralGeneratorTest(unittest.TestCase):
 
     def test_to_dict(self):
         expected_dict = dict()
-        expected_dict['type'] = "SpiralGenerator"
+        expected_dict['typeid'] = "scanpointgenerator:generator/SpiralGenerator:1.0"
         expected_dict['names'] = ['x', 'y']
         expected_dict['units'] = 'mm'
         expected_dict['centre'] = [0.0, 0.0]
@@ -85,3 +86,6 @@ class SpiralGeneratorTest(unittest.TestCase):
         self.assertEqual([0.0, 0.0], gen.centre)
         self.assertEqual(1.4, gen.radius)
         self.assertEqual(1, gen.scale)
+
+if __name__ == "__main__":
+    unittest.main()

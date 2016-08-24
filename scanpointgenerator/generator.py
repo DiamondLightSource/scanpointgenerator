@@ -66,6 +66,7 @@ class Generator(object):
         def decorator(generator):
 
             cls._generator_lookup[generator_type] = generator
+            generator.typeid = generator_type
 
             return generator
         return decorator
