@@ -39,5 +39,24 @@ class ContainsPointTest(unittest.TestCase):
 
         self.assertFalse(self.Circle.contains_point(self.point))
 
+class DictTest(unittest.TestCase):
+
+    def test_to_dict(self):
+        roi = CircularROI([1.1, 2.2], 3.3)
+        expected = {
+            "typeid":"scanpointgenerator:roi/CircularROI:1.0",
+            "centre":[1.1, 2.2],
+            "radius":3.3}
+        self.assertEquals(expected, roi.to_dict())
+
+    def test_from_dict(self):
+        d = {
+            "typeid":"scanpointgenerator:roi/CircularROI:1.0",
+            "centre":[0, 0.1],
+            "radius":1}
+        roi = CircularROI.from_dict(d)
+        self.assertEqual([0, 0.1], roi.centre)
+        self.assertEqual(1, roi.radius)
+
 if __name__ == "__main__":
     unittest.main()
