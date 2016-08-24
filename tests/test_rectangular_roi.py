@@ -24,7 +24,6 @@ class InitTest(unittest.TestCase):
 
         rectangle = RectangularROI([x_centre, y_centre], width, height)
 
-        self.assertEqual(rectangle.name, "Rectangle")
         self.assertEqual(rectangle.width, width)
         self.assertEqual(rectangle.height, height)
         self.assertEqual(rectangle.centre[0], x_centre)

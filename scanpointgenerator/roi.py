@@ -3,10 +3,10 @@
 class ROI(object):
 
     _roi_lookup = {}
+    typeid="scanpointgenerator:roi/ROI:1.0"
 
-    def __init__(self, name, centre):
+    def __init__(self, centre):
 
-        self.name = name
         self.centre = centre
 
     def contains_point(self, point):
@@ -16,8 +16,7 @@ class ROI(object):
         """Convert object attributes into a dictionary"""
 
         d = dict()
-        d['type'] = "ROI"
-        d['name'] = self.name
+        d['typeid'] = self.typeid
         d['centre'] = self.centre
 
         return d
@@ -35,7 +34,7 @@ class ROI(object):
             ROI: New ROI instance
         """
 
-        roi_type = d["type"]
+        roi_type = d["typeid"]
         roi = cls._roi_lookup[roi_type]
         assert roi is not cls, \
             "Subclass %s did not redefine from_dict" % roi_type
@@ -53,6 +52,7 @@ class ROI(object):
 
         def decorator(roi):
 
+            roi.typeid = roi_type
             cls._roi_lookup[roi_type] = roi
 
             return roi
