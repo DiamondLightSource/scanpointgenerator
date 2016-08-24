@@ -47,7 +47,7 @@ class Generator(object):
             Generator: New ScanPointGenerator instance
         """
 
-        generator_type = d["type"]
+        generator_type = d["typeid"]
         generator = cls._generator_lookup[generator_type]
         assert generator is not cls, \
             "Subclass %s did not redefine from_dict" % generator_type
@@ -66,6 +66,7 @@ class Generator(object):
         def decorator(generator):
 
             cls._generator_lookup[generator_type] = generator
+            generator.typeid = generator_type
 
             return generator
         return decorator

@@ -3,7 +3,7 @@ from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
 
-@Generator.register_subclass("ArrayGenerator")
+@Generator.register_subclass("scanpointgenerator:generator/ArrayGenerator:1.0")
 class ArrayGenerator(Generator):
     """Generate a given n-dimensional array of points"""
 
@@ -131,7 +131,7 @@ class ArrayGenerator(Generator):
         """Convert object attributes into a dictionary"""
 
         d = dict()
-        d['type'] = "ArrayGenerator"
+        d['typeid'] = self.typeid
         d['name'] = self.name
         d['units'] = list(self.position_units.values())[0]
         d['points'] = self.points
