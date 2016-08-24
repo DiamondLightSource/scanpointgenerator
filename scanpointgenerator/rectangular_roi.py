@@ -21,3 +21,13 @@ class RectangularROI(ROI):
             return False
         else:
             return True
+
+    def to_dict(self):
+        d = super(RectangularROI, self).to_dict()
+        d['width'] = self.width
+        d['height'] = self.height
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d['centre'], d['width'], d['height'])
