@@ -10,7 +10,7 @@ def to_list(value):
         return [value]
 
 
-@Generator.register_subclass("LineGenerator")
+@Generator.register_subclass("scanpointgenerator:generator/LineGenerator:1.0")
 class LineGenerator(Generator):
     """Generate a line of equally spaced N-dimensional points"""
 
@@ -89,7 +89,7 @@ class LineGenerator(Generator):
         """Convert object attributes into a dictionary"""
 
         d = dict()
-        d['type'] = "LineGenerator"
+        d['typeid'] = self.typeid
         d['name'] = self.name
         d['units'] = list(self.position_units.values())[0]
         d['start'] = self.start

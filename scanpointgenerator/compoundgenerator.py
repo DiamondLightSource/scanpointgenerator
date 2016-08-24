@@ -7,7 +7,7 @@ from scanpointgenerator.excluder import Excluder
 from scanpointgenerator.mutator import Mutator
 
 
-@Generator.register_subclass("CompoundGenerator")
+@Generator.register_subclass("scanpointgenerator:generator/CompoundGenerator:1.0")
 class CompoundGenerator(Generator):
     """Nest N generators, apply exclusion regions to relevant generator pairs
      and apply any mutators before yielding points"""
@@ -184,7 +184,7 @@ class CompoundGenerator(Generator):
         """Convert object attributes into a dictionary"""
 
         d = dict()
-        d['type'] = "CompoundGenerator"
+        d['typeid'] = self.typeid
 
         d['generators'] = []
         for generator in self.generators:

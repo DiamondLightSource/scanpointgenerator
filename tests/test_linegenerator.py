@@ -33,7 +33,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
     def test_to_dict(self):
         expected_dict = dict()
-        expected_dict['type'] = "LineGenerator"
+        expected_dict['typeid'] = "scanpointgenerator:generator/LineGenerator:1.0"
         expected_dict['name'] = ["x"]
         expected_dict['units'] = "mm"
         expected_dict['start'] = [1.0]

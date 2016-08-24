@@ -2,10 +2,11 @@ from scanpointgenerator.roi import ROI
 import math as m
 
 
+@ROI.register_subclass("scanpointgenerator:roi/CircularROI:1.0")
 class CircularROI(ROI):
 
     def __init__(self, centre, radius):
-        super(CircularROI, self).__init__("Circle", centre)
+        super(CircularROI, self).__init__(centre)
 
         if radius == 0.0:
             raise ValueError("Circle must have some size")
@@ -23,7 +24,6 @@ class CircularROI(ROI):
         """Convert object attributes into a dictionary"""
 
         d = super(CircularROI, self).to_dict()
-        d['type'] = "CircularROI"
         d['radius'] = self.radius
 
         return d
@@ -40,8 +40,7 @@ class CircularROI(ROI):
             CircularROI: New CircularROI instance
         """
 
-        name = d['name']
         centre = d['centre']
         radius = d['radius']
 
-        return cls(name, centre, radius)
+        return cls(centre, radius)

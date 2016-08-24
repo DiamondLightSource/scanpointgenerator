@@ -65,3 +65,5 @@ target/
 installed.files
 docs/html/
 
+# Vim swap files
+*.swp

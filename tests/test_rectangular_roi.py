@@ -1,5 +1,6 @@
 import unittest
 
+from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rectangular_roi import RectangularROI
 
 
@@ -24,7 +25,6 @@ class InitTest(unittest.TestCase):
 
         rectangle = RectangularROI([x_centre, y_centre], width, height)
 
-        self.assertEqual(rectangle.name, "Rectangle")
         self.assertEqual(rectangle.width, width)
         self.assertEqual(rectangle.height, height)
         self.assertEqual(rectangle.centre[0], x_centre)
@@ -60,3 +60,28 @@ class ContainsPointTest(unittest.TestCase):
         self.point = [1.0, -6.0]
 
         self.assertFalse(self.Rectangle.contains_point(self.point))
+
+class DictTest(unittest.TestCase):
+
+    def test_to_dict(self):
+        roi = RectangularROI([1, 2], 3, 4)
+        expected = {
+            "typeid":"scanpointgenerator:roi/RectangularROI:1.0",
+            "centre":[1, 2],
+            "width":3,
+            "height":4}
+        self.assertEqual(expected, roi.to_dict())
+
+    def test_from_dict(self):
+        d = {
+            "typeid":"scanpointgenerator:roi/RectangularROI:1.0",
+            "centre":[1, 2],
+            "width":3,
+            "height":4}
+        roi = RectangularROI.from_dict(d)
+        self.assertEqual([1, 2], roi.centre)
+        self.assertEqual(3, roi.width)
+        self.assertEqual(4, roi.height)
+
+if __name__ == "__main__":
+    unittest.main()
