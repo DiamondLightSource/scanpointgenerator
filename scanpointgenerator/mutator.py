@@ -57,6 +57,7 @@ class Mutator(object):
         def decorator(mutator):
 
             cls._mutator_lookup[mutator_type] = mutator
+            mutator.typeid = mutator_type
 
             return mutator
         return decorator

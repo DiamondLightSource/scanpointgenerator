@@ -38,7 +38,7 @@ for the CompoundGenerator is as follows::
         ],
         mutators: [
             {
-                type: "RandomOffsetMutator"
+                typeid: "scanpointgenerator:mutator/RandomOffsetMutator:1.0"
                 seed: 10
                 axes: ["x", "y"]
                 max_offset: {
@@ -105,7 +105,7 @@ And for the mutators:
 RandomOffsetMutator::
 
     {
-        type: "RandomOffsetMutator"
+        typeid: "scanpointgenerator:mutator/RandomOffsetMutator:1.0"
         seed: 10
         axes: ["x", "y"]
         max_offset: {

@@ -1,5 +1,6 @@
 import unittest
 
+from test_util import ScanPointGeneratorTest
 from scanpointgenerator.mutator import Mutator
 
 from pkg_resources import require
@@ -9,15 +10,10 @@ from mock import MagicMock
 
 class MutatorTest(unittest.TestCase):
 
-    def setUp(self):
-        self.m = Mutator()
-
-    def test_init(self):
-        self.assertEqual({}, self.m._mutator_lookup)
-
     def test_mutate_raises(self):
+        m = Mutator()
         with self.assertRaises(NotImplementedError):
-            self.m.mutate(MagicMock())
+            m.mutate(MagicMock())
 
     def test_register_subclass(self):
 
@@ -26,6 +22,7 @@ class MutatorTest(unittest.TestCase):
             pass
 
         self.assertEqual(TestMutator, Mutator._mutator_lookup["TestMutator"])
+        self.assertEqual("TestMutator", TestMutator.typeid)
 
 
 class SerialisationTest(unittest.TestCase):
@@ -45,3 +42,6 @@ class SerialisationTest(unittest.TestCase):
         self.m.from_dict(gen_dict)
 
         m.from_dict.assert_called_once_with(gen_dict)
+
+if __name__ == "__main__":
+    unittest.main()
