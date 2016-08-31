@@ -5,7 +5,7 @@ from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
 
-@Generator.register_subclass("SpiralGenerator")
+@Generator.register_subclass("scanpointgenerator:generator/SpiralGenerator:1.0")
 class SpiralGenerator(Generator):
     """Generate the points of an Archimedean spiral"""
 
@@ -77,7 +77,7 @@ class SpiralGenerator(Generator):
         """Convert object attributes into a dictionary"""
 
         d = dict()
-        d['type'] = "SpiralGenerator"
+        d['typeid'] = self.typeid
         d['names'] = self.names
         d['units'] = list(self.position_units.values())[0]
         d['centre'] = self.centre

@@ -5,7 +5,7 @@ from scanpointgenerator import Generator
 from scanpointgenerator import Point
 
 
-@Generator.register_subclass("LissajousGenerator")
+@Generator.register_subclass("scanpointgenerator:generator/LissajousGenerator:1.0")
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
@@ -83,7 +83,7 @@ class LissajousGenerator(Generator):
         box['height'] = self.y_max * 2
 
         d = dict()
-        d['type'] = "LissajousGenerator"
+        d['typeid'] = self.typeid
         d['names'] = self.names
         d['units'] = list(self.position_units.values())[0]
         d['box'] = box

@@ -98,7 +98,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
     def test_to_dict(self):
         expected_dict = dict()
-        expected_dict['type'] = "ArrayGenerator"
+        expected_dict['typeid'] = "scanpointgenerator:generator/ArrayGenerator:1.0"
         expected_dict['name'] = ['x', 'y']
         expected_dict['units'] = 'mm'
         expected_dict['points'] = [[0.0, 0.0], [1.0, 5.0], [2.0, 10.0], [3.0, 15.0]]

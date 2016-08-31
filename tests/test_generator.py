@@ -27,7 +27,7 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
         m = MagicMock()
         self.g._generator_lookup['TestGenerator'] = m
 
-        gen_dict = dict(type="TestGenerator")
+        gen_dict = dict(typeid="TestGenerator")
         self.g.from_dict(gen_dict)
 
         m.from_dict.assert_called_once_with(gen_dict)

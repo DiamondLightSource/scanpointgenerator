@@ -5,10 +5,10 @@ These generators are designed to be serialised and sent over json. The model
 for the CompoundGenerator is as follows::
 
     {
-        type: "CompoundGenerator",
+        typeid: "scanpointgenerator:generator/CompoundGenerator:1.0",
         generators: [
             {
-                type: "LineGenerator"
+                typeid: "scanpointgenerator:generator/LineGenerator:1.0"
                 name: "y"
                 units: "mm"
                 start: 0.0
@@ -17,7 +17,7 @@ for the CompoundGenerator is as follows::
                 alternate_direction = False
             },
             {
-                type: "LineGenerator"
+                typeid: "scanpointgenerator:generator/LineGenerator:1.0"
                 name: "x"
                 units: "mm"
                 start: 0.0
@@ -29,7 +29,7 @@ for the CompoundGenerator is as follows::
         excluders: [
             {
                 roi: {
-                    type: "CircularROI"
+                    typeid: "scanpointgenerator:roi/CircularROI:1.0"
                     centre: [0.0, 0.0]
                     radius: 0.5
                 }
@@ -38,7 +38,7 @@ for the CompoundGenerator is as follows::
         ],
         mutators: [
             {
-                type: "RandomOffsetMutator"
+                typeid: "scanpointgenerator:mutator/RandomOffsetMutator:1.0"
                 seed: 10
                 axes: ["x", "y"]
                 max_offset: {
@@ -54,7 +54,7 @@ The models for each base generator are:
 ArrayGenerator (where name and points can be N-dimensional and upper_bounds and lower_bounds are optional)::
 
     {
-        type: "ArrayGenerator"
+        typeid: "scanpointgenerator:generator/ArrayGenerator:1.0"
         name: "x" or ["x", "y"]
         units: "mm"
         points: [1.0, 2.0, 3.0] or [[1.0, 2.0], [2.0, 4.0], [3.0, 6.0]]
@@ -65,7 +65,7 @@ ArrayGenerator (where name and points can be N-dimensional and upper_bounds and 
 LineGenerator (name, start and stop can be N-dimensional to create and ND scan)::
 
     {
-        type: "LineGenerator"
+        typeid: "scanpointgenerator:generator/LineGenerator:1.0"
         name: "x" or ["x", "y"]
         units: "mm"
         start: 0.0 or [0.0, 0.0]
@@ -76,7 +76,7 @@ LineGenerator (name, start and stop can be N-dimensional to create and ND scan):
 LissajousGenerator (where num_points is optional)::
 
     {
-        type: "LissajousGenerator"
+        typeid: "scanpointgenerator:generator/LissajousGenerator:1.0"
         names: ["x", "y"]
         units: "mm"
         box: {
@@ -91,7 +91,7 @@ LissajousGenerator (where num_points is optional)::
 SpiralGenerator (where scale is optional)::
 
     {
-        type: Spiralgenerator
+        typeid: "scanpointgenerator:generator/SpiralGenerator:1.0"
         names: ["x", "y"]
         units: "mm"
         centre: [0.0, 0.0]
@@ -105,7 +105,7 @@ And for the mutators:
 RandomOffsetMutator::
 
     {
-        type: "RandomOffsetMutator"
+        typeid: "scanpointgenerator:mutator/RandomOffsetMutator:1.0"
         seed: 10
         axes: ["x", "y"]
         max_offset: {

@@ -1,5 +1,6 @@
 import unittest
 
+from test_util import ScanPointGeneratorTest
 from scanpointgenerator import LissajousGenerator
 
 
@@ -63,7 +64,7 @@ class LissajousGeneratorTest(unittest.TestCase):
     def test_to_dict(self):
         expected_dict = dict()
         box = dict()
-        expected_dict['type'] = "LissajousGenerator"
+        expected_dict['typeid'] = "scanpointgenerator:generator/LissajousGenerator:1.0"
         box['centre'] = [0.0, 0.0]
         box['width'] = 1.0
         box['height'] = 1.0
@@ -105,3 +106,6 @@ class LissajousGeneratorTest(unittest.TestCase):
         self.assertEqual(1.0, gen.y_max)
         self.assertEqual([0.0, 0.0], gen.centre)
         self.assertEqual(250, gen.num)
+
+if __name__ == "__main__":
+    unittest.main()

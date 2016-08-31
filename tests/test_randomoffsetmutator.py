@@ -111,7 +111,7 @@ class TestSerialisation(unittest.TestCase):
         self.l.to_dict.return_value = self.l_dict
 
         expected_dict = dict()
-        expected_dict['type'] = "RandomOffsetMutator"
+        expected_dict['typeid'] = "scanpointgenerator:mutator/RandomOffsetMutator:1.0"
         expected_dict['seed'] = 1
         expected_dict['axes'] = ["x"]
         expected_dict['max_offset'] = self.max_offset

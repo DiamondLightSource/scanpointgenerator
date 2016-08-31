@@ -2,6 +2,7 @@ from scanpointgenerator import Mutator
 from scanpointgenerator import random
 
 
+@Mutator.register_subclass("scanpointgenerator:mutator/RandomOffsetMutator:1.0")
 class RandomOffsetMutator(Mutator):
     """Mutator to apply a random offset to the points of an ND
     ScanPointGenerator"""
@@ -108,7 +109,7 @@ class RandomOffsetMutator(Mutator):
         """Convert object attributes into a dictionary"""
 
         d = dict()
-        d['type'] = "RandomOffsetMutator"
+        d['typeid'] = self.typeid
         d['seed'] = self.seed
         d['axes'] = self.axes
         d['max_offset'] = self.max_offset
