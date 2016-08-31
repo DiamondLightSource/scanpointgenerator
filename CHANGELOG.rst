@@ -3,11 +3,20 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-`1-3`_ - 2016-08-18
+`Unreleased` - No release date
+------------------------------
+
+Nothing
+
+`1-3`_ - 2016-08-31
 -------------------
 Added:
 
 - Remove OrderedDict entirely for 2.5 back-compatibility
+
+Changed:
+
+- type is now typeid to make it compatible with malcolm
 
 `1-2-1`_ - 2016-08-17
 ---------------------
@@ -65,6 +74,13 @@ Added:
 - Initial structure with Line and Nested generators
 
 .. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/0-3...HEAD
+.. _1-3: https://github.com/dls-controls/scanpointgenerator/compare/1-2-1...1-3
+.. _1-2-1: https://github.com/dls-controls/scanpointgenerator/compare/1-2...1-2
+.. _1-2: https://github.com/dls-controls/scanpointgenerator/compare/1-1...1-2
+.. _1-1: https://github.com/dls-controls/scanpointgenerator/compare/1-0...1-1
+.. _1-0: https://github.com/dls-controls/scanpointgenerator/compare/0-5...1-0
+.. _0-5: https://github.com/dls-controls/scanpointgenerator/compare/0-4...0-5
+.. _0-4: https://github.com/dls-controls/scanpointgenerator/compare/0-3...0-4
 .. _0-3: https://github.com/dls-controls/scanpointgenerator/compare/0-2...0-3
 .. _0-2: https://github.com/dls-controls/scanpointgenerator/compare/0-1...0-2
 
