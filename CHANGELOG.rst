@@ -3,10 +3,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-`Unreleased` - No release date
-------------------------------
+`1-3-1`_ - 2016-09-13
+---------------------
 
-Nothing
+Added:
+
+- Serialisation for ROIs
+- Change type to typeid to match with Malcolm
 
 `1-3`_ - 2016-08-31
 -------------------
@@ -73,7 +76,7 @@ Added:
 
 - Initial structure with Line and Nested generators
 
-.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/0-3...HEAD
+.. _1-3-1: https://github.com/dls-controls/scanpointgenerator/compare/1-3...1-3-1
 .. _1-3: https://github.com/dls-controls/scanpointgenerator/compare/1-2-1...1-3
 .. _1-2-1: https://github.com/dls-controls/scanpointgenerator/compare/1-2...1-2
 .. _1-2: https://github.com/dls-controls/scanpointgenerator/compare/1-1...1-2
