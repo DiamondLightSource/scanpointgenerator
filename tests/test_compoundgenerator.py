@@ -30,6 +30,15 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_names, ["y", "x"])
         self.assertEqual(self.g.axes, ["y", "x"])
 
+    def test_get_point(self):
+        self.assertEqual(self.g.get_point(0).positions,
+                         dict(x=1.0, y=2.0))
+        self.assertEqual(self.g.get_point(5).positions,
+                         dict(x=1.0, y=2.1))
+        self.assertEqual(self.g.get_point(3).positions,
+                         dict(x=1.2, y=2.1))
+        self.assertRaises(StopIteration, self.g.get_point, 6)
+
     def test_given_compound_raise_error(self):
         with self.assertRaises(TypeError):
             CompoundGenerator([self.g], [], [])

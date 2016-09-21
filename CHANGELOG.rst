@@ -3,6 +3,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+Unreleased
+----------
+
+Added:
+
+- Caching of points to CompoundGenerator
+
 `1-3-1`_ - 2016-09-13
 ---------------------
 

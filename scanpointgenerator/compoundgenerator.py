@@ -29,6 +29,7 @@ class CompoundGenerator(Generator):
         self.index_dims = []
         self.index_names = []
         self.axes = []
+
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
@@ -68,6 +69,10 @@ class CompoundGenerator(Generator):
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
                              self.index_names)
+
+        # These are set when using the get_point() interface
+        self._cached_iterator = None
+        self._cached_points = []
 
     def _base_iterator(self):
         """
@@ -179,6 +184,16 @@ class CompoundGenerator(Generator):
                 break
 
         return contains_point
+
+    def get_point(self, num):
+        if self._cached_iterator is None:
+            self._cached_iterator = self.iterator()
+        npoints = len(self._cached_points)
+        if num >= npoints:
+            # Generate some more points and cache them
+            for i in range(num - npoints + 1):
+                self._cached_points.append(next(self._cached_iterator))
+        return self._cached_points[num]
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""
