@@ -1,4 +1,5 @@
 import logging
+from threading import Lock
 
 from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
@@ -73,6 +74,7 @@ class CompoundGenerator(Generator):
         # These are set when using the get_point() interface
         self._cached_iterator = None
         self._cached_points = []
+        self._cached_lock = Lock()
 
     def _base_iterator(self):
         """
@@ -186,13 +188,23 @@ class CompoundGenerator(Generator):
         return contains_point
 
     def get_point(self, num):
+        # This is the only thread safe function in scanpointgenerator
         if self._cached_iterator is None:
             self._cached_iterator = self.iterator()
-        npoints = len(self._cached_points)
-        if num >= npoints:
+
+        if num >= len(self._cached_points):
             # Generate some more points and cache them
-            for i in range(num - npoints + 1):
-                self._cached_points.append(next(self._cached_iterator))
+            try:
+                self._cached_lock.acquire()
+                # Get npoints again in case someone else added them
+                npoints = len(self._cached_points)
+                for i in range(num - npoints + 1):
+                    self._cached_points.append(next(self._cached_iterator))
+            except:
+                self._cached_lock.release()
+                raise
+            else:
+                self._cached_lock.release()
         return self._cached_points[num]
 
     def to_dict(self):
