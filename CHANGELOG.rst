@@ -8,6 +8,13 @@ Unreleased
 
 Added:
 
+- Nothing yet
+
+`1-4`_ - 2016-10-22
+-------------------
+
+Added:
+
 - Caching of points to CompoundGenerator
 
 `1-3-1`_ - 2016-09-13
@@ -83,6 +90,7 @@ Added:
 
 - Initial structure with Line and Nested generators
 
+.. _1-4: https://github.com/dls-controls/scanpointgenerator/compare/1-3-1...1-4
 .. _1-3-1: https://github.com/dls-controls/scanpointgenerator/compare/1-3...1-3-1
 .. _1-3: https://github.com/dls-controls/scanpointgenerator/compare/1-2-1...1-3
 .. _1-2-1: https://github.com/dls-controls/scanpointgenerator/compare/1-2...1-2
