@@ -1,4 +1,5 @@
 import logging
+from threading import Lock
 
 from scanpointgenerator.compat import range_
 from scanpointgenerator import Generator
@@ -29,6 +30,7 @@ class CompoundGenerator(Generator):
         self.index_dims = []
         self.index_names = []
         self.axes = []
+
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
@@ -68,6 +70,11 @@ class CompoundGenerator(Generator):
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
                              self.index_names)
+
+        # These are set when using the get_point() interface
+        self._cached_iterator = None
+        self._cached_points = []
+        self._cached_lock = Lock()
 
     def _base_iterator(self):
         """
@@ -179,6 +186,26 @@ class CompoundGenerator(Generator):
                 break
 
         return contains_point
+
+    def get_point(self, num):
+        # This is the only thread safe function in scanpointgenerator
+        if self._cached_iterator is None:
+            self._cached_iterator = self.iterator()
+
+        if num >= len(self._cached_points):
+            # Generate some more points and cache them
+            try:
+                self._cached_lock.acquire()
+                # Get npoints again in case someone else added them
+                npoints = len(self._cached_points)
+                for i in range(num - npoints + 1):
+                    self._cached_points.append(next(self._cached_iterator))
+            except:
+                self._cached_lock.release()
+                raise
+            else:
+                self._cached_lock.release()
+        return self._cached_points[num]
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""
