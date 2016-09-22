@@ -6,9 +6,10 @@ from math import hypot, atan2, pi
 class SectorROI(ROI):
 
     def __init__(self, centre, radii, angles):
-        super(SectorROI, self).__init__(centre)
+        super(SectorROI, self).__init__()
         if radii[0] < 0 or radii[1] < radii[0] or radii[1] <= 0.0:
             raise ValueError("Sector size is invalid")
+        self.centre = centre
         self.radii = radii
         self.angles = self.constrain_angles(angles)
 
@@ -49,6 +50,7 @@ class SectorROI(ROI):
 
     def to_dict(self):
         d = super(SectorROI, self).to_dict()
+        d["centre"] = self.centre
         d["radii"] = self.radii
         d["angles"] = self.angles
         return d

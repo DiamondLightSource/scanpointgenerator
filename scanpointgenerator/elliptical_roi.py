@@ -5,9 +5,10 @@ from scanpointgenerator.roi import ROI
 class EllipticalROI(ROI):
 
     def __init__(self, centre, radii):
-        super(EllipticalROI, self).__init__(centre)
+        super(EllipticalROI, self).__init__()
         if radii[0] <= 0.0 or radii[1] <= 0.0:
             raise ValueError("Ellipse radii must be greater than zero")
+        self.centre = centre
         self.radii = radii
 
     def contains_point(self, point):
@@ -19,6 +20,7 @@ class EllipticalROI(ROI):
 
     def to_dict(self):
         d = super(EllipticalROI, self).to_dict()
+        d["centre"] = self.centre
         d["radii"] = self.radii
         return d
 
