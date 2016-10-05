@@ -67,7 +67,7 @@ Release Checklist
 Before a new release, please go through the following checklist:
 
 * Bump version in scanpointgenerator/version.py
-* Add a release note in CHANGELOG.rst
+* Add a release note and diff URL in CHANGELOG.rst
 * Git tag the version
 * Upload to pypi::
 
