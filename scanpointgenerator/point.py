@@ -19,3 +19,4 @@ class Point(object):
         self.lower = {}
         self.upper = {}
         self.indexes = []
+        self.duration = None
