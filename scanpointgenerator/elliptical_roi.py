@@ -6,12 +6,12 @@ from scanpointgenerator.roi import ROI
 @ROI.register_subclass("scanpointgenerator:roi/EllipticalROI:1.0")
 class EllipticalROI(ROI):
 
-    def __init__(self, centre, radii, angle=0):
+    def __init__(self, centre, semiaxes, angle=0):
         super(EllipticalROI, self).__init__()
-        if radii[0] <= 0.0 or radii[1] <= 0.0:
-            raise ValueError("Ellipse radii must be greater than zero")
+        if semiaxes[0] <= 0.0 or semiaxes[1] <= 0.0:
+            raise ValueError("Ellipse semi-axes must be greater than zero")
         self.centre = centre
-        self.radii = radii
+        self.semiaxes = semiaxes
         self.angle = angle
 
     def contains_point(self, point):
@@ -24,18 +24,18 @@ class EllipticalROI(ROI):
             ty = x * sin(phi) + y * cos(phi)
             x = tx
             y = ty
-        rx = float(self.radii[0])
-        ry = float(self.radii[1])
+        rx = float(self.semiaxes[0])
+        ry = float(self.semiaxes[1])
 
         return (x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1
 
     def to_dict(self):
         d = super(EllipticalROI, self).to_dict()
         d["centre"] = self.centre
-        d["radii"] = self.radii
+        d["semiaxes"] = self.semiaxes
         d["angle"] = self.angle
         return d
 
     @classmethod
     def from_dict(cls, d):
-        return cls(d["centre"], d["radii"], d["angle"])
+        return cls(d["centre"], d["semiaxes"], d["angle"])

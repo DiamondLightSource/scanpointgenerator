@@ -10,16 +10,16 @@ class EllipticalROITest(unittest.TestCase):
     def test_init(self):
         roi = EllipticalROI([1.1, 2.2], [3.3, 4.4], pi/4)
         self.assertEqual([1.1, 2.2], roi.centre)
-        self.assertEqual([3.3, 4.4], roi.radii)
+        self.assertEqual([3.3, 4.4], roi.semiaxes)
         self.assertEqual(pi/4, roi.angle)
 
     def test_default_angle(self):
         roi = EllipticalROI([1.1, 2.2], [3.3, 4.4])
         self.assertEqual([1.1, 2.2], roi.centre)
-        self.assertEqual([3.3, 4.4], roi.radii)
+        self.assertEqual([3.3, 4.4], roi.semiaxes)
         self.assertEqual(0, roi.angle)
 
-    def test_invalid_radii_fails(self):
+    def test_invalid_semiaxes_fails(self):
         with self.assertRaises(ValueError):
             roi = EllipticalROI([0, 0], [-1, 1])
         with self.assertRaises(ValueError):
@@ -59,7 +59,7 @@ class EllipticalROITest(unittest.TestCase):
         expected = {
             "typeid":"scanpointgenerator:roi/EllipticalROI:1.0",
             "centre":[1.1, 2.2],
-            "radii":[3.3, 4.4],
+            "semiaxes":[3.3, 4.4],
             "angle":pi/4}
         self.assertEquals(expected, roi.to_dict())
 
@@ -67,11 +67,11 @@ class EllipticalROITest(unittest.TestCase):
         d = {
             "typeid":"scanpointgenerator:roi/EllipticalROI:1.0",
             "centre":[-1, 0],
-            "radii":[3, 4],
+            "semiaxes":[3, 4],
             "angle":pi/4}
         roi = EllipticalROI.from_dict(d)
         self.assertEqual([-1, 0], roi.centre)
-        self.assertEqual([3, 4], roi.radii)
+        self.assertEqual([3, 4], roi.semiaxes)
         self.assertEqual(pi/4, roi.angle)
 
 if __name__ == "__main__":
