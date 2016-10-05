@@ -5,9 +5,8 @@ class ROI(object):
     _roi_lookup = {}
     typeid="scanpointgenerator:roi/ROI:1.0"
 
-    def __init__(self, centre):
-
-        self.centre = centre
+    def __init__(self):
+        pass
 
     def contains_point(self, point):
         raise NotImplementedError
@@ -17,8 +16,6 @@ class ROI(object):
 
         d = dict()
         d['typeid'] = self.typeid
-        d['centre'] = self.centre
-
         return d
 
     @classmethod

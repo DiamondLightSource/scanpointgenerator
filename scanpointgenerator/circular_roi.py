@@ -6,12 +6,13 @@ import math as m
 class CircularROI(ROI):
 
     def __init__(self, centre, radius):
-        super(CircularROI, self).__init__(centre)
+        super(CircularROI, self).__init__()
 
         if radius == 0.0:
             raise ValueError("Circle must have some size")
 
         self.radius = radius
+        self.centre = centre
 
     def contains_point(self, point):
         if m.sqrt((point[0] - self.centre[0]) ** 2 +
@@ -24,6 +25,7 @@ class CircularROI(ROI):
         """Convert object attributes into a dictionary"""
 
         d = super(CircularROI, self).to_dict()
+        d['centre'] = self.centre
         d['radius'] = self.radius
 
         return d
