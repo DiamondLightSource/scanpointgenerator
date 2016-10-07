@@ -10,7 +10,14 @@ Added:
 
 - Nothing yet
 
-`1-4`_ - 2016-10-22
+`1-5`_ - 2016-10-07
+-------------------
+
+Added:
+
+- Add full ROI set and FixedDurationMutator
+
+`1-4`_ - 2016-09-22
 -------------------
 
 Added:
@@ -90,6 +97,7 @@ Added:
 
 - Initial structure with Line and Nested generators
 
+.. _1-5: https://github.com/dls-controls/scanpointgenerator/compare/1-4...1-5
 .. _1-4: https://github.com/dls-controls/scanpointgenerator/compare/1-3-1...1-4
 .. _1-3-1: https://github.com/dls-controls/scanpointgenerator/compare/1-3...1-3-1
 .. _1-3: https://github.com/dls-controls/scanpointgenerator/compare/1-2-1...1-3
