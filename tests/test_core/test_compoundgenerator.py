@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
 from test_util import ScanPointGeneratorTest
@@ -5,8 +8,8 @@ from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
 from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import LissajousGenerator
-from scanpointgenerator.excluder import Excluder
-from scanpointgenerator.circular_roi import CircularROI
+from scanpointgenerator import Excluder
+from scanpointgenerator.rois import CircularROI
 
 from pkg_resources import require
 require("mock")

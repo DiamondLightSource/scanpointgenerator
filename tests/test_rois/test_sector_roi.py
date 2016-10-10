@@ -1,8 +1,11 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 from math import pi
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator.sector_roi import SectorROI
+from scanpointgenerator.rois.sector_roi import SectorROI
 
 
 class SectorInitTest(unittest.TestCase):

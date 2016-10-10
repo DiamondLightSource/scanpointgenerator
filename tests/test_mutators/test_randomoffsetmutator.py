@@ -1,8 +1,11 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator import RandomOffsetMutator
-from scanpointgenerator import LineGenerator
+from scanpointgenerator.mutators import RandomOffsetMutator
+from scanpointgenerator.generators import LineGenerator
 from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import Point
 
@@ -29,7 +32,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         number = self.m.get_random_number()
         self.assertEqual(-0.7892260970000002, number)
 
-    @patch('scanpointgenerator.randomoffsetmutator.RandomOffsetMutator.get_random_number',
+    @patch('scanpointgenerator.mutators.RandomOffsetMutator.get_random_number',
            return_value=1.0)
     def test_apply_offset(self, _):
         point = MagicMock()
@@ -40,7 +43,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         self.assertTrue(response)
         self.assertEqual(dict(x=1.25), point.positions)
 
-    @patch('scanpointgenerator.randomoffsetmutator.RandomOffsetMutator.get_random_number',
+    @patch('scanpointgenerator.mutators.RandomOffsetMutator.get_random_number',
            return_value=1.0)
     def test_apply_offset_unchanged(self, _):
         point = MagicMock()

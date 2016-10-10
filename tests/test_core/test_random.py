@@ -1,10 +1,14 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
 from pkg_resources import require
 require("mock")
 from mock import patch
 
-from scanpointgenerator.random import Random
+from test_util import ScanPointGeneratorTest
+from scanpointgenerator import Random
 
 
 class RandomTest(unittest.TestCase):
@@ -60,3 +64,6 @@ class RandomTest(unittest.TestCase):
         response = self.RNG._int32(0x100000001)
 
         self.assertEqual(1, response)
+
+if __name__ == "__main__":
+    unittest.main()

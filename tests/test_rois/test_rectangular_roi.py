@@ -1,8 +1,11 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 from math import pi
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator.rectangular_roi import RectangularROI
+from scanpointgenerator.rois.rectangular_roi import RectangularROI
 
 
 class InitTest(unittest.TestCase):

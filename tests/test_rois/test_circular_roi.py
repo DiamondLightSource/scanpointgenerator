@@ -1,7 +1,10 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator.circular_roi import CircularROI
+from scanpointgenerator.rois.circular_roi import CircularROI
 
 
 class InitTest(unittest.TestCase):

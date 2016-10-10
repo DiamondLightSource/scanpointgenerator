@@ -1,8 +1,11 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 from math import pi, sqrt
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator.linear_roi import LinearROI
+from scanpointgenerator.rois.linear_roi import LinearROI
 
 class LinearROIInitTest(unittest.TestCase):
 

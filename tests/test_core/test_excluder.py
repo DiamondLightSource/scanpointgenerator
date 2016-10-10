@@ -1,6 +1,10 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
-from scanpointgenerator.excluder import Excluder
+from test_util import ScanPointGeneratorTest
+from scanpointgenerator import Excluder
 
 from pkg_resources import require
 require("mock")
@@ -58,3 +62,6 @@ class TestSerialisation(unittest.TestCase):
 
         self.assertEqual(e.roi, self.r1)
         self.assertEqual(e.scannables, ['x', 'y'])
+
+if __name__ == "__main__":
+    unittest.main()
