@@ -1,6 +1,6 @@
 from scanpointgenerator.compat import range_
-from scanpointgenerator import Generator
-from scanpointgenerator import Point
+from scanpointgenerator.core import Generator
+from scanpointgenerator.core import Point
 
 
 def to_list(value):

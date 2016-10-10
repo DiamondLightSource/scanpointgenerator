@@ -1,4 +1,4 @@
-from scanpointgenerator import Mutator
+from scanpointgenerator.core import Mutator
 
 
 @Mutator.register_subclass("scanpointgenerator:mutator/FixedDurationMutator:1.0")

@@ -1,4 +1,4 @@
-from scanpointgenerator.roi import ROI
+from scanpointgenerator.core import ROI
 
 
 @ROI.register_subclass("scanpointgenerator:roi/PolygonalROI:1.0")

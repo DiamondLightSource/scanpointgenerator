@@ -2,10 +2,10 @@ import logging
 from threading import Lock
 
 from scanpointgenerator.compat import range_
-from scanpointgenerator import Generator
-from scanpointgenerator import Point
-from scanpointgenerator.excluder import Excluder
-from scanpointgenerator.mutator import Mutator
+from scanpointgenerator.core.generator import Generator
+from scanpointgenerator.core.point import Point
+from scanpointgenerator.core.excluder import Excluder
+from scanpointgenerator.core.mutator import Mutator
 
 
 @Generator.register_subclass("scanpointgenerator:generator/CompoundGenerator:1.0")

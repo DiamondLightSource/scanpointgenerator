@@ -1,4 +1,4 @@
-from scanpointgenerator.roi import ROI
+from scanpointgenerator.core import ROI
 from math import hypot, atan2, pi
 
 

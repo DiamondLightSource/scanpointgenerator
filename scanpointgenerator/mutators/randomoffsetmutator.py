@@ -1,5 +1,5 @@
-from scanpointgenerator import Mutator
-from scanpointgenerator import random
+from scanpointgenerator.core import Mutator
+from scanpointgenerator.core import random
 
 
 @Mutator.register_subclass("scanpointgenerator:mutator/RandomOffsetMutator:1.0")

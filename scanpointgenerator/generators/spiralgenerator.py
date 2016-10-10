@@ -1,8 +1,8 @@
 import math as m
 
 from scanpointgenerator.compat import range_
-from scanpointgenerator import Generator
-from scanpointgenerator import Point
+from scanpointgenerator.core import Generator
+from scanpointgenerator.core import Point
 
 
 @Generator.register_subclass("scanpointgenerator:generator/SpiralGenerator:1.0")
