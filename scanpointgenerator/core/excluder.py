@@ -46,13 +46,13 @@ class Excluder(object):
     @classmethod
     def from_dict(cls, d):
         """
-        Create a ScanRegion instance from a serialised dictionary
+        Create a Excluder instance from a serialised dictionary
 
         Args:
             d(dict): Dictionary of attributes
 
         Returns:
-            Excluder: New ScanRegion instance
+            Excluder: New Excluder instance
         """
 
         roi = d['roi'].from_dict()
