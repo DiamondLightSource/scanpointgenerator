@@ -41,7 +41,7 @@ class SerialisationTest(unittest.TestCase):
         m = MagicMock()
         self.m._mutator_lookup['TestMutator'] = m
 
-        gen_dict = dict(type="TestMutator")
+        gen_dict = dict(typeid="TestMutator")
         self.m.from_dict(gen_dict)
 
         m.from_dict.assert_called_once_with(gen_dict)

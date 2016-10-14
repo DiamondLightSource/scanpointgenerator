@@ -27,7 +27,7 @@ class FixedDurationMutator(Mutator):
             yield p
 
     def to_dict(self):
-        return {"typeid":self.typeid, "duration":self.duration}
+        return {"typeid": self.typeid, "duration": self.duration}
 
     @classmethod
     def from_dict(cls, d):

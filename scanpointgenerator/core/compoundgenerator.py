@@ -30,6 +30,7 @@ class CompoundGenerator(Generator):
         self.index_dims = []
         self.index_names = []
         self.axes = []
+        self.position_units = {}
 
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
@@ -45,6 +46,7 @@ class CompoundGenerator(Generator):
 
             self.index_dims += generator.index_dims
             self.index_names += generator.index_names
+            self.position_units.update(generator.position_units)
 
         self.num = 1
         self.periods = []
@@ -55,10 +57,6 @@ class CompoundGenerator(Generator):
         logging.debug("CompoundGenerator periods")
         logging.debug(self.periods)
 
-        self.position_units = generators[0].position_units.copy()
-        for generator in generators[1:]:
-            self.position_units.update(generator.position_units)
-
         if self.excluders:  # Calculate number of remaining points and flatten
                             # index dimensions
             remaining_points = 0
@@ -66,6 +64,7 @@ class CompoundGenerator(Generator):
                 # TODO: Faster with enumerate()?
                 remaining_points += 1
             self.index_dims = [remaining_points]
+            self.num = remaining_points
 
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -76,6 +75,30 @@ class CompoundGenerator(Generator):
         self._cached_points = []
         self._cached_lock = Lock()
 
+    def _get_sub_point(self, gen_index, point_num):
+        points = self.point_sets[gen_index]
+        axis_period = self.periods[gen_index]
+        axis_length = len(points)
+        # Can't use index_dims in case they have been flattened
+        # by an excluder
+
+        point_index = \
+            (point_num / (axis_period / axis_length)) % axis_length
+        loop_number = point_num / axis_period
+
+        # Floor floats to ints for indexing
+        point_index = int(point_index)
+        loop_number = int(loop_number)
+        if self.alternate_direction[gen_index] and loop_number % 2:
+            point_index = (axis_length - 1) - point_index
+            reverse = True
+        else:
+            reverse = False
+
+        sub_point = points[point_index]
+
+        return reverse, sub_point
+
     def _base_iterator(self):
         """
         Iterator to generate points by nesting each generator in self.generators
@@ -83,49 +106,29 @@ class CompoundGenerator(Generator):
         Yields:
             Point: Base points
         """
-
+        num_point_sets = len(self.point_sets)
         for point_num in range_(self.num):
-
             point = Point()
-            for gen_index, points in enumerate(self.point_sets):
-                axis_period = self.periods[gen_index]
-                axis_length = len(points)
-                # Can't use index_dims in case they have been flattened
-                # by an excluder
+            for gen_index in range_(num_point_sets - 1):
+                reverse, sub_point = self._get_sub_point(gen_index, point_num)
 
-                point_index = \
-                    (point_num / (axis_period / axis_length)) % axis_length
-                loop_number = point_num / axis_period
+                # Outer indexes use positions
+                point.positions.update(sub_point.positions)
+                point.upper.update(sub_point.positions)
+                point.lower.update(sub_point.positions)
+                point.indexes += sub_point.indexes
 
-                # Floor floats to ints for indexing
-                point_index = int(point_index)
-                loop_number = int(loop_number)
-                if self.alternate_direction[gen_index] and loop_number % 2:
-                    point_index = (axis_length - 1) - point_index
-                    reverse = True
-                else:
-                    reverse = False
-
-                current_point = points[point_index]
-
-                # If innermost generator, use bounds
-                if gen_index == len(self.point_sets) - 1:
-                    point.positions.update(current_point.positions)
-                    if reverse:  # Swap bounds if reversing
-                        point.upper.update(current_point.lower)
-                        point.lower.update(current_point.upper)
-                    else:
-                        point.upper.update(current_point.upper)
-                        point.lower.update(current_point.lower)
-                else:
-                    point.positions.update(current_point.positions)
-                    point.upper.update(current_point.positions)
-                    point.lower.update(current_point.positions)
-
-                point.indexes += current_point.indexes
-
-                logging.debug("Current point positions and indexes")
-                logging.debug([current_point.positions, current_point.indexes])
+            # If innermost generator, use bounds
+            reverse, sub_point = self._get_sub_point(
+                num_point_sets - 1, point_num)
+            point.positions.update(sub_point.positions)
+            if reverse:  # Swap bounds if reversing
+                point.upper.update(sub_point.lower)
+                point.lower.update(sub_point.upper)
+            else:
+                point.upper.update(sub_point.upper)
+                point.lower.update(sub_point.lower)
+            point.indexes += sub_point.indexes
 
             yield point
 
@@ -148,8 +151,11 @@ class CompoundGenerator(Generator):
         Yields:
             Point: Mutated points
         """
+        if self.excluders:
+            iterator = self._filtered_base_iterator()
+        else:
+            iterator = self._base_iterator()
 
-        iterator = self._filtered_base_iterator()
         for mutator in self.mutators:
             iterator = mutator.mutate(iterator)
 
@@ -177,11 +183,7 @@ class CompoundGenerator(Generator):
         contains_point = True
 
         for excluder in self.excluders:
-            coord_1 = point.positions[excluder.scannables[0]]
-            coord_2 = point.positions[excluder.scannables[1]]
-            coordinate = [coord_1, coord_2]
-
-            if not excluder.roi.contains_point(coordinate):
+            if not excluder.contains_point(point.positions):
                 contains_point = False
                 break
 

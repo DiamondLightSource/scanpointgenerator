@@ -37,7 +37,7 @@ class Mutator(object):
             Mutator: New Mutator instance
         """
 
-        mutator_type = d["type"]
+        mutator_type = d["typeid"]
         generator = cls._mutator_lookup[mutator_type]
         assert generator is not cls, \
             "Subclass %s did not redefine from_dict" % mutator_type
