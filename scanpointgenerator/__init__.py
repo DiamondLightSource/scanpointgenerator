@@ -1,4 +1,4 @@
 from scanpointgenerator.core import *
 from scanpointgenerator.generators import *
-import scanpointgenerator.rois
-import scanpointgenerator.mutators
+from scanpointgenerator.rois import *
+from scanpointgenerator.mutators import *
