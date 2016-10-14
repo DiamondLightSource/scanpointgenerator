@@ -66,6 +66,7 @@ class CompoundGenerator(Generator):
                 # TODO: Faster with enumerate()?
                 remaining_points += 1
             self.index_dims = [remaining_points]
+            self.num = remaining_points
 
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %

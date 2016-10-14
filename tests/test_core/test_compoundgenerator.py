@@ -121,6 +121,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(p.positions, dict(
                 x=xpositions[i], y=ypositions[i]))
             self.assertEqual(p.indexes, [indexes[i]])
+        self.assertEqual(gen.num, 5)
 
     def test_mutate_called(self):
         mutator = MagicMock()
