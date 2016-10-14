@@ -13,7 +13,7 @@ from scanpointgenerator.rois import CircularROI
 
 from pkg_resources import require
 require("mock")
-from mock import patch, MagicMock
+from mock import patch, MagicMock, ANY
 
 
 class CompoundGeneratorTest(ScanPointGeneratorTest):
@@ -54,38 +54,24 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_contains_point_true(self):
         point = MagicMock()
-        point.positions.__getitem__.side_effect = [1.0, 2.0]
-        roi = MagicMock()
-        roi.contains_point.return_value = True
-        region = MagicMock()
-        region.scannables = ['x', 'y']
-        region.roi = roi
-        self.g.excluders = [region]
+        excluder = MagicMock()
+        excluder.contains_point.return_value = True
+        self.g.excluders = [excluder]
 
         response = self.g.contains_point(point)
 
-        call_list = [call[0][0] for call in point.positions.__getitem__.call_args_list]
-        self.assertIn('x', call_list)
-        self.assertIn('y', call_list)
-        roi.contains_point.assert_called_once_with([1.0, 2.0])
+        excluder.contains_point.assert_called_once_with(point.positions)
         self.assertTrue(response)
 
     def test_contains_point_false(self):
         point = MagicMock()
-        point.positions.__getitem__.side_effect = [1.0, 2.0]
-        roi = MagicMock()
-        roi.contains_point.return_value = False
-        region = MagicMock()
-        region.scannables = ['x', 'y']
-        region.roi = roi
-        self.g.excluders = [region]
+        excluder = MagicMock()
+        excluder.contains_point.return_value = False
+        self.g.excluders = [excluder]
 
         response = self.g.contains_point(point)
 
-        call_list = [call[0][0] for call in point.positions.__getitem__.call_args_list]
-        self.assertIn('x', call_list)
-        self.assertIn('y', call_list)
-        roi.contains_point.assert_called_once_with([1.0, 2.0])
+        excluder.contains_point.assert_called_once_with(point.positions)
         self.assertFalse(response)
 
     def test_positions(self):
@@ -139,6 +125,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
     def test_mutate_called(self):
         mutator = MagicMock()
         self.g.mutators = [mutator]
+        self.g.excluders = [ANY]
         filtered = MagicMock()
         self.g._filtered_base_iterator = MagicMock()
         self.g._filtered_base_iterator.return_value = filtered
