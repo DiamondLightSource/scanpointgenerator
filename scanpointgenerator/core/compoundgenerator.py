@@ -30,6 +30,7 @@ class CompoundGenerator(Generator):
         self.index_dims = []
         self.index_names = []
         self.axes = []
+        self.position_units = {}
 
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
@@ -45,6 +46,7 @@ class CompoundGenerator(Generator):
 
             self.index_dims += generator.index_dims
             self.index_names += generator.index_names
+            self.position_units.update(generator.position_units)
 
         self.num = 1
         self.periods = []
@@ -54,10 +56,6 @@ class CompoundGenerator(Generator):
 
         logging.debug("CompoundGenerator periods")
         logging.debug(self.periods)
-
-        self.position_units = {}
-        for generator in generators:
-            self.position_units.update(generator.position_units)
 
         if self.excluders:  # Calculate number of remaining points and flatten
                             # index dimensions
