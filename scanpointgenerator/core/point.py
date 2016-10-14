@@ -1,5 +1,3 @@
-
-
 class Point(object):
     """Contains information about for each scan point
 
@@ -12,8 +10,8 @@ class Point(object):
             scannable dimension. E.g. {"x": 1.05, "y": 2.25}
         indexes (list): List of int indexes for each dataset dimension, fastest
             changing last. E.g. [15]
+        duration (int): Int or None for duration of the point exposure
     """
-
     def __init__(self):
         self.positions = {}
         self.lower = {}
