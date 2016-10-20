@@ -1,3 +1,5 @@
+import numpy as np
+
 from scanpointgenerator.compat import range_
 from scanpointgenerator.core import Generator
 from scanpointgenerator.core import Point
@@ -32,6 +34,9 @@ class LineGenerator(Generator):
         self.start = to_list(start)
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
+        self.points = None
+        self.points_lower = None
+        self.points_upper = None
 
         if len(self.name) != len(set(self.name)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -68,8 +73,29 @@ class LineGenerator(Generator):
 
         self.axes = self.name  # For GDA
 
-    def iterator(self):
+    def produce_points(self):
+        self.points = {}
+        self.points_lower = {}
+        self.points_upper = {}
+        for axis in range_(self.num_axes):
+            axis_name = self.name[axis]
+            start = self.start[axis]
+            stop = self.stop[axis]
+            d = stop - start
+            n = self.num - 1.
+            s = d / n
+            upper_start = start + 0.5 * d / n
+            upper_stop = stop + 0.5 * d / n
+            lower_start = start - 0.5 * d / n
+            lower_stop = stop - 0.5 * d / n
+            self.points[axis_name] = np.linspace(
+                start, stop, self.num, dtype=np.float64)
+            self.points_upper[axis_name] = np.linspace(
+                upper_start, upper_stop, self.num, dtype=np.float64)
+            self.points_lower[axis_name] = np.linspace(
+                lower_start, lower_stop, self.num, dtype=np.float64)
 
+    def iterator(self):
         for i in range_(self.num):
             point = Point()
 

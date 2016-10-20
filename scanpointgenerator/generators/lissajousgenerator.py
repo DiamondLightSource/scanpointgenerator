@@ -1,4 +1,5 @@
 import math as m
+import numpy as np
 
 from scanpointgenerator.compat import range_
 from scanpointgenerator.core import Generator
@@ -24,6 +25,9 @@ class LissajousGenerator(Generator):
 
         self.names = names
         self.units = units
+        self.points = None
+        self.points_lower = None
+        self.points_upper = None
 
         if len(self.names) != len(set(self.names)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -53,6 +57,28 @@ class LissajousGenerator(Generator):
         self.index_names = [gen_name]
 
         self.axes = self.names  # For GDA
+
+    def _calc_arrays(self, offset):
+        x0, y0 = self.centre[0], self.centre[1]
+        A, B = self.x_max, self.y_max
+        a, b = self.x_freq, self.y_freq
+        d = self.phase_diff
+        f = lambda t: y0 + A * np.sin(a * 2 * m.pi * (t+offset)/self.num + d)
+        x =  np.fromfunction(f, (self.num,), dtype=np.float64)
+        f = lambda t: B * np.sin(b * 2 * m.pi * (t+offset)/self.num)
+        y = np.fromfunction(f, (self.num,), dtype=np.float64)
+        return x, y
+
+    def produce_points(self):
+        self.points = {}
+        self.points_lower = {}
+        self.points_upper = {}
+
+        x = self.names[0]
+        y = self.names[1]
+        self.points[x], self.points[y] = self._calc_arrays(0)
+        self.points_upper[x], self.points_upper[y] = self._calc_arrays(0.5)
+        self.points_lower[x], self.points_lower[y] = self._calc_arrays(-0.5)
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""

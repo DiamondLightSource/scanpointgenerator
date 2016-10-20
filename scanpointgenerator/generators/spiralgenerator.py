@@ -1,4 +1,5 @@
 import math as m
+import numpy as np
 
 from scanpointgenerator.compat import range_
 from scanpointgenerator.core import Generator
@@ -16,8 +17,8 @@ class SpiralGenerator(Generator):
             names (list(str)): The scannable names e.g. ["x", "y"]
             units (str): The scannable units e.g. "mm"
             centre(list): List of two coordinates of centre point of spiral
-            radius(float): Radius of spiral
-            scale(float): Rate at which spiral expands; higher scale gives
+            radius(float): Maximum radius of spiral
+            scale(float): Gap between spiral arcs; higher scale gives
                 fewer points for same radius
             alternate_direction(bool): Specifier to reverse direction if
                 generator is nested
@@ -29,6 +30,9 @@ class SpiralGenerator(Generator):
         self.radius = radius
         self.scale = scale
         self.alternate_direction = alternate_direction
+        self.points = None
+        self.points_lower = None
+        self.points_upper = None
 
         if len(self.names) != len(set(self.names)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -46,6 +50,33 @@ class SpiralGenerator(Generator):
         self.index_names = [gen_name]
 
         self.axes = self.names  # For GDA
+
+    def _calc_arrays(self, offset):
+        # spiral equation : r = b * phi
+        # scale = 2 * pi * b
+        # parameterise phi with approximation:
+        # phi(t) = k * sqrt(t) (for some k)
+        # number of possible t is solved by sqrt(t) = max_r / b*k
+        b = self.scale / (2 * m.pi)
+        k = m.sqrt(4 * m.pi) # magic scaling factor for our angle steps
+        size = (self.radius) / (b * k)
+        size *= size
+        size = int(size) + 1 # TODO: Why the +1 ???
+        phi_t = lambda t: k * np.sqrt(t + offset)
+        phi = np.fromfunction(phi_t, (size,), dtype=np.float64)
+        x = self.centre[0] + b * phi * np.sin(phi)
+        y = self.centre[1] + b * phi * np.cos(phi)
+        return x, y
+
+    def produce_points(self):
+        self.points = {}
+        self.points_lower = {}
+        self.points_upper = {}
+        x = self.names[0]
+        y = self.names[1]
+        self.points_lower[x], self.points_lower[y] = self._calc_arrays(0)
+        self.points[x], self.points[y] = self._calc_arrays(0.5)
+        self.points_upper[x], self.points_upper[y] = self._calc_arrays(1.)
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""
