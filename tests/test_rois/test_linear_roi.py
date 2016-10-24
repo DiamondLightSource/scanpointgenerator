@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
+import numpy as np
 from math import pi, sqrt
 
 from test_util import ScanPointGeneratorTest
@@ -78,12 +79,19 @@ class LinearROIContainsTest(unittest.TestCase):
         p = [-0.0001, 0.0001]
         self.assertFalse(l.contains_point(p))
 
-
     def test_wraparound_angle(self):
         l = LinearROI([0, 0], sqrt(2), 2*pi + pi/4)
         p = [1, 1]
         self.assertTrue(l.contains_point(p))
 
+    def test_mask_points(self):
+        l = LinearROI([1, 1], 2*sqrt(2), -pi/4 - 2*pi)
+        px = [1, 2,  3, 1+1e-10, 3-1e-10, 2+1e-10, 2-1e-14,  3+1e-14, 1]
+        py = [1, 0, -1, 1      , -1     , 0+1e-10, 0+1e-14, -1-1e-14, 1+1e-14]
+        p = [np.array(px), np.array(py)]
+        expected = [True, True, True, False, False, False, True, True, True]
+        mask = l.mask_points(p, 1e-12)
+        self.assertEquals(expected, mask.tolist())
 
 class LinearROIDictTest(unittest.TestCase):
 

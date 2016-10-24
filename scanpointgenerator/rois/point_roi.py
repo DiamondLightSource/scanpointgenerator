@@ -1,3 +1,5 @@
+import numpy as np
+
 from scanpointgenerator.core import ROI
 
 
@@ -14,6 +16,13 @@ class PointROI(ROI):
         x = point[0] - self.point[0]
         y = point[1] - self.point[1]
         return x * x + y * y <= epsilon * epsilon
+
+    def mask_points(self, points, epsilon=0):
+        x = points[0] - self.point[0]
+        y = points[1] - self.point[1]
+        x *= x
+        y *= y
+        return (x + y) <= epsilon * epsilon
 
     def to_dict(self):
         d = super(PointROI, self).to_dict()

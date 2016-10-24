@@ -3,6 +3,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
+import numpy as np
+
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.polygonal_roi import PolygonalROI
 
@@ -63,6 +65,18 @@ class PolygonalROITests(unittest.TestCase):
         # ray-cast algorithm, even if traditionally considered "inside"
         p = [1.5, 1.5] # has winding number -2
         self.assertFalse(roi.contains_point(p))
+
+    def test_mask_points(self):
+        vertices = [[0, 0], [0, 2], [2, 2], [2, 1],
+                    [1, 1], [1, 3], [3, 3], [3, 0]]
+        roi = PolygonalROI(vertices)
+        px = [0.5, 0.5, 1.5, 1.5, 2.5,  2.5, 3.5, -0.5, 3.5, 2, 3, 0]
+        py = [0.5, 2.5, 1.5, 2.5, 2.5, -0.5, 1.5,  0.5, 0.5, 0, 2, 1.5]
+        p = [np.array(px), np.array(py)]
+        expected = [True, False, False, True, True, False, False, False, False,
+                    True, False, True]
+        mask = roi.mask_points(p)
+        self.assertEquals(expected, mask.tolist())
 
 if __name__ == "__main__":
     unittest.main()

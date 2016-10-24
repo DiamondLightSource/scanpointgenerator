@@ -3,6 +3,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
+import numpy as np
+
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.circular_roi import CircularROI
 
@@ -30,17 +32,22 @@ class InitTest(unittest.TestCase):
 class ContainsPointTest(unittest.TestCase):
 
     def setUp(self):
-        self.Circle = CircularROI([5.0, 15.0], 5.0)
-
-        self.point = [7.0, 11.0]
+        self.roi = CircularROI([5.0, 15.0], 5.0)
 
     def test_given_valid_point_then_return_True(self):
-        self.assertTrue(self.Circle.contains_point(self.point))
+        point = [7.0, 11.0]
+        self.assertTrue(self.roi.contains_point(point))
 
     def test_given_point_outside_then_return_False(self):
-        self.point = [9.0, 11.0]
+        point = [9.0, 11.0]
+        self.assertFalse(self.roi.contains_point(point))
 
-        self.assertFalse(self.Circle.contains_point(self.point))
+    def test_mask_points(self):
+        points = [np.array([7., 9.]), np.array([11., 11.])]
+        expected = [True, False]
+        mask = self.roi.mask_points(points)
+        self.assertEqual(expected, mask.tolist())
+
 
 class DictTest(unittest.TestCase):
 

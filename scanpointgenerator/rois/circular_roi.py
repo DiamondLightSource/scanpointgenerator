@@ -1,5 +1,6 @@
 from scanpointgenerator.core import ROI
 import math as m
+import numpy as np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/CircularROI:1.0")
@@ -20,6 +21,14 @@ class CircularROI(ROI):
             return False
         else:
             return True
+
+    def mask_points(self, points):
+        x = points[0] - self.centre[0]
+        y = points[1] - self.centre[1]
+        x *= x
+        y *= y
+        r2 = self.radius * self.radius
+        return x + y <= r2
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

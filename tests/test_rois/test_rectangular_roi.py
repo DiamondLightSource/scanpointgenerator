@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
+import numpy as np
 from math import pi
 
 from test_util import ScanPointGeneratorTest
@@ -89,6 +90,14 @@ class ContainsPointTest(unittest.TestCase):
         self.assertFalse(roi.contains_point(p))
         p = [0.99, 1.99]
         self.assertFalse(roi.contains_point(p))
+
+    def test_mask(self):
+        roi = RectangularROI([1, 2], 1, 1, pi/4)
+        points = [np.array([2, 2, 1, 1, 1.7, 0.3, 1.01, 0.99]),
+                  np.array([3, 2, 2, 3.4, 2.7, 2.705, 1.99, 1.99])]
+        expected = [False, False, True, True, True, True, False, False]
+        mask = roi.mask_points(points)
+        self.assertEqual(expected, mask.tolist())
 
 class DictTest(unittest.TestCase):
 

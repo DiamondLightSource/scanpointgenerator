@@ -1,5 +1,6 @@
 from scanpointgenerator.core import ROI
 from math import hypot, atan2, pi
+import numpy as np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/SectorROI:1.0")
@@ -45,6 +46,23 @@ class SectorROI(ROI):
         # angle along starting at angles[0]
         theta = (phi - angles[0] + 2*pi) % (2*pi)
         return theta <= sweep
+
+    def mask_points(self, points):
+        x = points[0] - self.centre[0]
+        y = points[1] - self.centre[1]
+        r2 = (np.square(x) + np.square(y))
+        phi_0, phi_1 = self.constrain_angles(self.angles)
+        # phi_0 <= phi_1, phi_0 in [0, 2pi), phi_1 < 4pi
+        phi_x = np.arctan2(y, x)
+        # translate phi_x to range [0, 2pi]
+        phi_x = (2*pi + phi_x) % (2*pi)
+        # define phi_s and phi_x "offset from phi_0"
+        phi_s = phi_1 - phi_0
+        phi_x -= phi_0 + 2*pi
+        phi_x %= 2*pi
+        mask = (r2 <= self.radii[1]) & (r2 >= self.radii[0])
+        mask &= (phi_x <= phi_s)
+        return mask
 
     def to_dict(self):
         d = super(SectorROI, self).to_dict()
