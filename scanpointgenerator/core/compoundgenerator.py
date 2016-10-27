@@ -1,5 +1,10 @@
 import logging
-from threading import Lock
+
+import sys
+if sys.platform.startswith('java'):
+    Lock = object  # Workaround for GDA
+else:
+    from threading import Lock
 
 from scanpointgenerator.compat import range_
 from scanpointgenerator.core.generator import Generator
