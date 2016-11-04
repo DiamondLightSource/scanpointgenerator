@@ -34,6 +34,9 @@ class Excluder(object):
 
         return self.roi.contains_point(sub_point)
 
+    def create_mask(self, x_points, y_points):
+        return self.roi.mask_points([x_points, y_points])
+
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
