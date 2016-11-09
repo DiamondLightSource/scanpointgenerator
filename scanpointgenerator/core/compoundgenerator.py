@@ -253,9 +253,11 @@ class CompoundGenerator(Generator):
                 self.generator_idx_scaling[g] = d
 
     def iterator(self):
-        # just one axis for now
-        for n in range_(self.num):
-            yield self.get_point(n)
+        it = (self.get_point(n) for n in range_(self.num))
+        for m in self.mutators:
+            it = m.mutate(it)
+        for p in it:
+            yield p
 
     def get_point(self, n):
         # how far along each index are we?
