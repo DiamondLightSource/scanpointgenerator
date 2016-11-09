@@ -57,12 +57,16 @@ class LissajousGeneratorTest(unittest.TestCase):
                  {'y': -0.29389262614623674, 'x': 0.47552825814757677}]
         indexes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-        for i, p in enumerate(g.iterator()):
-            self.assertEqual(p.positions, positions[i])
-            self.assertEqual(p.lower, lower[i])
-            self.assertEqual(p.upper, upper[i])
-            self.assertEqual(p.indexes, [indexes[i]])
-        self.assertEqual(i, 9)
+        points = list(g.iterator())
+        self.assertEqual(10, len(points))
+        result = [{'x':p.positions['x'], 'y':p.positions['y']} for p in points]
+        self.assertEquals(result, positions)
+        result = [{'x':p.upper['x'], 'y':p.upper['y']} for p in points]
+        self.assertEquals(result, upper)
+        result = [{'x':p.lower['x'], 'y':p.lower['y']} for p in points]
+        self.assertEquals(result, lower)
+        result = [p.indexes[0] for p in points]
+        self.assertEquals(result, indexes)
 
     def test_array_positions(self):
         g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1, num_points=10)

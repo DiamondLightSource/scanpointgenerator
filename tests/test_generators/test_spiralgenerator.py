@@ -77,9 +77,9 @@ class SpiralGeneratorTest(unittest.TestCase):
         indexes = [0, 1, 2, 3, 4, 5, 6]
 
         for i, p in enumerate(self.g.iterator()):
-            self.assertEqual(p.positions, positions[i])
-            self.assertEqual(p.lower, lower[i])
-            self.assertEqual(p.upper, upper[i])
+            self.assertEqual(positions[i], p.positions)
+            self.assertEqual(lower[i], p.lower)
+            self.assertEqual(upper[i], p.upper)
             self.assertEqual(p.indexes, [indexes[i]])
         self.assertEqual(i, 6)
 
