@@ -10,7 +10,8 @@ from scanpointgenerator.core import Point
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
-    def __init__(self, names, units, box, num_lobes, num_points=None):
+    def __init__(self, names, units, box, num_lobes,
+            num_points=None, alternate_direction=False):
         """
         Args:
             names (list(str)): The scannable names e.g. ["x", "y"]
@@ -28,6 +29,7 @@ class LissajousGenerator(Generator):
         self.points = None
         self.points_lower = None
         self.points_upper = None
+        self.alternate_direction = alternate_direction
 
         if len(self.names) != len(set(self.names)):
             raise ValueError("Axis names cannot be duplicated; given %s" %

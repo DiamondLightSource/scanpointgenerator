@@ -17,10 +17,9 @@ class CompoundGeneratorPerformanceTest(ScanPointGeneratorTest):
         start_time = time.time()
 
         s = SpiralGenerator(
-            ["x", "y"], "mm", [0, 0], 6, 0.02,
-            alternate_direction=True) # ~2e5 points
-        z = LineGenerator("z", "mm", 0, 1, 100) #1e2 points
-        w = LineGenerator("w", "mm", 0, 1, 10) #1e1 points
+            ["x", "y"], "mm", [0, 0], 6, 0.02, True) # ~2e5 points
+        z = LineGenerator("z", "mm", 0, 1, 100, True) #1e2 points
+        w = LineGenerator("w", "mm", 0, 1, 10, True) #1e1 points
         r1 = CircularROI([-0.7, 4], 0.5)
         r2 = CircularROI([0.5, 0.5], 0.3)
         r3 = CircularROI([0.2, 4], 0.5)

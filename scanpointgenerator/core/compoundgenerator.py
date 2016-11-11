@@ -62,7 +62,8 @@ class CompoundGenerator(Generator):
                 "generators":[generator],
                 "masks":[],
                 "tile":1,
-                "repeat":1}
+                "repeat":1,
+                "alternate":generator.alternate_direction}
             self.indexes.append(idx)
 
         for excluder in self.excluders:
@@ -74,8 +75,8 @@ class CompoundGenerator(Generator):
                 - self.generators.index(gen_2)
             if gen_diff < -1 or gen_diff > 1:
                 raise ValueError(
-                    "Excluders must be defined on axes that are adjacent in \
-                        generator order")
+                    "Excluders must be defined on axes that are adjacent in " \
+                        "generator order")
             if gen_diff == 1:
                 gen_1, gen_2 = gen_2, gen_1
                 axis_1, axis_2 = axis_2, axis_1
@@ -88,11 +89,15 @@ class CompoundGenerator(Generator):
             idx_1 = [i for i in self.indexes if axis_1 in i["axes"]][0]
             idx_2 = [i for i in self.indexes if axis_2 in i["axes"]][0]
             idx_diff = self.indexes.index(idx_1) - self.indexes.index(idx_2)
+            if idx_1["alternate"] != idx_2["alternate"]:
+                raise ValueError(
+                    "Generators tied by regions must have the same " \
+                            "alternate_direction setting")
             # merge "inner" into "outer"
             if idx_diff < -1 or idx_diff > 1:
                 raise ValueError(
-                    "Excluders must be defined on axes that are adjacent in \
-                        generator order")
+                    "Excluders must be defined on axes that are adjacent in " \
+                        "generator order")
             if idx_diff == 1:
                 idx_1, idx_2 = idx_2, idx_1
                 idx_diff = -1
@@ -126,47 +131,30 @@ class CompoundGenerator(Generator):
             #####
             # if gen_1 and gen_2 are different then the outer axis will have to
             # have its elements repeated and the inner axis will have to have
-            # itself repeated - need to determine which is the inner axis
+            # itself repeated - gen_1 is always inner axis
 
             points_1 = self.axes_points[axis_1]
             points_2 = self.axes_points[axis_2]
 
             doubled_mask = False # used for some cases of alternating generators
 
-            if gen_1 is gen_2 and gen_1.alternate_direction:
+            if gen_1 is gen_2 and idx["alternate"]:
                 # run *both* axes backwards
                 # but our mask will be a factor of 2 too big
                 doubled_mask = True
                 points_1 = np.append(points_1, points_1[::-1])
                 points_2 = np.append(points_2, points_2[::-1])
-            elif gen_1.alternate_direction and gen_2.alternate_direction:
+            elif idx["alternate"]:
                 doubled_mask = True
                 points_1 = np.append(points_1, points_1[::-1])
                 points_2 = np.append(points_2, points_2[::-1])
-                #tile = gen_1.num
-                #points_2 = np.tile(points_2, tile)
-                tile = gen_1.num / 2.
-                tmp = np.tile(points_2, int(tile))
-                if tile % 1 != 0:
-                    points_2 = np.append(tmp, points_2[:gen_2.num])
-                    points_2 = np.tile(points_2, 2)
+                points_2 = np.tile(points_2, gen_1.num)
                 points_1 = np.repeat(points_1, gen_2.num)
-            elif gen_2.alternate_direction:
-                points_1 = np.repeat(points_1, gen_2.num)
-                points_2 = np.append(points_2, points_2[::-1])
-                tile = gen_1.num / 2.
-                points_2 = np.tile(points_2, int(tile))
-                if tile % 1 != 0:
-                    points_2 = np.append(
-                        points_2, self.axes_points[axis_2])
-            elif gen_1.alternate_direction:
-                doubled_mask = True
-                points_1 = np.append(points_1, points_1[::-1])
-                points_1 = np.repeat(points_1, gen_2.num)
-                points_2 = np.tile(points_2, gen_1.num * 2)
             elif gen_1 is not gen_2:
                 points_1 = np.repeat(points_1, gen_2.num)
                 points_2 = np.tile(points_2, gen_1.num)
+            # else not needed; do nothing if gen_1 is gen_2 and not alternating
+
 
             if axis_1 == excluder.scannables[0]:
                 mask = excluder.create_mask(points_1, points_2)
@@ -200,36 +188,19 @@ class CompoundGenerator(Generator):
         # Generate full index mask and "apply"
         #####
         for idx in self.indexes:
-            # if first generator alternates then we want a reverse mask
-            reverse = idx["generators"][0].alternate_direction
-            rmask = np.full(idx["size"], True, dtype=np.bool) if reverse else None
             mask = np.full(idx["size"], True, dtype=np.bool)
             for m in idx["masks"]:
                 assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
                         "Mask lengths are not consistent"
                 expanded = np.repeat(m["mask"], m["repeat"])
-                if m["tile"] < 1:
-                    # the second half of this mask forms part of the "reverse"
-                    if reverse:
-                        rmask &= expanded[len(expanded)//2:]
-                    expanded = expanded[:len(expanded)//2]
-                elif m["tile"] % 1 != 0:
+                if m["tile"] % 1 != 0:
                     ex = np.tile(expanded, int(m["tile"]))
                     expanded = np.append(ex, expanded[:len(expanded)//2])
-                    if reverse:
-                        rmask &= expanded
                 else:
                     expanded = np.tile(expanded, int(m["tile"]))
-                    if reverse:
-                        rmask &= expanded
                 mask &= expanded
             idx["mask"] = mask
             idx["indicies"] = np.flatnonzero(mask)
-            idx["rmask"] = rmask
-            idx["rindicies"] = np.flatnonzero(rmask) if reverse else None
-            if reverse:
-                assert len(idx["indicies"]) == len(idx["rindicies"]), \
-                    "Index indicies and reverse direction indicies are not of equal length"
             if len(idx["indicies"]) == 0:
                 raise ValueError("Regions would exclude entire scan")
             repeat *= len(idx["indicies"])
@@ -260,34 +231,39 @@ class CompoundGenerator(Generator):
             yield p
 
     def get_point(self, n):
-        # how far along each index are we?
         if n >= self.num:
             raise IndexError("Requested point is out of range")
         p = Point()
-        prev_g = None
-        idx_reverse = False
-        gen_reverse = False
+
+        # need to know how far along each index we are
+        # and, in the case of alternating indicies, how
+        # many times we've run through them
+        kc = 0 # the "cumulative" k for each index
         for idx in self.indexes:
             indicies = idx["indicies"]
-            if idx_reverse and idx["rindicies"] is not None:
-                indicies = idx["rindicies"]
             i = n // idx["repeat"]
+            r = i // len(indicies)
             i %= len(indicies)
             k = indicies[i]
+            idx_reverse = False
+            if idx["alternate"] and kc % 2 == 1:
+                indicies = indicies[::-1]
+                idx_reverse = True
+            kc *= len(indicies)
+            kc += k
+            k = indicies[i]
             # need point k along each generator in index
+            # in alternating case, need to sometimes go backward
             for g in idx["generators"]:
                 j = k // self.generator_idx_scaling[g]["repeat"]
+                gr = j // g.num
                 j %= g.num
-                if g.alternate_direction:
-                    if gen_reverse:
-                        j = g.num - j - 1
-                gen_reverse = j % 2 == 1
+                if idx["alternate"] and g is not idx["generators"][0] and gr % 2 == 1:
+                    j = g.num - j - 1
                 for axis in g.axes:
                     p.positions[axis] = g.points[axis][j]
                     p.lower[axis] = g.points_lower[axis][j]
                     p.upper[axis] = g.points_upper[axis][j]
-                prev_g = g
-            idx_reverse = gen_reverse
         return p
 
     def to_dict(self):
