@@ -48,6 +48,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         expected_pos = [{"x":x/4., "y":y/4.}
             for y in range_(4, 9) for x in range_(4, 9)]
         self.assertEqual(expected_pos, [p.positions for p in points])
+        expected_indexes = [[y, x] for y in range_(0, 5) for x in range_(0, 5)]
+        self.assertEqual(expected_indexes, [p.indexes for p in points])
 
     def test_get_point(self):
         x = LineGenerator("x", "mm", -1., 1, 5, False)
@@ -59,11 +61,17 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g.prepare()
         points = [g.get_point(n) for n in range(0, g.num)]
         pos = [p.positions for p in points]
-        expected = [(x/2., y/2., z/2.) for z in range_(-2, 3)
-            for y in range_(-2, 3)
+        idx = [p.indexes for p in points]
+        xy_expected = [(x/2., y/2.) for y in range_(-2, 3)
             for x in range_(-2, 3)]
-        expected = [{'x':x, 'y':y, 'z':z} for (x, y, z) in expected if x*x + y*y <= 1]
+        xy_expected = [(x, y) for (x, y) in xy_expected
+            if x*x + y*y <= 1]
+        expected = [{"x":x, "y":y, "z":z/2.} for z in range_(-2, 3)
+            for (x, y) in xy_expected]
         self.assertEqual(expected, pos)
+        expected_idx = [[z, xy] for z in range_(5)
+            for xy in range_(len(xy_expected))]
+        self.assertEqual(expected_idx, idx)
 
     def test_get_point_large_scan(self):
         s = SpiralGenerator(["x", "y"], "mm", [0, 0], 6, 1) #114 points
@@ -106,12 +114,15 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g = CompoundGenerator([y, x], [], [])
         g.prepare()
         expected = []
-        for y in range(1, 6):
-            r = range(1, 6) if y % 2 == 1 else range(5, 0, -1)
+        expected_idx = []
+        for y in range_(1, 6):
+            r = range_(1, 6) if y % 2 == 1 else range_(5, 0, -1)
             for x in r:
                 expected.append({"y":float(y), "x":float(x)})
-        points = [p.positions for p in list(g.iterator())]
-        self.assertEqual(expected, points)
+                expected_idx.append([y - 1, x - 1])
+        points = list(g.iterator())
+        self.assertEqual(expected, [p.positions for p in points])
+        self.assertEqual(expected_idx, [p.indexes for p in points])
 
     def test_alternating_three_axis(self):
         z = LineGenerator("z", "mm", 1, 2, 2)
@@ -120,6 +131,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g = CompoundGenerator([z, y, x], [], [])
         g.prepare()
         expected = []
+        expected_idx = []
         y_f = True
         x_f = True
         for z in range_(1, 3):
@@ -130,8 +142,10 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                 x_f = not x_f
                 for x in x_r:
                     expected.append({"x":float(x), "y":float(y), "z":float(z)})
-        actual = [p.positions for p in g.iterator()]
-        self.assertEqual(expected, actual)
+                    expected_idx.append([z-1, y-1, x-1])
+        points = list(g.iterator())
+        self.assertEqual(expected, [p.positions for p in points])
+        self.assertEqual(expected_idx, [p.indexes for p in points])
 
     def test_alternating_with_region(self):
         y = LineGenerator("y", "mm", 1, 5, 5, True)
@@ -149,8 +163,10 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                 expected.append({"y":float(y), "x":float(x)})
         expected = [p for p in expected if
             (p["y"] >= 2 and p["y"] < 4 and p["x"] >= 2 and p["x"] < 4)]
-        points = [p.positions for p in list(g.iterator())]
-        self.assertEqual(expected, points)
+        expected_idx = [[xy] for xy in range_(len(expected))]
+        points = list(g.iterator())
+        self.assertEqual(expected, [p.positions for p in points])
+        self.assertEqual(expected_idx, [p.indexes for p in points])
 
     def test_inner_alternating(self):
         z = LineGenerator("z", "mm", 1, 5, 5)
@@ -160,19 +176,31 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         e1 = Excluder(r1, ["x", "y"])
         g = CompoundGenerator([z, y, x], [e1], [])
         g.prepare()
-        actual = [p.positions for p in list(g.iterator())]
         expected = []
-        iy = 0
-        ix = 0
+        xy_expected = []
+        x_f = True
+        for y in range_(1, 6):
+            for x in (range_(1, 6) if x_f else range(5, 0, -1)):
+                if x >= 2 and x < 4 and y >= 2 and y < 4:
+                    xy_expected.append((x, y))
+            x_f = not x_f
+        xy_f = True
         for z in range_(1, 6):
-            for y in (range(1, 6) if iy % 2 == 0 else range(5, 0, -1)):
-                for x in (range(1, 6) if ix % 2 == 0 else range(5, 0, -1)):
-                    if x >= 2 and x < 4 and y >= 2 and y < 4:
-                        expected.append(
-                            {"x":float(x), "y":float(y), "z":float(z)})
-                    ix += 1
-                iy += 1
-        self.assertEqual(expected, actual)
+            for (x, y) in (xy_expected if xy_f else xy_expected[::-1]):
+                expected.append({"x":float(x), "y":float(y), "z":float(z)})
+            xy_f = not xy_f
+
+        expected_idx = []
+        xy_f = True
+        for z in range_(0, 5):
+            xy_idx = range_(len(xy_expected)) if xy_f \
+                else range_(len(xy_expected)-1, -1, -1)
+            expected_idx += [[z, xy] for xy in xy_idx]
+            xy_f = not xy_f
+
+        points = list(g.iterator())
+        self.assertEqual(expected, [p.positions for p in points])
+        self.assertEqual(expected_idx, [p.indexes for p in points])
 
     def test_two_dim_inner_alternates(self):
         wg = LineGenerator("w", "mm", 0, 1, 2)
@@ -428,29 +456,42 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g.prepare()
 
         points = []
+        l1s = []
+        tl2 = []
+
         s_f = True
-        t_f = True
-        l2_f = True
         for l1 in line1.points["l1"]:
             sp = zip(spiral_s.points['s1'], spiral_s.points['s2'])
             sp = sp if s_f else list(sp)[::-1]
             s_f = not s_f
-            for (s1, s2) in sp:
-                tp = zip(spiral_t.points["t1"], spiral_t.points["t2"])
-                tp = tp if t_f else list(tp)[::-1]
-                t_f = not t_f
-                for (t1, t2) in tp:
-                    l2p = line2.points['l2'] if l2_f else line2.points['l2'][::-1]
-                    l2_f = not l2_f
-                    for l2 in l2p:
-                        points.append((l2, t1, t2, s1, s2, l1))
+            l1s += [(s1, s2, l1) for (s1, s2) in sp]
+        l2_f = True
+        for (t1, t2) in zip(spiral_t.points['t1'], spiral_t.points['t2']):
+            l2p = line2.points['l2'] if l2_f else line2.points['l2'][::-1]
+            l2_f = not l2_f
+            tl2 += [(l2, t1, t2) for l2 in l2p if l2*l2 + t1*t1 <= 1]
+        t_f = True
+        for (s1, s2, l1) in l1s:
+            inner = tl2 if t_f else tl2[::-1]
+            t_f = not t_f
+            points += [(l2, t1, t2, s1, s2, l1) for (l2, t1, t2) in inner
+                    if s1*s1 + l1*l1 <= 1]
+        l1s_original = l1s
+        l1s = [(s1, s2, l1) for (s1, s2, l1) in l1s if s1*s1 + l1*l1 <= 1]
 
         expected = [{"l2":l2, "t1":t1, "t2":t2, "s1":s1, "s2":s2, "l1":l1}
-            for (l2, t1, t2, s1, s2, l1) in points if
-            s1*s1 + l1*l1 <= 1 and l2*l2 + t1*t1 <= 1]
+            for (l2, t1, t2, s1, s2, l1) in points]
 
-        actual = [p.positions for p in list(g.iterator())]
-        self.assertEqual(expected, actual)
+        expected_idx = []
+        t_f = (l1s_original.index(l1s[0])) % 2 == 0 # t_f is False
+        for d1 in range_(len(l1s)):
+            expected_idx += [[d1, d2] for d2 in (range_(len(tl2)) if t_f else
+                range_(len(tl2) - 1, -1, -1))]
+            t_f = not t_f
+
+        gpoints = list(g.iterator())
+        self.assertEqual(expected, [p.positions for p in gpoints])
+        self.assertEqual(expected_idx, [p.indexes for p in gpoints])
 
     def test_mutators(self):
         mutator_1 = FixedDurationMutator(0.2)

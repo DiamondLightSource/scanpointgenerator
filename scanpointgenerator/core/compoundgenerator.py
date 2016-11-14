@@ -246,13 +246,14 @@ class CompoundGenerator(Generator):
             k = indicies[i]
             dim_reverse = False
             if dim["alternate"] and kc % 2 == 1:
-                indicies = indicies[::-1]
+                i = len(indicies) - i - 1
                 dim_reverse = True
             kc *= len(indicies)
             kc += k
             k = indicies[i]
             # need point k along each generator in index
             # in alternating case, need to sometimes go backward
+            p.indexes.append(i)
             for g in dim["generators"]:
                 j = k // self.generator_dim_scaling[g]["repeat"]
                 gr = j // g.num
