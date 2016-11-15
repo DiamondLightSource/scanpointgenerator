@@ -1,7 +1,5 @@
-import numpy as np
-
 from scanpointgenerator.core import ROI
-from scanpointgenerator.compat import range_
+from scanpointgenerator.compat import range_, np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/PolygonalROI:1.0")

@@ -3,10 +3,9 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
-import numpy as np
-
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.polygonal_roi import PolygonalROI
+from scanpointgenerator.compat import np
 
 
 class PolygonalROITests(unittest.TestCase):

@@ -1,8 +1,7 @@
 import logging
-import numpy as np
 from threading import Lock
 
-from scanpointgenerator.compat import range_
+from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core.generator import Generator
 from scanpointgenerator.core.point import Point
 from scanpointgenerator.core.excluder import Excluder
@@ -187,7 +186,7 @@ class CompoundGenerator(Generator):
         # Generate full index mask and "apply"
         #####
         for dim in self.dimensions:
-            mask = np.full(dim["size"], True, dtype=np.bool)
+            mask = np.full(dim["size"], True, dtype=np.int8)
             for m in dim["masks"]:
                 assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
                         "Mask lengths are not consistent"
@@ -199,7 +198,7 @@ class CompoundGenerator(Generator):
                     expanded = np.tile(expanded, int(m["tile"]))
                 mask &= expanded
             dim["mask"] = mask
-            dim["indicies"] = np.flatnonzero(mask)
+            dim["indicies"] = np.nonzero(mask)[0]
             if len(dim["indicies"]) == 0:
                 raise ValueError("Regions would exclude entire scan")
             repeat *= len(dim["indicies"])

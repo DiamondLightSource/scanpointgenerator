@@ -2,11 +2,11 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
-import numpy as np
 from math import pi
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.rectangular_roi import RectangularROI
+from scanpointgenerator.compat import np
 
 
 class InitTest(unittest.TestCase):

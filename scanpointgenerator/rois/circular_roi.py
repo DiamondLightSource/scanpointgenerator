@@ -1,6 +1,5 @@
 from scanpointgenerator.core import ROI
 import math as m
-import numpy as np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/CircularROI:1.0")

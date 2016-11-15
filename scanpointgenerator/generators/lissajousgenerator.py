@@ -1,7 +1,6 @@
 import math as m
-import numpy as np
 
-from scanpointgenerator.compat import range_
+from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core import Generator
 from scanpointgenerator.core import Point
 
@@ -66,9 +65,9 @@ class LissajousGenerator(Generator):
         a, b = self.x_freq, self.y_freq
         d = self.phase_diff
         f = lambda t: y0 + A * np.sin(a * 2 * m.pi * (t+offset)/self.num + d)
-        x =  np.fromfunction(f, (self.num,), dtype=np.float64)
+        x = f(np.arange(self.num))
         f = lambda t: B * np.sin(b * 2 * m.pi * (t+offset)/self.num)
-        y = np.fromfunction(f, (self.num,), dtype=np.float64)
+        y = f(np.arange(self.num))
         return x, y
 
     def produce_points(self):

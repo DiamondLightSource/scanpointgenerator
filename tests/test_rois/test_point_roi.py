@@ -2,10 +2,10 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
-import numpy as np
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.point_roi import PointROI
+from scanpointgenerator.compat import np
 
 
 class PointROITest(unittest.TestCase):

@@ -1,7 +1,7 @@
-import numpy as np
 from math import cos, sin
 
 from scanpointgenerator.core import ROI
+from scanpointgenerator.compat import np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/RectangularROI:1.0")

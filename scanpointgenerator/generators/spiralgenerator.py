@@ -1,7 +1,6 @@
 import math as m
-import numpy as np
 
-from scanpointgenerator.compat import range_
+from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core import Generator
 from scanpointgenerator.core import Point
 
@@ -63,7 +62,7 @@ class SpiralGenerator(Generator):
         size *= size
         size = int(size) + 1 # TODO: Why the +1 ???
         phi_t = lambda t: k * np.sqrt(t + offset)
-        phi = np.fromfunction(phi_t, (size,), dtype=np.float64)
+        phi = phi_t(np.arange(size))
         x = self.centre[0] + b * phi * np.sin(phi)
         y = self.centre[1] + b * phi * np.cos(phi)
         return x, y

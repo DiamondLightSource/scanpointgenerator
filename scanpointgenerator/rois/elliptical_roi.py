@@ -1,4 +1,3 @@
-import numpy as np
 from math import cos, sin
 
 from scanpointgenerator.core import ROI

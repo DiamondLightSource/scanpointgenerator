@@ -3,10 +3,10 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 from math import pi
-import numpy as np
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.sector_roi import SectorROI
+from scanpointgenerator.compat import np
 
 
 class SectorInitTest(unittest.TestCase):

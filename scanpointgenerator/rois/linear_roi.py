@@ -1,7 +1,7 @@
 from math import cos, sin
-import numpy as np
 
 from scanpointgenerator.core import ROI
+from scanpointgenerator.compat import np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/LinearROI:1.0")

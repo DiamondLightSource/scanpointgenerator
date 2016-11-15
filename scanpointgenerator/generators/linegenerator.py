@@ -1,6 +1,4 @@
-import numpy as np
-
-from scanpointgenerator.compat import range_
+from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core import Generator
 from scanpointgenerator.core import Point
 
@@ -89,11 +87,11 @@ class LineGenerator(Generator):
             lower_start = start - 0.5 * d / n
             lower_stop = stop - 0.5 * d / n
             self.points[axis_name] = np.linspace(
-                start, stop, self.num, dtype=np.float64)
+                float(start), float(stop), self.num)
             self.points_upper[axis_name] = np.linspace(
-                upper_start, upper_stop, self.num, dtype=np.float64)
+                float(upper_start), float(upper_stop), self.num)
             self.points_lower[axis_name] = np.linspace(
-                lower_start, lower_stop, self.num, dtype=np.float64)
+                float(lower_start), float(lower_stop), self.num)
 
     def iterator(self):
         for i in range_(self.num):

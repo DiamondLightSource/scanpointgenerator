@@ -3,10 +3,10 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 from math import pi
-import numpy as np
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.elliptical_roi import EllipticalROI
+from scanpointgenerator.compat import np
 
 
 class EllipticalROITest(unittest.TestCase):

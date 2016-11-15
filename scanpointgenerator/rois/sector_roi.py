@@ -1,6 +1,7 @@
-from scanpointgenerator.core import ROI
 from math import hypot, atan2, pi
-import numpy as np
+
+from scanpointgenerator.core import ROI
+from scanpointgenerator.compat import np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/SectorROI:1.0")
