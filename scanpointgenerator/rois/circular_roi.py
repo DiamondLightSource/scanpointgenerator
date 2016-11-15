@@ -22,12 +22,16 @@ class CircularROI(ROI):
             return True
 
     def mask_points(self, points):
-        x = points[0] - self.centre[0]
-        y = points[1] - self.centre[1]
+        x = points[0]
+        x -= self.centre[0]
+        y = points[1]
+        y -= self.centre[1]
+        # use in place operations as much as possible (to save array creation)
         x *= x
         y *= y
+        x += y
         r2 = self.radius * self.radius
-        return x + y <= r2
+        return x <= r2
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

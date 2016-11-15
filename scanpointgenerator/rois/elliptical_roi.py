@@ -30,8 +30,10 @@ class EllipticalROI(ROI):
         return (x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1
 
     def mask_points(self, points):
-        x = points[0] - self.centre[0]
-        y = points[1] - self.centre[1]
+        x = points[0]
+        x -= self.centre[0]
+        y = points[1]
+        y -= self.centre[1]
         if self.angle != 0:
             phi = -self.angle
             tx = x * cos(phi) - y * sin(phi)
@@ -44,7 +46,8 @@ class EllipticalROI(ROI):
         x /= rx2
         y *= y
         y /= ry2
-        return x + y <= 1
+        x += y
+        return x <= 1
 
     def to_dict(self):
         d = super(EllipticalROI, self).to_dict()

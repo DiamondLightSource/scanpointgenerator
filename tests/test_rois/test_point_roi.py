@@ -36,12 +36,11 @@ class PointROITest(unittest.TestCase):
         roi = PointROI([1, 2])
         px = [1, 0, 1+1e-15, 1,       1]
         py = [2, 0, 2,       2+1e-15, 2+1e-14]
-        points = [np.array(px), np.array(py)]
         expected = [True, False, True, True, False]
-        mask = roi.mask_points(points, 2e-15)
+        mask = roi.mask_points([np.array(px), np.array(py)], 2e-15)
         self.assertEqual(expected, mask.tolist())
 
-        mask = roi.mask_points(points, 0)
+        mask = roi.mask_points([np.array(px), np.array(py)], 0)
         expected = [True, False, False, False, False]
         self.assertEqual(expected, mask.tolist())
 

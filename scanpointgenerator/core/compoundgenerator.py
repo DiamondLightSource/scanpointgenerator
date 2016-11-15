@@ -151,7 +151,12 @@ class CompoundGenerator(Generator):
             elif gen_1 is not gen_2:
                 points_1 = np.repeat(points_1, gen_2.num)
                 points_2 = np.tile(points_2, gen_1.num)
-            # else not needed; do nothing if gen_1 is gen_2 and not alternating
+            else:
+                # copy the points arrays anyway so the regions can
+                # safely perform any array operations in place
+                # this is advantageous in the cases above
+                points_1 = np.copy(points_1)
+                points_2 = np.copy(points_2)
 
 
             if axis_1 == excluder.scannables[0]:

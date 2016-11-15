@@ -49,8 +49,10 @@ class SectorROI(ROI):
         return theta <= sweep
 
     def mask_points(self, points):
-        x = points[0] - self.centre[0]
-        y = points[1] - self.centre[1]
+        x = points[0]
+        y = points[1]
+        x -= self.centre[0]
+        y -= self.centre[1]
         r2 = (np.square(x) + np.square(y))
         phi_0, phi_1 = self.constrain_angles(self.angles)
         # phi_0 <= phi_1, phi_0 in [0, 2pi), phi_1 < 4pi
