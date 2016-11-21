@@ -342,8 +342,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                             {"t":float(t), "z":float(z),
                             "y":float(y), "x":float(x)})
         expected = [p for p in expected if
-            (p["y"] >= 3 and p["y"] < 5 and p["x"] >= 3 and p["x"] < 5) and
-            (p["z"] >= 3 and p["z"] < 5 and p["y"] >= 3 and p["y"] < 5)]
+            (p["y"] >= 3 and p["y"] <= 5 and p["x"] >= 3 and p["x"] <= 5) and
+            (p["z"] >= 3 and p["z"] <= 5 and p["y"] >= 3 and p["y"] <= 5)]
         self.assertEqual(expected, points)
 
     def test_line_spiral(self):
@@ -584,8 +584,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         p = []
         for z in range_(0, 5):
             p += [(x, y, z) for (x, y) in (xy if z % 2 == 0 else xy[::-1])]
-        expected = [x >= -2 and x < 1 and y >= -2 and y < 2
-                and z >= 0 and z < 3 for (x, y, z) in p]
+        expected = [x >= -2 and x <= 1 and y >= -2 and y <= 2
+                and z >= 0 and z <= 3 for (x, y, z) in p]
         actual = g.dimensions[0]["mask"].tolist()
         self.assertEqual(expected, actual)
 
@@ -600,8 +600,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         g.prepare()
         p = list(zip(g.axes_points['x'], g.axes_points['y']))
         p = [(x, y, z) for z in range_(0, 5) for (x, y) in p]
-        expected = [x >= -2 and x < 1 and y >= -2 and y < 2
-                and z >= 0 and z < 3 for (x, y, z) in p]
+        expected = [x >= -2 and x <= 1 and y >= -2 and y <= 2
+                and z >= 0 and z <= 3 for (x, y, z) in p]
         actual = g.dimensions[0]["mask"].tolist()
         self.assertEqual(expected, actual)
 
