@@ -28,6 +28,13 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(lower, self.g.points_lower['x'].tolist())
         self.assertEqual(upper, self.g.points_upper['x'].tolist())
 
+    def test_single_point(self):
+        g = LineGenerator("x", "mm", 1.0, 4.0, 1)
+        g.produce_points()
+        self.assertEqual([1.0], g.points["x"].tolist())
+        self.assertEqual([2.5], g.points_upper["x"].tolist())
+        self.assertEqual([-0.5], g.points_lower["x"].tolist())
+
     def test_iterator(self):
         positions = [1.0, 3.0, 5.0, 7.0, 9.0]
         lower = [0.0, 2.0, 4.0, 6.0, 8.0]

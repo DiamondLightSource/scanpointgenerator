@@ -81,18 +81,23 @@ class LineGenerator(Generator):
             start = self.start[axis]
             stop = self.stop[axis]
             d = stop - start
-            n = self.num - 1.
-            s = d / n
-            upper_start = start + 0.5 * d / n
-            upper_stop = stop + 0.5 * d / n
-            lower_start = start - 0.5 * d / n
-            lower_stop = stop - 0.5 * d / n
-            self.points[axis_name] = np.linspace(
-                float(start), float(stop), self.num)
-            self.points_upper[axis_name] = np.linspace(
-                float(upper_start), float(upper_stop), self.num)
-            self.points_lower[axis_name] = np.linspace(
-                float(lower_start), float(lower_stop), self.num)
+            if self.num == 1:
+                self.points[axis_name] = np.array([start])
+                self.points_upper[axis_name] = np.array([start + 0.5 * d])
+                self.points_lower[axis_name] = np.array([start - 0.5 * d])
+            else:
+                n = self.num - 1.
+                s = d / n
+                upper_start = start + 0.5 * d / n
+                upper_stop = stop + 0.5 * d / n
+                lower_start = start - 0.5 * d / n
+                lower_stop = stop - 0.5 * d / n
+                self.points[axis_name] = np.linspace(
+                    float(start), float(stop), self.num)
+                self.points_upper[axis_name] = np.linspace(
+                    float(upper_start), float(upper_stop), self.num)
+                self.points_lower[axis_name] = np.linspace(
+                    float(lower_start), float(lower_stop), self.num)
 
     def iterator(self):
         for i in range_(self.num):
