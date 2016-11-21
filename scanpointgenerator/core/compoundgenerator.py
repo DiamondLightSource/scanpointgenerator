@@ -87,11 +87,6 @@ class CompoundGenerator(Generator):
             dim_2 = [i for i in self.dimensions if axis_2 in i["axes"]][0]
             dim_diff = self.dimensions.index(dim_1) \
                 - self.dimensions.index(dim_2)
-            if dim_1["alternate"] != dim_2["alternate"]:
-                raise ValueError(
-                    "Generators tied by regions must have the same " \
-                            "alternate_direction setting")
-            # merge "inner" into "outer"
             if dim_diff < -1 or dim_diff > 1:
                 raise ValueError(
                     "Excluders must be defined on axes that are adjacent in " \
@@ -99,6 +94,12 @@ class CompoundGenerator(Generator):
             if dim_diff == 1:
                 dim_1, dim_2 = dim_2, dim_1
                 dim_diff = -1
+            if dim_1["alternate"] != dim_2["alternate"] \
+                    and dim_1 is not self.dimensions[0]:
+                raise ValueError(
+                    "Generators tied by regions must have the same " \
+                            "alternate_direction setting")
+            # merge "inner" into "outer"
             if dim_diff == -1:
                 # dim_1 is "outer" - preserves axis ordering
 
@@ -121,6 +122,7 @@ class CompoundGenerator(Generator):
                 dim_1["axes"] += dim_2["axes"]
                 dim_1["generators"] += dim_2["generators"]
                 dim_1["size"] *= dim_2["size"]
+                dim_1["alternate"] |= dim_2["alternate"]
                 self.dimensions.remove(dim_2)
             dim = dim_1
 

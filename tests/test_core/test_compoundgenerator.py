@@ -288,7 +288,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(e, a)
 
     def test_alternating_regions_2(self):
-        z = LineGenerator("z", "mm", 1, 5, 5, True)
+        z = LineGenerator("z", "mm", 1, 5, 5)
         y = LineGenerator("y", "mm", 1, 5, 5, True)
         x = LineGenerator("x", "mm", 1, 5, 5, True)
         r1 = RectangularROI([2, 2], 2, 2)
@@ -399,7 +399,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         lissajous = LissajousGenerator(
             ["j1", "j2"], "mm",
             {"centre":[-0.5, 0.7], "width":2, "height":3.5},
-            7, 100, True)
+            7, 100)
         line2 = LineGenerator(["l2"], "mm", -3, 3, 7, True)
         line1 = LineGenerator(["l1"], "mm", -1, 2, 5, True)
         spiral = SpiralGenerator(["s1", "s2"], "mm", [1, 2], 5, 2.5, True)
@@ -445,7 +445,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(e, a)
 
     def test_double_spiral_scan(self):
-        line1 = LineGenerator(["l1"], "mm", -1, 2, 5, True)
+        line1 = LineGenerator(["l1"], "mm", -1, 2, 5)
         spiral_s = SpiralGenerator(["s1", "s2"], "mm", [1, 2], 5, 2.5, True)
         spiral_t = SpiralGenerator(["t1", "t2"], "mm", [0, 0], 5, 2.5, True)
         line2 = LineGenerator(["l2"], "mm", -1, 2, 5, True)
