@@ -35,6 +35,7 @@ class LineGenerator(Generator):
         self.points = None
         self.points_lower = None
         self.points_upper = None
+        self.units = units
 
         if len(self.name) != len(set(self.name)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -115,7 +116,7 @@ class LineGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['name'] = self.name
-        d['units'] = list(self.position_units.values())[0]
+        d['units'] = self.units
         d['start'] = self.start
         d['stop'] = self.stop
         d['num'] = self.num

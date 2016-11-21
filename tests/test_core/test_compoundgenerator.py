@@ -150,7 +150,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
     def test_alternating_with_region(self):
         y = LineGenerator("y", "mm", 1, 5, 5, True)
         x = LineGenerator("x", "mm", 1, 5, 5, True)
-        r1 = RectangularROI([2, 2], 2, 2)
+        r1 = CircularROI([3, 3], 1.5)
         e1 = Excluder(r1, ["y", "x"])
         g = CompoundGenerator([y, x], [e1], [])
         g.prepare()
@@ -162,7 +162,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             for x in r:
                 expected.append({"y":float(y), "x":float(x)})
         expected = [p for p in expected if
-            (p["y"] >= 2 and p["y"] < 4 and p["x"] >= 2 and p["x"] < 4)]
+            ((p["x"]-3)**2 + (p["y"]-3)**2 <= 1.5**2)]
         expected_idx = [[xy] for xy in range_(len(expected))]
         points = list(g.iterator())
         self.assertEqual(expected, [p.positions for p in points])
@@ -172,7 +172,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         z = LineGenerator("z", "mm", 1, 5, 5)
         y = LineGenerator("y", "mm", 1, 5, 5, alternate_direction=True)
         x = LineGenerator("x", "mm", 1, 5, 5, alternate_direction=True)
-        r1 = RectangularROI([2, 2], 2, 2)
+        r1 = CircularROI([3, 3], 1.5)
         e1 = Excluder(r1, ["x", "y"])
         g = CompoundGenerator([z, y, x], [e1], [])
         g.prepare()
@@ -181,7 +181,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         x_f = True
         for y in range_(1, 6):
             for x in (range_(1, 6) if x_f else range(5, 0, -1)):
-                if x >= 2 and x < 4 and y >= 2 and y < 4:
+                if (x-3)**2 + (y-3)**2 <= 1.5**2:
                     xy_expected.append((x, y))
             x_f = not x_f
         xy_f = True
@@ -291,7 +291,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         z = LineGenerator("z", "mm", 1, 5, 5)
         y = LineGenerator("y", "mm", 1, 5, 5, True)
         x = LineGenerator("x", "mm", 1, 5, 5, True)
-        r1 = RectangularROI([2, 2], 2, 2)
+        r1 = CircularROI([3, 3], 1.5)
         e1 = Excluder(r1, ["x", "y"])
         e2 = Excluder(r1, ["z", "y"])
         g = CompoundGenerator([z, y, x], [e1, e2], []) #20 points
@@ -310,8 +310,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                     expected.append({"x":float(x), "y":float(y), "z":float(z)})
 
         expected = [p for p in expected
-            if p["x"] >= 2 and p["x"] < 4 and p["y"] >= 2 and p["y"] < 4
-            and p["z"] >= 2 and p["z"] < 4]
+            if (p["x"]-3)**2 + (p["y"]-3)**2 <= 1.5**2
+            and (p["z"]-3)**2 + (p["y"]-3)**2 <= 1.5**2]
         self.assertEqual(expected, actual)
 
     def test_alternating_complex(self):
@@ -507,6 +507,24 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             x_pos += 1
         self.assertEqual(6, x_pos)
 
+    def test_grid_rect_region(self):
+        xg = LineGenerator("x", "mm", 1, 10, 10)
+        yg = LineGenerator("y", "mm", 1, 10, 10)
+        r = RectangularROI([3, 3], 6, 6)
+        e = Excluder(r, ["x", "y"])
+        g = CompoundGenerator([yg, xg], [e], [])
+        g.prepare()
+        self.assertEqual(49, g.num)
+        p = g.get_point(8)
+        self.assertEqual([1, 1], p.indexes)
+        self.assertEqual((4, 4), (p.positions['y'], p.positions['x']))
+        p = g.get_point(48)
+        self.assertEqual([6, 6], p.indexes)
+        self.assertEqual((9, 9), (p.positions['y'], p.positions['x']))
+        p = g.get_point(14)
+        self.assertEqual([2, 0], p.indexes)
+        self.assertEqual((5, 3), (p.positions['y'], p.positions['x']))
+
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""
 
@@ -640,7 +658,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         zg = LineGenerator("z", "mm", 0, 4, 5, alternate_direction=True)
         yg = LineGenerator("y", "mm", 1, 5, 5, alternate_direction=True)
         xg = LineGenerator("x", "mm", 2, 6, 5, alternate_direction=True)
-        r1 = RectangularROI([3., 3.], 2., 2.)
+        r1 = CircularROI([4., 4.], 1.5)
         e1 = Excluder(r1, ["y", "x"])
         e2 = Excluder(r1, ["z", "y"])
         g = CompoundGenerator([tg, zg, yg, xg], [e1, e2], [])
@@ -654,8 +672,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         for z in range_(0, 5):
             for y in (range_(1, 6) if iy % 2 == 0 else range_(5, 0, -1)):
                 for x in (range_(2, 7) if ix % 2 == 0 else range_(6, 1, -1)):
-                    xyz_mask.append( x >= 3 and x < 5 and y >= 3 and y < 5
-                            and z >= 3 and z < 5 )
+                    xyz_mask.append( (x-4)**2 + (y-4)**2 <= 1.5**2 \
+                        and (y-4)**2 + (z-4)**2 <= 1.5**2)
                     xyz.append((x, y, z))
                     ix += 1
                 iy += 1
