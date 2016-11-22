@@ -20,30 +20,25 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
     def test_array_positions(self):
         positions = [1.0, 3.0, 5.0, 7.0, 9.0]
-        lower = [0.0, 2.0, 4.0, 6.0, 8.0]
-        upper = [2.0, 4.0, 6.0, 8.0, 10.0]
+        bounds = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
         indexes = [0, 1, 2, 3, 4]
         self.g.produce_points()
         self.assertEqual(positions, self.g.points['x'].tolist())
-        self.assertEqual(lower, self.g.points_lower['x'].tolist())
-        self.assertEqual(upper, self.g.points_upper['x'].tolist())
+        self.assertEqual(bounds, self.g.bounds['x'].tolist())
 
     def test_negative_direction(self):
         g = LineGenerator("x", "mm", 2, -2, 5)
         positions = [2., 1., 0., -1., -2.]
-        lower = [2.5, 1.5, 0.5, -0.5, -1.5]
-        upper = [1.5, 0.5, -0.5, -1.5, -2.5]
+        bounds = [2.5, 1.5, 0.5, -0.5, -1.5, -2.5]
         g.produce_points()
         self.assertEqual(positions, g.points['x'].tolist())
-        self.assertEqual(lower, g.points_lower['x'].tolist())
-        self.assertEqual(upper, g.points_upper['x'].tolist())
+        self.assertEqual(bounds, g.bounds['x'].tolist())
 
     def test_single_point(self):
         g = LineGenerator("x", "mm", 1.0, 4.0, 1)
         g.produce_points()
         self.assertEqual([1.0], g.points["x"].tolist())
-        self.assertEqual([2.5], g.points_upper["x"].tolist())
-        self.assertEqual([-0.5], g.points_lower["x"].tolist())
+        self.assertEqual([-0.5, 2.5], g.bounds["x"].tolist())
 
     def test_iterator(self):
         positions = [1.0, 3.0, 5.0, 7.0, 9.0]

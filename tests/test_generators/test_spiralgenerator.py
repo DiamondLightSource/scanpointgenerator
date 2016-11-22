@@ -30,14 +30,8 @@ class SpiralGeneratorTest(unittest.TestCase):
                      {'y': 0.3924587351155914, 'x': 1.130650533568409},
                      {'y': -0.5868891557832875, 'x': 1.18586065489788},
                      {'y': -1.332029488076613, 'x': 0.5428735608675326}]
-        lower = [{'y': 0.0, 'x': 0.0},
+        bounds = [{'y':0.0, 'x':0.0},
                  {'y': -0.5189218293602549, 'x': -0.2214272368007088},
-                 {'y': 0.23645222432582483, 'x': -0.7620433832656455},
-                 {'y': 0.9671992383675001, 'x': -0.13948222773063082},
-                 {'y': 0.7807653675717078, 'x': 0.8146440851904461},
-                 {'y': -0.09160107657707395, 'x': 1.2582363345925418},
-                 {'y': -1.0190886264001306, 'x': 0.9334439933089926}]
-        upper = [{'y': -0.5189218293602549, 'x': -0.2214272368007088},
                  {'y': 0.23645222432582483, 'x': -0.7620433832656455},
                  {'y': 0.9671992383675001, 'x': -0.13948222773063082},
                  {'y': 0.7807653675717078, 'x': 0.8146440851904461},
@@ -46,11 +40,9 @@ class SpiralGeneratorTest(unittest.TestCase):
                  {'y': -1.4911377166541206, 'x': 0.06839234794968006}]
         self.g.produce_points()
         p = [{"x":x, "y":y} for (x, y) in zip(self.g.points['x'], self.g.points['y'])]
-        l = [{"x":x, "y":y} for (x, y) in zip(self.g.points_lower['x'], self.g.points_lower['y'])]
-        u = [{"x":x, "y":y} for (x, y) in zip(self.g.points_upper['x'], self.g.points_upper['y'])]
+        b = [{"x":x, "y":y} for (x, y) in zip(self.g.bounds['x'], self.g.bounds['y'])]
         self.assertEqual(positions, p)
-        self.assertEqual(lower, l)
-        self.assertEqual(upper, u)
+        self.assertEqual(bounds, b)
 
     def test_iterator(self):
         positions = [{'y': -0.3211855677650875, 'x': 0.23663214944574582},

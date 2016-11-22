@@ -59,27 +59,27 @@ class LissajousGenerator(Generator):
 
         self.axes = self.names  # For GDA
 
-    def _calc_arrays(self, offset):
+    def produce_points(self):
+        self.points = {}
+        self.bounds = {}
+
         x0, y0 = self.centre[0], self.centre[1]
         A, B = self.x_max, self.y_max
         a, b = self.x_freq, self.y_freq
         d = self.phase_diff
-        f = lambda t: y0 + A * np.sin(a * 2 * m.pi * (t+offset)/self.num + d)
+        f = lambda t: y0 + A * np.sin(a * 2 * m.pi * t/self.num + d)
         x = f(np.arange(self.num))
-        f = lambda t: B * np.sin(b * 2 * m.pi * (t+offset)/self.num)
+        f = lambda t: y0 + A * np.sin(a * 2 * m.pi * (t-0.5)/self.num + d)
+        bx = f(np.arange(self.num + 1))
+        f = lambda t: B * np.sin(b * 2 * m.pi * t/self.num)
         y = f(np.arange(self.num))
-        return x, y
+        f = lambda t: B * np.sin(b * 2 * m.pi * (t-0.5)/self.num)
+        by = f(np.arange(self.num + 1))
 
-    def produce_points(self):
-        self.points = {}
-        self.points_lower = {}
-        self.points_upper = {}
-
-        x = self.names[0]
-        y = self.names[1]
-        self.points[x], self.points[y] = self._calc_arrays(0)
-        self.points_upper[x], self.points_upper[y] = self._calc_arrays(0.5)
-        self.points_lower[x], self.points_lower[y] = self._calc_arrays(-0.5)
+        self.points[self.names[0]] = x
+        self.points[self.names[1]] = y
+        self.bounds[self.names[0]] = bx
+        self.bounds[self.names[1]] = by
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""

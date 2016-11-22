@@ -28,8 +28,7 @@ class CompoundGenerator(Generator):
         self.axes = []
         self.position_units = {}
         self.axes_points = {}
-        self.axes_points_lower = {}
-        self.axes_points_upper = {}
+        self.axes_bounds = {}
         self.dimensions = []
         self.alternate_direction = [g.alternate_direction for g in generators]
         for generator in generators:
@@ -91,8 +90,7 @@ class CompoundGenerator(Generator):
         for generator in generators:
             generator.produce_points()
             self.axes_points.update(generator.points)
-            self.axes_points_lower.update(generator.points_lower)
-            self.axes_points_upper.update(generator.points_upper)
+            self.axes_bounds.update(generator.bounds)
             self.num *= generator.num
 
             dim = {"size":generator.num,
@@ -305,22 +303,21 @@ class CompoundGenerator(Generator):
                 j = k // self.generator_dim_scaling[g]["repeat"]
                 gr = j // g.num
                 j %= g.num
-                bounds_reverse = False
+                j_lower = j
+                j_upper = j + 1
                 if dim["alternate"] and g is not dim["generators"][0] and gr % 2 == 1:
                     # the top level generator's direction is handled by
                     # the fact that the reverse direction was appended
                     j = g.num - j - 1
-                    bounds_reverse = True
-                # seriously messy logic now
-                bounds_reverse |= dim_reverse and g is dim["generators"][0]
+                    j_lower = j + 1
+                    j_upper = j
+                elif dim_reverse and g is dim["generators"][0]:
+                    # top level generator is running in reverse
+                    j_lower, j_upper = j_upper, j_lower
                 for axis in g.axes:
                     p.positions[axis] = g.points[axis][j]
-                    lower = g.points_upper[axis] if bounds_reverse \
-                        else g.points_lower[axis]
-                    upper = g.points_lower[axis] if bounds_reverse \
-                        else g.points_upper[axis]
-                    p.lower[axis] = lower[j]
-                    p.upper[axis] = upper[j]
+                    p.lower[axis] = g.bounds[axis][j_lower]
+                    p.upper[axis] = g.bounds[axis][j_upper]
         return p
 
     def to_dict(self):

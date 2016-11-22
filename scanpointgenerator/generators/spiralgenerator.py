@@ -50,7 +50,10 @@ class SpiralGenerator(Generator):
 
         self.axes = self.names  # For GDA
 
-    def _calc_arrays(self, offset):
+    def produce_points(self):
+        self.points = {}
+        self.bounds = {}
+
         # spiral equation : r = b * phi
         # scale = 2 * pi * b
         # parameterise phi with approximation:
@@ -61,21 +64,21 @@ class SpiralGenerator(Generator):
         size = (self.radius) / (b * k)
         size *= size
         size = int(size) + 1 # TODO: Why the +1 ???
-        phi_t = lambda t: k * np.sqrt(t + offset)
+
+        phi_t = lambda t: k * np.sqrt(t + 0.5)
         phi = phi_t(np.arange(size))
         x = self.centre[0] + b * phi * np.sin(phi)
         y = self.centre[1] + b * phi * np.cos(phi)
-        return x, y
+        self.points[self.names[0]] = x
+        self.points[self.names[1]] = y
 
-    def produce_points(self):
-        self.points = {}
-        self.points_lower = {}
-        self.points_upper = {}
-        x = self.names[0]
-        y = self.names[1]
-        self.points_lower[x], self.points_lower[y] = self._calc_arrays(0)
-        self.points[x], self.points[y] = self._calc_arrays(0.5)
-        self.points_upper[x], self.points_upper[y] = self._calc_arrays(1.)
+        size += 1
+        phi_t = lambda t: k * np.sqrt(t)
+        phi = phi_t(np.arange(size))
+        bx = self.centre[0] + b * phi * np.sin(phi)
+        by = self.centre[1] + b * phi * np.cos(phi)
+        self.bounds[self.names[0]] = bx
+        self.bounds[self.names[1]] = by
 
     def _calc(self, i):
         """Calculate the coordinate for a given index"""

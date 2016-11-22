@@ -481,8 +481,10 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         l2_f = True
         for (t1, t2) in zip(spiral_t.points['t1'], spiral_t.points['t2']):
             l2p = line2.points['l2'] if l2_f else line2.points['l2'][::-1]
-            l2pu = line2.points_upper['l2'] if l2_f else line2.points_lower['l2'][::-1]
-            l2pl = line2.points_lower['l2'] if l2_f else line2.points_upper['l2'][::-1]
+            l2pu = line2.bounds['l2'][1:len(line2.points['l2'])+1]
+            l2pl = line2.bounds['l2'][0:len(line2.points['l2'])]
+            if not l2_f:
+                l2pu, l2pl = l2pl[::-1], l2pu[::-1]
             l2_f = not l2_f
             tl2 += [(l2, l2u, l2l, t1, t2) for (l2, l2u, l2l) in
                 zip(l2p, l2pu, l2pl) if l2*l2 + t1*t1 <= 1]
@@ -555,11 +557,9 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         g = CompoundGenerator([y, x], [], [])
         g.prepare()
         self.assertListAlmostEqual([1.0, 1.1, 1.2], g.axes_points["x"].tolist())
-        self.assertListAlmostEqual([0.95, 1.05, 1.15], g.axes_points_lower["x"].tolist())
-        self.assertListAlmostEqual([1.05, 1.15, 1.25], g.axes_points_upper["x"].tolist())
+        self.assertListAlmostEqual([0.95, 1.05, 1.15, 1.25], g.axes_bounds["x"].tolist())
         self.assertListAlmostEqual([2.0, 2.1], g.axes_points["y"].tolist())
-        self.assertListAlmostEqual([1.95, 2.05], g.axes_points_lower["y"].tolist())
-        self.assertListAlmostEqual([2.05, 2.15], g.axes_points_upper["y"].tolist())
+        self.assertListAlmostEqual([1.95, 2.05, 2.15], g.axes_bounds["y"].tolist())
         self.assertEqual(g.num, 6)
 
         self.assertEqual(2, len(g.dimensions))

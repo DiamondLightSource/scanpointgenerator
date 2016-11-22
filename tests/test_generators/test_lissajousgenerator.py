@@ -80,17 +80,8 @@ class LissajousGeneratorTest(unittest.TestCase):
                      {'y': 0.2938926261462367, 'x': -0.1545084971874738},
                      {'y': -0.2938926261462364, 'x': 0.1545084971874736},
                      {'y': -0.4755282581475769, 'x': 0.4045084971874736}]
-        lower = [{'y': -0.29389262614623657, 'x': 0.47552825814757677},
+        bounds = [{'y': -0.29389262614623657, 'x': 0.47552825814757677},
                  {'y': 0.29389262614623657, 'x': 0.4755282581475768},
-                 {'y': 0.4755282581475768, 'x': 0.2938926261462366},
-                 {'y': 6.123233995736766e-17, 'x': 6.123233995736766e-17},
-                 {'y': -0.47552825814757677, 'x': -0.2938926261462365},
-                 {'y': -0.2938926261462367, 'x': -0.47552825814757677},
-                 {'y': 0.29389262614623607, 'x': -0.47552825814757682},
-                 {'y': 0.4755282581475768, 'x': -0.2938926261462367},
-                 {'y': 1.8369701987210297e-16, 'x': -1.2246467991473532e-16},
-                 {'y': -0.4755282581475767, 'x': 0.29389262614623646}]
-        upper = [{'y': 0.29389262614623657, 'x': 0.4755282581475768},
                  {'y': 0.4755282581475768, 'x': 0.2938926261462366},
                  {'y': 6.123233995736766e-17, 'x': 6.123233995736766e-17},
                  {'y': -0.47552825814757677, 'x': -0.2938926261462365},
@@ -102,13 +93,10 @@ class LissajousGeneratorTest(unittest.TestCase):
                  {'y': -0.29389262614623674, 'x': 0.47552825814757677}]
 
         g.produce_points()
-        points = [{'x':x, 'y':y} for (x, y) in zip(g.points['x'], g.points['y'])]
-        points_upper = [{'x':x, 'y':y} for (x, y) in zip(g.points_upper['x'], g.points_upper['y'])]
-        points_lower = [{'x':x, 'y':y} for (x, y) in zip(g.points_lower['x'], g.points_lower['y'])]
-        self.assertEqual(10, len(points))
-        self.assertEquals(points, positions)
-        self.assertEquals(points_upper, upper)
-        self.assertEquals(points_lower, lower)
+        p = [{'x':x, 'y':y} for (x, y) in zip(g.points['x'], g.points['y'])]
+        b = [{'x':x, 'y':y} for (x, y) in zip(g.bounds['x'], g.bounds['y'])]
+        self.assertEqual(positions, p)
+        self.assertEqual(bounds, b)
 
     def test_to_dict(self):
         expected_dict = dict()
