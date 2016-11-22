@@ -28,6 +28,16 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(lower, self.g.points_lower['x'].tolist())
         self.assertEqual(upper, self.g.points_upper['x'].tolist())
 
+    def test_negative_direction(self):
+        g = LineGenerator("x", "mm", 2, -2, 5)
+        positions = [2., 1., 0., -1., -2.]
+        lower = [2.5, 1.5, 0.5, -0.5, -1.5]
+        upper = [1.5, 0.5, -0.5, -1.5, -2.5]
+        g.produce_points()
+        self.assertEqual(positions, g.points['x'].tolist())
+        self.assertEqual(lower, g.points_lower['x'].tolist())
+        self.assertEqual(upper, g.points_upper['x'].tolist())
+
     def test_single_point(self):
         g = LineGenerator("x", "mm", 1.0, 4.0, 1)
         g.produce_points()

@@ -305,12 +305,22 @@ class CompoundGenerator(Generator):
                 j = k // self.generator_dim_scaling[g]["repeat"]
                 gr = j // g.num
                 j %= g.num
+                bounds_reverse = False
                 if dim["alternate"] and g is not dim["generators"][0] and gr % 2 == 1:
+                    # the top level generator's direction is handled by
+                    # the fact that the reverse direction was appended
                     j = g.num - j - 1
+                    bounds_reverse = True
+                # seriously messy logic now
+                bounds_reverse |= dim_reverse and g is dim["generators"][0]
                 for axis in g.axes:
                     p.positions[axis] = g.points[axis][j]
-                    p.lower[axis] = g.points_lower[axis][j]
-                    p.upper[axis] = g.points_upper[axis][j]
+                    lower = g.points_upper[axis] if bounds_reverse \
+                        else g.points_lower[axis]
+                    upper = g.points_lower[axis] if bounds_reverse \
+                        else g.points_upper[axis]
+                    p.lower[axis] = lower[j]
+                    p.upper[axis] = upper[j]
         return p
 
     def to_dict(self):

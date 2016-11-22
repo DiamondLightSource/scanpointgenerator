@@ -21,7 +21,7 @@ class LineGenerator(Generator):
             units (str): The scannable units. E.g. "mm"
             start (float/list(float)): The first position to be generated.
                 e.g. 1.0 or [1.0, 2.0]
-            stop (float or list(float)): The first position to be generated.
+            stop (float or list(float)): The final position to be generated.
                 e.g. 5.0 or [5.0, 10.0]
             num (int): The number of points to generate. E.g. 5
             alternate_direction(bool): Specifier to reverse direction if

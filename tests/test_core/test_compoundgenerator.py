@@ -115,37 +115,50 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g.prepare()
         expected = []
         expected_idx = []
+        expected_lower = []
+        expected_upper = []
         for y in range_(1, 6):
-            r = range_(1, 6) if y % 2 == 1 else range_(5, 0, -1)
+            x_f = y % 2 == 1
+            r = range_(1, 6) if x_f else range_(5, 0, -1)
             for x in r:
                 expected.append({"y":float(y), "x":float(x)})
                 expected_idx.append([y - 1, x - 1])
+                expected_lower.append(x + (-0.5 if x_f else 0.5))
+                expected_upper.append(x + (0.5 if x_f else -0.5))
         points = list(g.iterator())
         self.assertEqual(expected, [p.positions for p in points])
         self.assertEqual(expected_idx, [p.indexes for p in points])
+        self.assertEqual(expected_lower, [p.lower["x"] for p in points])
+        self.assertEqual(expected_upper, [p.upper["x"] for p in points])
 
     def test_alternating_three_axis(self):
         z = LineGenerator("z", "mm", 1, 2, 2)
         y = LineGenerator("y", "mm", 1, 2, 2, True)
-        x = LineGenerator("x", "mm", 1, 3, 3, True)
+        x = LineGenerator("x", "mm", 3, 1, 3, True)
         g = CompoundGenerator([z, y, x], [], [])
         g.prepare()
         expected = []
         expected_idx = []
+        expected_lower = []
+        expected_upper = []
         y_f = True
         x_f = True
         for z in range_(1, 3):
             y_r = range_(1, 3) if y_f else range_(2, 0, -1)
             y_f = not y_f
             for y in y_r:
-                x_r = range_(1, 4) if x_f else range_(3, 0, -1)
-                x_f = not x_f
+                x_r = range_(3, 0, -1) if x_f else range_(1, 4)
                 for x in x_r:
                     expected.append({"x":float(x), "y":float(y), "z":float(z)})
-                    expected_idx.append([z-1, y-1, x-1])
+                    expected_idx.append([z-1, y-1, 3-x])
+                    expected_lower.append(x + (0.5 if x_f else -0.5))
+                    expected_upper.append(x + (-0.5 if x_f else 0.5))
+                x_f = not x_f
         points = list(g.iterator())
         self.assertEqual(expected, [p.positions for p in points])
         self.assertEqual(expected_idx, [p.indexes for p in points])
+        self.assertEqual(expected_lower, [p.lower["x"] for p in points])
+        self.assertEqual(expected_upper, [p.upper["x"] for p in points])
 
     def test_alternating_with_region(self):
         y = LineGenerator("y", "mm", 1, 5, 5, True)
@@ -468,19 +481,22 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         l2_f = True
         for (t1, t2) in zip(spiral_t.points['t1'], spiral_t.points['t2']):
             l2p = line2.points['l2'] if l2_f else line2.points['l2'][::-1]
+            l2pu = line2.points_upper['l2'] if l2_f else line2.points_lower['l2'][::-1]
+            l2pl = line2.points_lower['l2'] if l2_f else line2.points_upper['l2'][::-1]
             l2_f = not l2_f
-            tl2 += [(l2, t1, t2) for l2 in l2p if l2*l2 + t1*t1 <= 1]
+            tl2 += [(l2, l2u, l2l, t1, t2) for (l2, l2u, l2l) in
+                zip(l2p, l2pu, l2pl) if l2*l2 + t1*t1 <= 1]
         t_f = True
         for (s1, s2, l1) in l1s:
             inner = tl2 if t_f else tl2[::-1]
             t_f = not t_f
-            points += [(l2, t1, t2, s1, s2, l1) for (l2, t1, t2) in inner
-                    if s1*s1 + l1*l1 <= 1]
+            points += [(l2, l2u, l2l, t1, t2, s1, s2, l1)
+                for (l2, l2u, l2l, t1, t2) in inner if s1*s1 + l1*l1 <= 1]
         l1s_original = l1s
         l1s = [(s1, s2, l1) for (s1, s2, l1) in l1s if s1*s1 + l1*l1 <= 1]
 
         expected = [{"l2":l2, "t1":t1, "t2":t2, "s1":s1, "s2":s2, "l1":l1}
-            for (l2, t1, t2, s1, s2, l1) in points]
+            for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
 
         expected_idx = []
         t_f = (l1s_original.index(l1s[0])) % 2 == 0 # t_f is False
@@ -489,9 +505,14 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                 range_(len(tl2) - 1, -1, -1))]
             t_f = not t_f
 
+        expected_l2_lower = [l2l for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
+        expected_l2_upper = [l2u for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
+
         gpoints = list(g.iterator())
         self.assertEqual(expected, [p.positions for p in gpoints])
         self.assertEqual(expected_idx, [p.indexes for p in gpoints])
+        self.assertEqual(expected_l2_lower, [p.lower["l2"] for p in gpoints])
+        self.assertEqual(expected_l2_upper, [p.upper["l2"] for p in gpoints])
 
     def test_mutators(self):
         mutator_1 = FixedDurationMutator(0.2)
