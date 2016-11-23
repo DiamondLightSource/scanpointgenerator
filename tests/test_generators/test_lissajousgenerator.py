@@ -7,7 +7,7 @@ from test_util import ScanPointGeneratorTest
 from scanpointgenerator import LissajousGenerator
 
 
-class LissajousGeneratorTest(unittest.TestCase):
+class LissajousGeneratorTest(ScanPointGeneratorTest):
 
     def setUp(self):
         self.bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
@@ -97,6 +97,27 @@ class LissajousGeneratorTest(unittest.TestCase):
         b = [{'x':x, 'y':y} for (x, y) in zip(g.bounds['x'], g.bounds['y'])]
         self.assertEqual(positions, p)
         self.assertEqual(bounds, b)
+
+    def test_array_positions_with_offset(self):
+        g = LissajousGenerator(
+            ['x', 'y'], 'mm',
+            {"centre":[1., 0.], "height":1., "width":2.},
+            1, num_points = 5)
+        g.produce_points()
+        expected_x = [2.0, 1.3090169943749475, 0.19098300532505266,
+            0.19098300532505266, 1.3090169943749475]
+        expected_y = [0.0, 0.2938926261462366, -0.4755282581475768,
+            0.47552825814757677, -0.2938926261462364]
+        expected_bx = [1.8090169943749475, 1.8090169943749475,
+            0.6909830056250528, 0.0,
+            0.6909830056250523, 1.8090169943749472]
+        expected_by = [-0.47552825814757677, 0.47552825814757677,
+            -0.2938926261462365, -1.2246467991473532e-16,
+            0.2938926261462367, -0.4755282581475769]
+        self.assertListAlmostEqual(expected_x, g.points['x'].tolist())
+        self.assertListAlmostEqual(expected_y, g.points['y'].tolist())
+        self.assertListAlmostEqual(expected_bx, g.bounds['x'].tolist())
+        self.assertListAlmostEqual(expected_by, g.bounds['y'].tolist())
 
     def test_to_dict(self):
         expected_dict = dict()
