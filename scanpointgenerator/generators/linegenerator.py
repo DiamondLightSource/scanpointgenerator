@@ -94,22 +94,6 @@ class LineGenerator(Generator):
                 self.bounds[axis_name] = np.linspace(
                     float(bound_start), float(bound_stop), self.num + 1)
 
-    def iterator(self):
-        for i in range_(self.num):
-            point = Point()
-
-            for axis_index in range_(self.num_axes):
-                axis_name = self.name[axis_index]
-                start = self.start[axis_index]
-                step = self.step[axis_index]
-
-                point.positions[axis_name] = start + i * step
-                point.lower[axis_name] = start + (i - 0.5) * step
-                point.upper[axis_name] = start + (i + 0.5) * step
-
-            point.indexes = [i]
-            yield point
-
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 

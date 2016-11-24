@@ -4,10 +4,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator.mutators import RandomOffsetMutator
+from scanpointgenerator.compat import range_
 from scanpointgenerator.generators import LineGenerator
-from scanpointgenerator import CompoundGenerator
-from scanpointgenerator import Point
+from scanpointgenerator.mutators import RandomOffsetMutator
+from scanpointgenerator import Point, CompoundGenerator
 
 from pkg_resources import require
 require("mock")
@@ -17,7 +17,6 @@ from mock import patch, MagicMock
 class RandomOffsetMutatorTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.line_gen = LineGenerator("x", "mm", 1.0, 5.0, 5)
         self.m = RandomOffsetMutator(1, ["x"], dict(x=0.25))
 
     def test_init(self):
@@ -76,7 +75,16 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
                  3.355476113375, 4.572636740625, 5.5]
         indexes = [0, 1, 2, 3, 4]
 
-        for i, p in enumerate(self.m.mutate(self.line_gen.iterator())):
+        def test_iterator():
+            for x in range_(1, 6):
+                p = Point()
+                p.positions['x'] = x
+                p.lower['x'] = x - 0.5
+                p.upper['x'] = x + 0.5
+                p.indexes = [x - 1]
+                yield p
+
+        for i, p in enumerate(self.m.mutate(test_iterator())):
             self.assertAlmostEqual(p.positions['x'], positions[i], places=10)
             self.assertAlmostEqual(p.lower['x'], lower[i], places=10)
             self.assertAlmostEqual(p.upper['x'], upper[i], places=10)

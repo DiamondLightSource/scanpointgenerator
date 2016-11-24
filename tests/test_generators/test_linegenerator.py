@@ -9,22 +9,21 @@ from scanpointgenerator import LineGenerator
 
 class LineGeneratorTest(ScanPointGeneratorTest):
 
-    def setUp(self):
-        self.g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate_direction=True)
-
     def test_init(self):
-        self.assertEqual(self.g.position_units, dict(x="mm"))
-        self.assertEqual(self.g.index_dims, [5])
-        self.assertEqual(self.g.index_names, ["x"])
-        self.assertEqual(self.g.axes, ["x"])
+        g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate_direction=True)
+        self.assertEqual(dict(x="mm"), g.position_units)
+        self.assertEqual([5], g.index_dims)
+        self.assertEqual(["x"], g.index_names)
+        self.assertEqual(["x"], g.axes)
 
     def test_array_positions(self):
+        g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate_direction=True)
         positions = [1.0, 3.0, 5.0, 7.0, 9.0]
         bounds = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
         indexes = [0, 1, 2, 3, 4]
-        self.g.produce_points()
-        self.assertEqual(positions, self.g.points['x'].tolist())
-        self.assertEqual(bounds, self.g.bounds['x'].tolist())
+        g.produce_points()
+        self.assertEqual(positions, g.points['x'].tolist())
+        self.assertEqual(bounds, g.bounds['x'].tolist())
 
     def test_negative_direction(self):
         g = LineGenerator("x", "mm", 2, -2, 5)
@@ -40,23 +39,12 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([1.0], g.points["x"].tolist())
         self.assertEqual([-0.5, 2.5], g.bounds["x"].tolist())
 
-    def test_iterator(self):
-        positions = [1.0, 3.0, 5.0, 7.0, 9.0]
-        lower = [0.0, 2.0, 4.0, 6.0, 8.0]
-        upper = [2.0, 4.0, 6.0, 8.0, 10.0]
-        indexes = [0, 1, 2, 3, 4]
-        for i, p in enumerate(self.g.iterator()):
-            self.assertEqual(p.positions, dict(x=positions[i]))
-            self.assertEqual(p.lower, dict(x=lower[i]))
-            self.assertEqual(p.upper, dict(x=upper[i]))
-            self.assertEqual(p.indexes, [indexes[i]])
-        self.assertEqual(i, 4)
-
     def test_duplicate_name_raises(self):
         with self.assertRaises(ValueError):
             LineGenerator(["x", "x"], "mm", 0.0, 1.0, 5)
 
     def test_to_dict(self):
+        g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate_direction=True)
         expected_dict = dict()
         expected_dict['typeid'] = "scanpointgenerator:generator/LineGenerator:1.0"
         expected_dict['name'] = ["x"]
@@ -66,8 +54,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         expected_dict['num'] = 5
         expected_dict['alternate_direction'] = True
 
-        d = self.g.to_dict()
-
+        d = g.to_dict()
         self.assertEqual(expected_dict, d)
 
     def test_from_dict(self):
@@ -91,40 +78,34 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(5, gen.num)
         self.assertTrue(gen.alternate_direction)
 
-
 class LineGenerator2DTest(ScanPointGeneratorTest):
 
-    def setUp(self):
-        self.g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
-
     def test_init(self):
-        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(self.g.index_dims, [5])
-        self.assertEqual(self.g.index_names, ["x_y_Line"])
-        self.assertEqual(self.g.axes, ["x", "y"])
+        g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+        self.assertEqual(dict(x="mm", y="mm"), g.position_units)
+        self.assertEqual([5], g.index_dims)
+        self.assertEqual(["x_y_Line"], g.index_names)
+        self.assertEqual(["x", "y"], g.axes)
 
     def test_given_inconsistent_dims_then_raise_error(self):
-
         with self.assertRaises(ValueError):
             LineGenerator("x", "mm", [1.0], [5.0, 10.0], 5)
 
     def test_give_one_point_then_step_zero(self):
         l = LineGenerator(["1", "2", "3", "4", "5"], "mm", [0.0]*5, [10.0]*5, 1)
-        self.assertEqual(l.step, [0]*5)
+        self.assertEqual([0]*5, l.step)
 
-    def test_iterator(self):
+    def test_array_positions(self):
+        g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
+        g.produce_points()
         x_positions = [1.0, 2.0, 3.0, 4.0, 5.0]
         y_positions = [2.0, 4.0, 6.0, 8.0, 10.0]
-        lower = [0.5, 1.5, 2.5, 3.5, 4.5]
-        upper = [1.5, 2.5, 3.5, 4.5, 5.5]
-        indexes = [0, 1, 2, 3, 4]
-        for i, p in enumerate(self.g.iterator()):
-            self.assertEqual(p.positions, dict(x=x_positions[i],
-                                               y=y_positions[i]))
-            self.assertEqual(p.lower["x"], lower[i])
-            self.assertEqual(p.upper["x"], upper[i])
-            self.assertEqual(p.indexes, [indexes[i]])
-        self.assertEqual(i, 4)
+        x_bounds = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+        y_bounds = [1, 3, 5, 7, 9, 11]
+        self.assertEqual(x_positions, g.points['x'].tolist())
+        self.assertEqual(y_positions, g.points['y'].tolist())
+        self.assertEqual(x_bounds, g.bounds['x'].tolist())
+        self.assertEqual(y_bounds, g.bounds['y'].tolist())
 
 if __name__ == "__main__":
     unittest.main()

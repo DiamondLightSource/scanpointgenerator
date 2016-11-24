@@ -20,7 +20,6 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.position_units, None)
         self.assertEqual(self.g.index_dims, None)
         self.assertEqual(self.g.index_names, None)
-        self.assertRaises(NotImplementedError, self.g.iterator)
 
     def test_to_dict_raises(self):
         with self.assertRaises(NotImplementedError):

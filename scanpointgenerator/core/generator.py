@@ -22,14 +22,6 @@ class Generator(object):
     _generator_lookup = {}
     axes = []
 
-    def iterator(self):
-        """An iterator yielding positions at each scan point
-
-        Yields:
-            Point: The next scan :class:`Point`
-        """
-        raise NotImplementedError
-
     def to_dict(self):
         """Abstract method to convert object attributes into a dictionary"""
         raise NotImplementedError

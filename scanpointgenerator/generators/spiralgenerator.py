@@ -37,12 +37,8 @@ class SpiralGenerator(Generator):
             raise ValueError("Axis names cannot be duplicated; given %s" %
                              names)
 
-        self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor
-        self.beta = scale / (2 * m.pi)  # Radius scale factor
-        self.num = self._end_point(self.radius) + 1
 
         self.position_units = {names[0]: units, names[1]: units}
-        self.index_dims = [self._end_point(self.radius)]
         gen_name = "Spiral"
         for axis_name in self.names[::-1]:
             gen_name = axis_name + "_" + gen_name
@@ -50,21 +46,25 @@ class SpiralGenerator(Generator):
 
         self.axes = self.names  # For GDA
 
-    def produce_points(self):
-        self.points = {}
-        self.bounds = {}
-
         # spiral equation : r = b * phi
         # scale = 2 * pi * b
         # parameterise phi with approximation:
         # phi(t) = k * sqrt(t) (for some k)
         # number of possible t is solved by sqrt(t) = max_r / b*k
-        b = self.scale / (2 * m.pi)
-        k = m.sqrt(4 * m.pi) # magic scaling factor for our angle steps
-        size = (self.radius) / (b * k)
-        size *= size
-        size = int(size) + 1 # TODO: Why the +1 ???
+        self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor = k
+        self.beta = scale / (2 * m.pi)  # Radius scale factor = b
+        self.num = int((self.radius / (self.alpha * self.beta)) ** 2) + 1
 
+    def produce_points(self):
+        self.points = {}
+        self.bounds = {}
+
+        b = self.beta
+        k = self.alpha
+        size = self.num
+
+        # parameterise phi with approximation:
+        # phi(t) = k * sqrt(t) (for some k)
         phi_t = lambda t: k * np.sqrt(t + 0.5)
         phi = phi_t(np.arange(size))
         x = self.centre[0] + b * phi * np.sin(phi)
@@ -79,32 +79,6 @@ class SpiralGenerator(Generator):
         by = self.centre[1] + b * phi * np.cos(phi)
         self.bounds[self.names[0]] = bx
         self.bounds[self.names[1]] = by
-
-    def _calc(self, i):
-        """Calculate the coordinate for a given index"""
-        theta = self.alpha * m.sqrt(i)
-        radius = self.beta * theta
-        x = self.centre[0] + radius * m.sin(theta)
-        y = self.centre[1] + radius * m.cos(theta)
-
-        return x, y
-
-    def _end_point(self, radius):
-        """Calculate the index of the final point contained by circle"""
-        return int((radius / (self.alpha * self.beta)) ** 2)
-
-    def iterator(self):
-        for i in range_(0, self._end_point(self.radius) + 1):
-            p = Point()
-            p.indexes = [i]
-
-            i += 0.5  # Offset so lower bound of first point is not less than 0
-
-            p.positions[self.names[0]], p.positions[self.names[1]] = self._calc(i)
-            p.upper[self.names[0]], p.upper[self.names[1]] = self._calc(i + 0.5)
-            p.lower[self.names[0]], p.lower[self.names[1]] = self._calc(i - 0.5)
-
-            yield p
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

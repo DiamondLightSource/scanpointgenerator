@@ -81,26 +81,6 @@ class LissajousGenerator(Generator):
         self.bounds[self.names[0]] = bx
         self.bounds[self.names[1]] = by
 
-    def _calc(self, i):
-        """Calculate the coordinate for a given index"""
-        x = self.centre[0] + \
-            self.x_max * m.sin(self.x_freq * i * self.increment +
-                               self.phase_diff)
-        y = self.centre[1] + \
-            self.y_max * m.sin(self.y_freq * i * self.increment)
-
-        return x, y
-
-    def iterator(self):
-        for i in range_(self.num):
-            p = Point()
-            p.positions[self.names[0]], p.positions[self.names[1]] = self._calc(i)
-            p.lower[self.names[0]], p.lower[self.names[1]] = self._calc(i - 0.5)
-            p.upper[self.names[0]], p.upper[self.names[1]] = self._calc(i + 0.5)
-            p.indexes = [i]
-
-            yield p
-
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
