@@ -27,6 +27,7 @@ class CompoundGenerator(Generator):
         self.mutators = mutators
         self.axes = []
         self.position_units = {}
+        self.index_dims = []
         self.dimensions = []
         self.num = 1
         self.dim_meta = {}
@@ -139,6 +140,7 @@ class CompoundGenerator(Generator):
             self.num *= len(indicies)
             self.dim_meta[dim]["mask"] = mask
             self.dim_meta[dim]["indicies"] = indicies
+            self.index_dims.append(len(indicies))
 
         repeat = self.num
         tile = 1
