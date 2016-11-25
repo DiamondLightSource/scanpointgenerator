@@ -67,14 +67,12 @@ class LissajousGenerator(Generator):
         A, B = self.x_max, self.y_max
         a, b = self.x_freq, self.y_freq
         d = self.phase_diff
-        f = lambda t: x0 + A * np.sin(a * 2 * m.pi * t/self.num + d)
-        x = f(np.arange(self.num))
-        f = lambda t: x0 + A * np.sin(a * 2 * m.pi * (t-0.5)/self.num + d)
-        bx = f(np.arange(self.num + 1))
-        f = lambda t: y0 + B * np.sin(b * 2 * m.pi * t/self.num)
-        y = f(np.arange(self.num))
-        f = lambda t: y0 + B * np.sin(b * 2 * m.pi * (t-0.5)/self.num)
-        by = f(np.arange(self.num + 1))
+        fx = lambda t: x0 + A * np.sin(a * 2*m.pi * t/self.num + d)
+        fy = lambda t: y0 + B * np.sin(b * 2*m.pi * t/self.num)
+        x = fx(np.arange(self.num))
+        bx = fx(np.arange(self.num + 1) - 0.5)
+        y = fy(np.arange(self.num))
+        by = fy(np.arange(self.num + 1) - 0.5)
 
         self.points[self.names[0]] = x
         self.points[self.names[1]] = y
