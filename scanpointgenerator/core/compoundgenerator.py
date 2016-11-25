@@ -1,5 +1,4 @@
 import logging
-from threading import Lock
 
 from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core.generator import Generator
