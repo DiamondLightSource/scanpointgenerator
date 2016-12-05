@@ -86,7 +86,7 @@ class LineGenerator(Generator):
                     [start - 0.5 * d, start + 0.5 * d])
             else:
                 n = self.num - 1.
-                s = d / n
+                s = float(d) / n
                 bound_stop = stop + 0.5 * s
                 bound_start = start - 0.5 * s
                 self.points[axis_name] = np.linspace(
