@@ -22,6 +22,15 @@ class Generator(object):
     _generator_lookup = {}
     axes = []
 
+    def produce_points(self):
+        """
+        Abstract method to create and cache position and bound arrays
+
+        Point arrays should be stored in self.points[axis] and bounds in
+        self.bounds[axis]
+        """
+        raise NotImplementedError
+
     def to_dict(self):
         """Abstract method to convert object attributes into a dictionary"""
         raise NotImplementedError

@@ -9,10 +9,11 @@ from scanpointgenerator.rois import RectangularROI
 from scanpointgenerator.generators import LineGenerator
 
 
-@Generator.register_subclass("scanpointgenerator:generator/CompoundGenerator:1.0")
-class CompoundGenerator(Generator):
+class CompoundGenerator(object):
     """Nest N generators, apply exclusion regions to relevant generator pairs
     and apply any mutators before yielding points"""
+
+    typeid = "scanpointgenerator:generator/CompoundGenerator:1.0"
 
     def __init__(self, generators, excluders, mutators):
         """
