@@ -1,3 +1,5 @@
+.. _mutators:
+
 Mutators
 ========
 
@@ -18,7 +20,8 @@ apply it to a snake scan
 .. plot::
     :include-source:
 
-    from scanpointgenerator import LineGenerator, CompoundGenerator, plot_generator
+    from scanpointgenerator import LineGenerator, CompoundGenerator
+    from scanpointgenerator.plotgenerator import plot_generator
 
     xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=True)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
@@ -30,7 +33,8 @@ And with the random offset
 .. plot::
     :include-source:
 
-    from scanpointgenerator import LineGenerator, CompoundGenerator, RandomOffsetMutator, plot_generator
+    from scanpointgenerator import LineGenerator, CompoundGenerator, RandomOffsetMutator
+    from scanpointgenerator.plotgenerator import plot_generator
 
     xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=True)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)

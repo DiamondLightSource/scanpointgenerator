@@ -1,6 +1,5 @@
 from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core import Generator
-from scanpointgenerator.core import Point
 
 
 def to_list(value):
@@ -33,8 +32,7 @@ class LineGenerator(Generator):
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
         self.points = None
-        self.points_lower = None
-        self.points_upper = None
+        self.bounds = None
         self.units = units
 
         if len(self.name) != len(set(self.name)):

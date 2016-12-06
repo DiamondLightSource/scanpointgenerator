@@ -17,7 +17,8 @@ of each capture point.
 .. plot::
     :include-source:
 
-    from scanpointgenerator import LineGenerator, plot_generator
+    from scanpointgenerator import LineGenerator
+    from scanpointgenerator.plotgenerator import plot_generator
 
     gen = LineGenerator("x", "mm", 0.0, 1.0, 5)
     plot_generator(gen)
@@ -27,7 +28,8 @@ LineGenerator is N dimensional; just pass in ND lists for name, start and stop.
 .. plot::
     :include-source:
 
-    from scanpointgenerator import LineGenerator, plot_generator
+    from scanpointgenerator import LineGenerator
+    from scanpointgenerator.plotgenerator import plot_generator
 
     gen = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
     plot_generator(gen)

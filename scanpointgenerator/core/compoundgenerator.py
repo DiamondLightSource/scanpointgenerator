@@ -178,8 +178,11 @@ class CompoundGenerator(object):
     def get_point(self, n):
         """
         Retrieve the desired point from the generator
+
         Args:
             n (int): point to be generated
+        Returns:
+            Point: The requested point
         """
 
         if n >= self.num:
@@ -244,6 +247,7 @@ class CompoundGenerator(object):
     def from_dict(cls, d):
         """
         Create a CompoundGenerator instance from a serialised dictionary
+
         Args:
             d(dict): Dictionary of attributes
         Returns:

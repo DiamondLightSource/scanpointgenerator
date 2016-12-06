@@ -1,3 +1,5 @@
+.. _excluders:
+
 Excluders
 =========
 
@@ -18,8 +20,8 @@ Here we use a CircularROI to filter the points of a snake scan
     :include-source:
 
     from scanpointgenerator import LineGenerator, CompoundGenerator, \
-    Excluder, plot_generator
-    from scanpointgenerator.circular_roi import CircularROI
+    Excluder, CircularROI
+    from scanpointgenerator.plotgenerator import plot_generator
 
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
@@ -33,8 +35,8 @@ And with the excluder applied
     :include-source:
 
     from scanpointgenerator import LineGenerator, CompoundGenerator, \
-    Excluder, plot_generator
-    from scanpointgenerator.circular_roi import CircularROI
+    Excluder, CircularROI
+    from scanpointgenerator.plotgenerator import plot_generator
 
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
