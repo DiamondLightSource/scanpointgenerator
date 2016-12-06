@@ -1,4 +1,3 @@
-from scanpointgenerator.generators.arraygenerator import ArrayGenerator
 from scanpointgenerator.generators.linegenerator import LineGenerator
 from scanpointgenerator.generators.lissajousgenerator import LissajousGenerator
 from scanpointgenerator.generators.spiralgenerator import SpiralGenerator
