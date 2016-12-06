@@ -223,8 +223,12 @@ class CompoundGenerator(object):
                     j_lower, j_upper = j_upper, j_lower
                 for axis in g.axes:
                     point.positions[axis] = g.points[axis][j]
-                    point.lower[axis] = g.bounds[axis][j_lower]
-                    point.upper[axis] = g.bounds[axis][j_upper]
+                    if g is self.generators[-1]:
+                        point.lower[axis] = g.bounds[axis][j_lower]
+                        point.upper[axis] = g.bounds[axis][j_upper]
+                    else:
+                        point.lower[axis] = g.points[axis][j]
+                        point.upper[axis] = g.points[axis][j]
         return point
 
     def to_dict(self):
