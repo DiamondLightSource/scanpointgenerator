@@ -71,15 +71,15 @@ class CompoundGenerator(object):
                 gen_1.produce_points()
                 gen_2.produce_points()
                 valid = np.full(gen_1.num, True, dtype=np.int8)
-                valid &= \
-                    gen_1.points[axis_1] <= rect.roi.width + rect.roi.start[0]
-                valid &= gen_1.points[axis_1] >= rect.roi.start[0]
-                points_1 = gen_1.points[axis_1][valid.astype(np.bool)]
+                valid &= gen_1.positions[axis_1] \
+                        <= rect.roi.width + rect.roi.start[0]
+                valid &= gen_1.positions[axis_1] >= rect.roi.start[0]
+                points_1 = gen_1.positions[axis_1][valid.astype(np.bool)]
                 valid = np.full(gen_2.num, True, dtype=np.int8)
-                valid &= \
-                    gen_2.points[axis_2] <= rect.roi.height + rect.roi.start[1]
-                valid &= gen_2.points[axis_2] >= rect.roi.start[1]
-                points_2 = gen_2.points[axis_2][valid.astype(np.bool)]
+                valid &= gen_2.positions[axis_2] \
+                        <= rect.roi.height + rect.roi.start[1]
+                valid &= gen_2.positions[axis_2] >= rect.roi.start[1]
+                points_2 = gen_2.positions[axis_2][valid.astype(np.bool)]
                 new_gen1 = LineGenerator(
                     gen_1.name, gen_1.units, points_1[0], points_1[-1],
                     len(points_1), gen_1.alternate_direction)
@@ -225,13 +225,13 @@ class CompoundGenerator(object):
                     # so bounds are swapped
                     j_lower, j_upper = j_upper, j_lower
                 for axis in g.axes:
-                    point.positions[axis] = g.points[axis][j]
+                    point.positions[axis] = g.positions[axis][j]
                     if g is self.generators[-1]:
                         point.lower[axis] = g.bounds[axis][j_lower]
                         point.upper[axis] = g.bounds[axis][j_upper]
                     else:
-                        point.lower[axis] = g.points[axis][j]
-                        point.upper[axis] = g.points[axis][j]
+                        point.lower[axis] = g.positions[axis][j]
+                        point.upper[axis] = g.positions[axis][j]
         return point
 
     def to_dict(self):
@@ -274,8 +274,8 @@ class Dimension(object):
         axis_outer = excluder.scannables[1]
         gen_inner = [g for g in self.generators if axis_inner in g.axes][0]
         gen_outer = [g for g in self.generators if axis_outer in g.axes][0]
-        points_x = gen_inner.points[axis_inner]
-        points_y = gen_outer.points[axis_outer]
+        points_x = gen_inner.positions[axis_inner]
+        points_y = gen_outer.positions[axis_outer]
         if self.generators.index(gen_inner) > self.generators.index(gen_outer):
             gen_inner, gen_outer = gen_outer, gen_inner
             axis_inner, axis_outer = axis_outer, axis_inner
@@ -367,4 +367,3 @@ class Dimension(object):
         dim.alternate = outer.alternate or inner.alternate
         dim.size = outer.size * inner.size
         return dim
-

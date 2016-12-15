@@ -31,7 +31,7 @@ class LineGenerator(Generator):
         self.start = to_list(start)
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
-        self.points = None
+        self.positions = None
         self.bounds = None
         self.units = units
 
@@ -71,7 +71,7 @@ class LineGenerator(Generator):
         self.axes = self.name  # For GDA
 
     def produce_points(self):
-        self.points = {}
+        self.positions = {}
         self.bounds = {}
         for axis in range_(self.num_axes):
             axis_name = self.name[axis]
@@ -79,7 +79,7 @@ class LineGenerator(Generator):
             stop = self.stop[axis]
             d = stop - start
             if self.num == 1:
-                self.points[axis_name] = np.array([start])
+                self.positions[axis_name] = np.array([start])
                 self.bounds[axis_name] = np.array(
                     [start - 0.5 * d, start + 0.5 * d])
             else:
@@ -87,7 +87,7 @@ class LineGenerator(Generator):
                 s = float(d) / n
                 bound_stop = stop + 0.5 * s
                 bound_start = start - 0.5 * s
-                self.points[axis_name] = np.linspace(
+                self.positions[axis_name] = np.linspace(
                     float(start), float(stop), self.num)
                 self.bounds[axis_name] = np.linspace(
                     float(bound_start), float(bound_stop), self.num + 1)

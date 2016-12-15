@@ -22,7 +22,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         bounds = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
         indexes = [0, 1, 2, 3, 4]
         g.produce_points()
-        self.assertEqual(positions, g.points['x'].tolist())
+        self.assertEqual(positions, g.positions['x'].tolist())
         self.assertEqual(bounds, g.bounds['x'].tolist())
 
     def test_negative_direction(self):
@@ -30,13 +30,13 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         positions = [2., 1., 0., -1., -2.]
         bounds = [2.5, 1.5, 0.5, -0.5, -1.5, -2.5]
         g.produce_points()
-        self.assertEqual(positions, g.points['x'].tolist())
+        self.assertEqual(positions, g.positions['x'].tolist())
         self.assertEqual(bounds, g.bounds['x'].tolist())
 
     def test_single_point(self):
         g = LineGenerator("x", "mm", 1.0, 4.0, 1)
         g.produce_points()
-        self.assertEqual([1.0], g.points["x"].tolist())
+        self.assertEqual([1.0], g.positions["x"].tolist())
         self.assertEqual([-0.5, 2.5], g.bounds["x"].tolist())
 
     def test_duplicate_name_raises(self):
@@ -102,8 +102,8 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
         y_positions = [2.0, 4.0, 6.0, 8.0, 10.0]
         x_bounds = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
         y_bounds = [1, 3, 5, 7, 9, 11]
-        self.assertEqual(x_positions, g.points['x'].tolist())
-        self.assertEqual(y_positions, g.points['y'].tolist())
+        self.assertEqual(x_positions, g.positions['x'].tolist())
+        self.assertEqual(y_positions, g.positions['y'].tolist())
         self.assertEqual(x_bounds, g.bounds['x'].tolist())
         self.assertEqual(y_bounds, g.bounds['y'].tolist())
 

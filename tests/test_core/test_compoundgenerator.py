@@ -90,7 +90,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g = CompoundGenerator([t, w, z, s], [e1, e2, e3], [])
         g.prepare()
 
-        spiral = [(x, y) for (x, y) in zip(s.points["x"], s.points["y"])]
+        spiral = [(x, y) for (x, y) in zip(s.positions["x"], s.positions["y"])]
         zwt = [(z/99., w/4., t/4.) for t in range_(0, 5)
             for w in range_(0, 5)
             for z in range_(0, 100)]
@@ -253,8 +253,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         points = []
         for t in range_(1, 6):
             for z in (range_(-1, 4) if it % 2 == 0 else range_(3, -2, -1)):
-                s1p = spiral.points["s1"] if iz % 2 == 0 else spiral.points["s1"][::-1]
-                s2p = spiral.points["s2"] if iz % 2 == 0 else spiral.points["s2"][::-1]
+                s1p = spiral.positions["s1"] if iz % 2 == 0 else spiral.positions["s1"][::-1]
+                s2p = spiral.positions["s2"] if iz % 2 == 0 else spiral.positions["s2"][::-1]
                 points += [(x, y, s1, s2, z, t) for (s1, s2) in zip(s1p, s2p)
                         for y in range(0, 5) for x in range(0, 5)
                         if s1*s1 + z*z <= 1 and y*y + x*x <= 1]
@@ -429,15 +429,15 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         l1_f = True
         s_f = True
         points = []
-        for (j1, j2) in zip(lissajous.points["j1"], lissajous.points["j2"]):
-            l2p = line2.points["l2"] if l2_f else line2.points["l2"][::-1]
+        for (j1, j2) in zip(lissajous.positions["j1"], lissajous.positions["j2"]):
+            l2p = line2.positions["l2"] if l2_f else line2.positions["l2"][::-1]
             l2_f = not l2_f
             for l2 in l2p:
-                l1p = line1.points["l1"] if l1_f else line1.points["l1"][::-1]
+                l1p = line1.positions["l1"] if l1_f else line1.positions["l1"][::-1]
                 l1_f = not l1_f
                 for l1 in l1p:
-                    sp = zip(spiral.points["s1"], spiral.points["s2"]) if s_f \
-                        else zip(spiral.points["s1"][::-1], spiral.points["s2"][::-1])
+                    sp = zip(spiral.positions["s1"], spiral.positions["s2"]) if s_f \
+                        else zip(spiral.positions["s1"][::-1], spiral.positions["s2"][::-1])
                     s_f = not s_f
                     for (s1, s2) in sp:
                         points.append((s1, s2, l1, l2, j1, j2))
@@ -473,16 +473,16 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         tl2 = []
 
         s_f = True
-        for l1 in line1.points["l1"]:
-            sp = zip(spiral_s.points['s1'], spiral_s.points['s2'])
+        for l1 in line1.positions["l1"]:
+            sp = zip(spiral_s.positions['s1'], spiral_s.positions['s2'])
             sp = sp if s_f else list(sp)[::-1]
             s_f = not s_f
             l1s += [(s1, s2, l1) for (s1, s2) in sp]
         l2_f = True
-        for (t1, t2) in zip(spiral_t.points['t1'], spiral_t.points['t2']):
-            l2p = line2.points['l2'] if l2_f else line2.points['l2'][::-1]
-            l2pu = line2.bounds['l2'][1:len(line2.points['l2'])+1]
-            l2pl = line2.bounds['l2'][0:len(line2.points['l2'])]
+        for (t1, t2) in zip(spiral_t.positions['t1'], spiral_t.positions['t2']):
+            l2p = line2.positions['l2'] if l2_f else line2.positions['l2'][::-1]
+            l2pu = line2.bounds['l2'][1:len(line2.positions['l2'])+1]
+            l2pl = line2.bounds['l2'][0:len(line2.positions['l2'])]
             if not l2_f:
                 l2pu, l2pl = l2pl[::-1], l2pu[::-1]
             l2_f = not l2_f
@@ -617,7 +617,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         e2 = Excluder(r2, ["y", "z"])
         g = CompoundGenerator([zgen, spiral], [e1, e2], [])
         g.prepare()
-        xy = list(zip(spiral.points['x'], spiral.points['y']))
+        xy = list(zip(spiral.positions['x'], spiral.positions['y']))
         p = []
         for z in range_(0, 5):
             p += [(x, y, z) for (x, y) in (xy if z % 2 == 0 else xy[::-1])]
@@ -635,7 +635,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         e2 = Excluder(r2, ["y", "z"])
         g = CompoundGenerator([zgen, spiral], [e1, e2], [])
         g.prepare()
-        p = list(zip(spiral.points['x'], spiral.points['y']))
+        p = list(zip(spiral.positions['x'], spiral.positions['y']))
         p = [(x, y, z) for z in range_(0, 5) for (x, y) in p]
         expected = [x >= -2 and x <= 1 and y >= -2 and y <= 2
                 and z >= 0 and z <= 3 for (x, y, z) in p]
@@ -649,7 +649,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         e = Excluder(r, ["x", "y"])
         g = CompoundGenerator([z, spiral], [e], [])
         g.prepare()
-        p = list(zip(spiral.points['x'], spiral.points['y']))
+        p = list(zip(spiral.positions['x'], spiral.positions['y']))
         expected = [x >= -2 and x < 1 and y >= -2 and y < 2 for (x, y) in p]
         expected_r = [x >= -2 and x < 1 and y >= -2 and y < 2 for (x, y) in p[::-1]]
         actual = g.dim_meta[g.dimensions[1]]["mask"].tolist()

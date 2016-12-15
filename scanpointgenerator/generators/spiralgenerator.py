@@ -29,9 +29,8 @@ class SpiralGenerator(Generator):
         self.radius = radius
         self.scale = scale
         self.alternate_direction = alternate_direction
-        self.points = None
-        self.points_lower = None
-        self.points_upper = None
+        self.positions = None
+        self.bounds = None
 
         if len(self.names) != len(set(self.names)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -56,7 +55,7 @@ class SpiralGenerator(Generator):
         self.num = int((self.radius / (self.alpha * self.beta)) ** 2) + 1
 
     def produce_points(self):
-        self.points = {}
+        self.positions = {}
         self.bounds = {}
 
         b = self.beta
@@ -69,8 +68,8 @@ class SpiralGenerator(Generator):
         phi = phi_t(np.arange(size))
         x = self.centre[0] + b * phi * np.sin(phi)
         y = self.centre[1] + b * phi * np.cos(phi)
-        self.points[self.names[0]] = x
-        self.points[self.names[1]] = y
+        self.positions[self.names[0]] = x
+        self.positions[self.names[1]] = y
 
         size += 1
         phi_t = lambda t: k * np.sqrt(t)

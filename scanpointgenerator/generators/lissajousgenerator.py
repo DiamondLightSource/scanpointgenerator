@@ -25,9 +25,8 @@ class LissajousGenerator(Generator):
 
         self.names = names
         self.units = units
-        self.points = None
-        self.points_lower = None
-        self.points_upper = None
+        self.positions = None
+        self.bounds = None
         self.alternate_direction = alternate_direction
 
         if len(self.names) != len(set(self.names)):
@@ -60,7 +59,7 @@ class LissajousGenerator(Generator):
         self.axes = self.names  # For GDA
 
     def produce_points(self):
-        self.points = {}
+        self.positions = {}
         self.bounds = {}
 
         x0, y0 = self.centre[0], self.centre[1]
@@ -74,8 +73,8 @@ class LissajousGenerator(Generator):
         y = fy(np.arange(self.num))
         by = fy(np.arange(self.num + 1) - 0.5)
 
-        self.points[self.names[0]] = x
-        self.points[self.names[1]] = y
+        self.positions[self.names[0]] = x
+        self.positions[self.names[1]] = y
         self.bounds[self.names[0]] = bx
         self.bounds[self.names[1]] = by
 

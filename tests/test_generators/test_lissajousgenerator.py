@@ -48,7 +48,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
                  {'y': -0.29389262614623674, 'x': 0.47552825814757677}]
 
         g.produce_points()
-        p = [{'x':x, 'y':y} for (x, y) in zip(g.points['x'], g.points['y'])]
+        p = [{'x':x, 'y':y} for (x, y) in zip(g.positions['x'], g.positions['y'])]
         b = [{'x':x, 'y':y} for (x, y) in zip(g.bounds['x'], g.bounds['y'])]
         self.assertEqual(positions, p)
         self.assertEqual(bounds, b)
@@ -69,8 +69,8 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         expected_by = [-0.47552825814757677, 0.47552825814757677,
             -0.2938926261462365, -1.2246467991473532e-16,
             0.2938926261462367, -0.4755282581475769]
-        self.assertListAlmostEqual(expected_x, g.points['x'].tolist())
-        self.assertListAlmostEqual(expected_y, g.points['y'].tolist())
+        self.assertListAlmostEqual(expected_x, g.positions['x'].tolist())
+        self.assertListAlmostEqual(expected_y, g.positions['y'].tolist())
         self.assertListAlmostEqual(expected_bx, g.bounds['x'].tolist())
         self.assertListAlmostEqual(expected_by, g.bounds['y'].tolist())
 
