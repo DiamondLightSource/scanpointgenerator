@@ -54,30 +54,20 @@ class SpiralGenerator(Generator):
         self.beta = scale / (2 * m.pi)  # Radius scale factor = b
         self.num = int((self.radius / (self.alpha * self.beta)) ** 2) + 1
 
-    def produce_points(self):
-        self.positions = {}
-        self.bounds = {}
-
+    def prepare_arrays(self, index_array):
+        arrays = {}
         b = self.beta
         k = self.alpha
         size = self.num
-
         # parameterise phi with approximation:
         # phi(t) = k * sqrt(t) (for some k)
         phi_t = lambda t: k * np.sqrt(t + 0.5)
-        phi = phi_t(np.arange(size))
+        phi = phi_t(index_array)
         x = self.centre[0] + b * phi * np.sin(phi)
         y = self.centre[1] + b * phi * np.cos(phi)
-        self.positions[self.names[0]] = x
-        self.positions[self.names[1]] = y
-
-        size += 1
-        phi_t = lambda t: k * np.sqrt(t)
-        phi = phi_t(np.arange(size))
-        bx = self.centre[0] + b * phi * np.sin(phi)
-        by = self.centre[1] + b * phi * np.cos(phi)
-        self.bounds[self.names[0]] = bx
-        self.bounds[self.names[1]] = by
+        arrays[self.names[0]] = x
+        arrays[self.names[1]] = y
+        return arrays
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

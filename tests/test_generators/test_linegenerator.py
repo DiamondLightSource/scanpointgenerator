@@ -21,7 +21,8 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         positions = [1.0, 3.0, 5.0, 7.0, 9.0]
         bounds = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
         indexes = [0, 1, 2, 3, 4]
-        g.produce_points()
+        g.prepare_positions()
+        g.prepare_bounds()
         self.assertEqual(positions, g.positions['x'].tolist())
         self.assertEqual(bounds, g.bounds['x'].tolist())
 
@@ -29,13 +30,15 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         g = LineGenerator("x", "mm", 2, -2, 5)
         positions = [2., 1., 0., -1., -2.]
         bounds = [2.5, 1.5, 0.5, -0.5, -1.5, -2.5]
-        g.produce_points()
+        g.prepare_positions()
+        g.prepare_bounds()
         self.assertEqual(positions, g.positions['x'].tolist())
         self.assertEqual(bounds, g.bounds['x'].tolist())
 
     def test_single_point(self):
         g = LineGenerator("x", "mm", 1.0, 4.0, 1)
-        g.produce_points()
+        g.prepare_positions()
+        g.prepare_bounds()
         self.assertEqual([1.0], g.positions["x"].tolist())
         self.assertEqual([-0.5, 2.5], g.bounds["x"].tolist())
 
@@ -97,7 +100,8 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
 
     def test_array_positions(self):
         g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
-        g.produce_points()
+        g.prepare_positions()
+        g.prepare_bounds()
         x_positions = [1.0, 2.0, 3.0, 4.0, 5.0]
         y_positions = [2.0, 4.0, 6.0, 8.0, 10.0]
         x_bounds = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]

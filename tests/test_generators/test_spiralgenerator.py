@@ -36,7 +36,8 @@ class SpiralGeneratorTest(unittest.TestCase):
                  {'y': -0.09160107657707395, 'x': 1.2582363345925418},
                  {'y': -1.0190886264001306, 'x': 0.9334439933089926},
                  {'y': -1.4911377166541206, 'x': 0.06839234794968006}]
-        self.g.produce_points()
+        self.g.prepare_positions()
+        self.g.prepare_bounds()
         p = [{"x":x, "y":y} for (x, y) in zip(self.g.positions['x'], self.g.positions['y'])]
         b = [{"x":x, "y":y} for (x, y) in zip(self.g.bounds['x'], self.g.bounds['y'])]
         self.assertEqual(positions, p)

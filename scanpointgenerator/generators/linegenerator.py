@@ -70,27 +70,17 @@ class LineGenerator(Generator):
 
         self.axes = self.name  # For GDA
 
-    def produce_points(self):
-        self.positions = {}
-        self.bounds = {}
-        for axis in range_(self.num_axes):
-            axis_name = self.name[axis]
-            start = self.start[axis]
-            stop = self.stop[axis]
+    def prepare_arrays(self, index_array):
+        arrays = {}
+        for axis, start, stop in zip(self.name, self.start, self.stop):
             d = stop - start
-            if self.num == 1:
-                self.positions[axis_name] = np.array([start])
-                self.bounds[axis_name] = np.array(
-                    [start - 0.5 * d, start + 0.5 * d])
-            else:
-                n = self.num - 1.
-                s = float(d) / n
-                bound_stop = stop + 0.5 * s
-                bound_start = start - 0.5 * s
-                self.positions[axis_name] = np.linspace(
-                    float(start), float(stop), self.num)
-                self.bounds[axis_name] = np.linspace(
-                    float(bound_start), float(bound_stop), self.num + 1)
+            step = float(d)
+            # if self.num == 1 then single point case
+            if self.num > 1:
+                step /= (self.num - 1)
+            f = lambda t: (t * step) + start
+            arrays[axis] = f(index_array)
+        return arrays
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

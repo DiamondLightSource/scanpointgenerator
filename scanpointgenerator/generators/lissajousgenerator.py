@@ -58,25 +58,17 @@ class LissajousGenerator(Generator):
 
         self.axes = self.names  # For GDA
 
-    def produce_points(self):
-        self.positions = {}
-        self.bounds = {}
-
+    def prepare_arrays(self, index_array):
+        arrays = {}
         x0, y0 = self.centre[0], self.centre[1]
         A, B = self.x_max, self.y_max
         a, b = self.x_freq, self.y_freq
         d = self.phase_diff
         fx = lambda t: x0 + A * np.sin(a * 2*m.pi * t/self.num + d)
         fy = lambda t: y0 + B * np.sin(b * 2*m.pi * t/self.num)
-        x = fx(np.arange(self.num))
-        bx = fx(np.arange(self.num + 1) - 0.5)
-        y = fy(np.arange(self.num))
-        by = fy(np.arange(self.num + 1) - 0.5)
-
-        self.positions[self.names[0]] = x
-        self.positions[self.names[1]] = y
-        self.bounds[self.names[0]] = bx
-        self.bounds[self.names[1]] = by
+        arrays[self.names[0]] = fx(index_array)
+        arrays[self.names[1]] = fy(index_array)
+        return arrays
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

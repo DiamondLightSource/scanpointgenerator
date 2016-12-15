@@ -47,7 +47,8 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
                  {'y': -0.4755282581475767, 'x': 0.29389262614623646},
                  {'y': -0.29389262614623674, 'x': 0.47552825814757677}]
 
-        g.produce_points()
+        g.prepare_positions()
+        g.prepare_bounds()
         p = [{'x':x, 'y':y} for (x, y) in zip(g.positions['x'], g.positions['y'])]
         b = [{'x':x, 'y':y} for (x, y) in zip(g.bounds['x'], g.bounds['y'])]
         self.assertEqual(positions, p)
@@ -58,7 +59,8 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
             ['x', 'y'], 'mm',
             {"centre":[1., 0.], "height":1., "width":2.},
             1, num_points = 5)
-        g.produce_points()
+        g.prepare_positions()
+        g.prepare_bounds()
         expected_x = [2.0, 1.3090169943749475, 0.19098300532505266,
             0.19098300532505266, 1.3090169943749475]
         expected_y = [0.0, 0.2938926261462366, -0.4755282581475768,

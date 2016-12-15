@@ -68,8 +68,8 @@ class CompoundGenerator(object):
                 continue
             if isinstance(gen_1, LineGenerator) \
                     and isinstance(gen_2, LineGenerator):
-                gen_1.produce_points()
-                gen_2.produce_points()
+                gen_1.prepare_positions()
+                gen_2.prepare_positions()
                 valid = np.full(gen_1.num, True, dtype=np.int8)
                 valid &= gen_1.positions[axis_1] \
                         <= rect.roi.width + rect.roi.start[0]
@@ -91,8 +91,10 @@ class CompoundGenerator(object):
                 excluders.remove(rect)
 
         for generator in generators:
-            generator.produce_points()
+            generator.prepare_positions()
             self.dimensions.append(Dimension(generator))
+        # only the inner-most generator needs to have bounds calculated
+        generators[-1].prepare_bounds()
 
         for excluder in excluders:
             axis_1, axis_2 = excluder.scannables

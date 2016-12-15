@@ -1,3 +1,4 @@
+from scanpointgenerator.compat import np
 
 
 class Generator(object):
@@ -18,18 +19,32 @@ class Generator(object):
     position_units = None
     index_dims = None
     index_names = None
+    positions = None
+    bounds = None
+    num = 0
     # Lookup table for generator subclasses
     _generator_lookup = {}
     axes = []
 
-    def produce_points(self):
+    def prepare_arrays(self, index_array):
         """
-        Abstract method to create and cache position and bound arrays
+        Abstract method to create position or bounds array from provided index
+        array. index_array will be np.arange(self.num) for positions and
+        np.arange(self.num + 1) - 0.5 for bounds.
 
-        Point arrays should be stored in self.points[axis] and bounds in
-        self.bounds[axis]
+        Args:
+            index_array (np.array): Index array to produce parameterised points
+
+        Returns:
+            Positions: Dictionary of axis names to position/bounds arrays
         """
         raise NotImplementedError
+
+    def prepare_positions(self):
+        self.positions = self.prepare_arrays(np.arange(self.num))
+
+    def prepare_bounds(self):
+        self.bounds = self.prepare_arrays(np.arange(self.num + 1) - 0.5)
 
     def to_dict(self):
         """Abstract method to convert object attributes into a dictionary"""

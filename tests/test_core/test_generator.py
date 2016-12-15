@@ -21,9 +21,13 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
         self.assertEqual(self.g.index_dims, None)
         self.assertEqual(self.g.index_names, None)
 
-    def test_produce_points_raises(self):
+    def test_prepare_positions_raises(self):
         with self.assertRaises(NotImplementedError):
-            self.g.produce_points()
+            self.g.prepare_positions()
+
+    def test_prepare_bounds_raises(self):
+        with self.assertRaises(NotImplementedError):
+            self.g.prepare_bounds()
 
     def test_to_dict_raises(self):
         with self.assertRaises(NotImplementedError):
