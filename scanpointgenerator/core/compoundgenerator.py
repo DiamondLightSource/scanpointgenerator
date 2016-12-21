@@ -177,8 +177,6 @@ class CompoundGenerator(object):
             Point: The next point
         """
         it = (self.get_point(n) for n in range_(self.num))
-        for m in self.mutators:
-            it = m.mutate(it)
         for p in it:
             yield p
 
@@ -239,6 +237,8 @@ class CompoundGenerator(object):
                     else:
                         point.lower[axis] = g.positions[axis][j]
                         point.upper[axis] = g.positions[axis][j]
+        for m in self.mutators:
+            point = m.mutate(point)
         return point
 
     def to_dict(self):

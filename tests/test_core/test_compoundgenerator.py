@@ -516,10 +516,13 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_l2_lower, [p.lower["l2"] for p in gpoints])
         self.assertEqual(expected_l2_upper, [p.upper["l2"] for p in gpoints])
 
-    def test_mutators(self):
+    @patch("scanpointgenerator.core.random.Random")
+    def test_mutators(self, random_patch):
+        random_mock = MagicMock()
+        random_mock.random.return_value = 0.1
+        random_patch.return_value = random_mock
         mutator_1 = FixedDurationMutator(0.2)
         mutator_2 = RandomOffsetMutator(0, ["x"], {"x":1})
-        mutator_2.get_random_number = MagicMock(return_value=0.1)
         x = LineGenerator('x', 'mm', 1, 5, 5)
         g = CompoundGenerator([x], [], [mutator_1, mutator_2])
         g.prepare()

@@ -7,16 +7,16 @@ class Mutator(object):
     # Lookup table for mutator subclasses
     _mutator_lookup = {}
 
-    def mutate(self, iterator):
+    def mutate(self, point):
         """
-        Abstract method to take each point from the given iterator, apply a
-        mutation and then yield the new point
+        Abstract method to take a point, apply a mutation and then return the
+        new point
 
         Args:
-            iterator(iter): Iterator to mutate
+            Point: point to mutate
 
-        Yields:
-            Point: Mutated points from generator
+        Returns:
+            Point: Mutated point
         """
         raise NotImplementedError
 
