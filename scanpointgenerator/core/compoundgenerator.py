@@ -51,6 +51,11 @@ class CompoundGenerator(object):
         Prepare data structures and masks required for point generation.
         Must be called before get_point or iterator are called.
         """
+        self.dimensions = []
+        self.index_dims = []
+        self.dim_meta = {}
+        self.generator_dim_scaling = {}
+
         # we're going to mutate these structures
         excluders = list(self.excluders)
         generators = list(self.generators)
