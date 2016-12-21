@@ -202,7 +202,7 @@ class CompoundGenerator(object):
         kc = 0 # the "cumulative" k for each dimension
         for dim in self.dimensions:
             indicies = self.dim_meta[dim]["indicies"]
-            i = n // self.dim_meta[dim]["repeat"]
+            i = int(n // self.dim_meta[dim]["repeat"])
             i %= len(indicies)
             k = indicies[i]
             dim_reverse = False
@@ -216,8 +216,8 @@ class CompoundGenerator(object):
             # in alternating case, need to sometimes go backward
             point.indexes.append(i)
             for g in dim.generators:
-                j = k // self.generator_dim_scaling[g]["repeat"]
-                r = j // g.num
+                j = int(k // self.generator_dim_scaling[g]["repeat"])
+                r = int(j // g.num)
                 j %= g.num
                 j_lower = j
                 j_upper = j + 1
@@ -343,7 +343,7 @@ class Dimension(object):
             expanded = np.repeat(m["mask"], m["repeat"])
             if m["tile"] % 1 != 0:
                 ex = np.tile(expanded, int(m["tile"]))
-                expanded = np.append(ex, expanded[:len(expanded)//2])
+                expanded = np.append(ex, expanded[:int(len(expanded)//2)])
             else:
                 expanded = np.tile(expanded, int(m["tile"]))
             mask &= expanded
