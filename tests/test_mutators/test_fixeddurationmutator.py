@@ -38,7 +38,7 @@ class FixedDurationMutatorTest(unittest.TestCase):
         duration = Mock()
         m = FixedDurationMutator(duration)
         points = [Mock(), Mock(), Mock()]
-        mutated_points = [m.mutate(p) for p in points]
+        mutated_points = [m.mutate(p, i) for i, p in enumerate(points)]
         self.assertEqual(points, mutated_points)
         for p in mutated_points:
             self.assertIs(duration, p.duration)

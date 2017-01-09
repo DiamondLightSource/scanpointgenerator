@@ -7,13 +7,14 @@ class Mutator(object):
     # Lookup table for mutator subclasses
     _mutator_lookup = {}
 
-    def mutate(self, point):
+    def mutate(self, point, index):
         """
         Abstract method to take a point, apply a mutation and then return the
         new point
 
         Args:
             Point: point to mutate
+            Index: one-dimensional linear index of point
 
         Returns:
             Point: Mutated point

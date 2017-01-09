@@ -238,7 +238,7 @@ class CompoundGenerator(object):
                         point.lower[axis] = g.positions[axis][j]
                         point.upper[axis] = g.positions[axis][j]
         for m in self.mutators:
-            point = m.mutate(point)
+            point = m.mutate(point, n)
         return point
 
     def to_dict(self):

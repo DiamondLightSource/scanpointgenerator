@@ -11,12 +11,13 @@ class FixedDurationMutator(Mutator):
         """
         self.duration = duration
 
-    def mutate(self, point):
+    def mutate(self, point, index):
         """
         Applies duration to points in the given iterator, yielding them
 
         Args:
             Point: Point to mutate
+            Index: one-dimensional index of point
 
         Returns:
             Point: Mutated point

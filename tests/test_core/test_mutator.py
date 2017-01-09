@@ -16,7 +16,7 @@ class MutatorTest(unittest.TestCase):
     def test_mutate_raises(self):
         m = Mutator()
         with self.assertRaises(NotImplementedError):
-            m.mutate(MagicMock())
+            m.mutate(MagicMock(), MagicMock())
 
     def test_register_subclass(self):
 
