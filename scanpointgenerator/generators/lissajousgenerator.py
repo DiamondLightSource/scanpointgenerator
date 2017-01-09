@@ -25,8 +25,6 @@ class LissajousGenerator(Generator):
 
         self.names = names
         self.units = units
-        self.positions = None
-        self.bounds = None
         self.alternate_direction = alternate_direction
 
         if len(self.names) != len(set(self.names)):

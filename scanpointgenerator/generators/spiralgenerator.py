@@ -29,8 +29,6 @@ class SpiralGenerator(Generator):
         self.radius = radius
         self.scale = scale
         self.alternate_direction = alternate_direction
-        self.positions = None
-        self.bounds = None
 
         if len(self.names) != len(set(self.names)):
             raise ValueError("Axis names cannot be duplicated; given %s" %

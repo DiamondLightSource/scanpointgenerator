@@ -31,8 +31,6 @@ class LineGenerator(Generator):
         self.start = to_list(start)
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
-        self.positions = None
-        self.bounds = None
         self.units = units
 
         if len(self.name) != len(set(self.name)):
