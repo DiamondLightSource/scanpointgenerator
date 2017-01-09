@@ -35,19 +35,13 @@ less elements, because the last two or more dimensions will be unrolled into
 one long array. This avoids sparse datasets.
 
 .. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
-    :pyobject: LineGenerator.produce_points
+    :pyobject: LineGenerator.prepare_arrays
 
 This is used by CompoundGenerator to create the points for this generator.
-In here, we should create an array of points for each axis and store them in
-a dictionary attribute, using the axis names for the key. The same should be
-done for the boundaries between points.
+This method should create, for each axis the generator defines, an array of
+positions by transforming the input index array.
+The index array will be the numpy array [0, 1, 2, ..., n-1, n] for normal
+positions, and [-0.5, 0.5, 1.5, ..., n-0.5, n+0.5] when used to calculate
+boundary positions.
 
-The dictionaries are {axis_name : numpy float array}:
-
-- self.points: The capture positions corresponding to the centre of
-  the scan frame
-- self.bounds: The boundary between points for continuous scanning.
-
-As a rule, if the position of points can be parameterised by
-``[f(t) for t in range(num_points)]`` then the bounds should be given by
-``[f(t - 0.5) for t in range(num_points + 1)]``
+The arrays are returned as a dictionary of {axis_name : numpy float array}
