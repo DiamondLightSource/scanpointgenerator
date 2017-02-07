@@ -294,6 +294,9 @@ def asarray(data, dtype=None):
 
 asanyarray = asarray
 
+def copy(a, order='K'):
+    return ndarray(buffer=a._jdataset(), copy=True)
+
 @_wrap
 def asfarray(data, dtype=None):
     jdata = __cvt_jobj(data, copy=False, force=True)
