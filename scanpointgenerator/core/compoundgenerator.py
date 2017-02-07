@@ -141,7 +141,7 @@ class CompoundGenerator(object):
         for dim in self.dimensions:
             self.dim_meta[dim] = {}
             mask = dim.create_dimension_mask()
-            indicies = np.nonzero(mask)[0]
+            indicies = np.arange(mask.shape[0])
             if len(indicies) == 0:
                 raise ValueError("Regions would exclude entire scan")
             self.num *= len(indicies)
