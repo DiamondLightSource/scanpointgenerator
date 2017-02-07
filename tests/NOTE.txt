@@ -1,0 +1,5 @@
+The scanpoint generator also needs to run against
+
+org.eclipse.scanning.test/src/org/eclipse/scanning/test/points/Suite.java
+
+In fact it is a good idea to run it against the whole org.eclipse.scanning.test deck.
