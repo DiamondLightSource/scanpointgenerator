@@ -49,6 +49,18 @@ class Generator(object):
     def to_dict(self):
         """Abstract method to convert object attributes into a dictionary"""
         raise NotImplementedError
+    
+    def iterator(self):
+        """
+        Iterator yielding generator positions at each scan point
+
+        Yields:
+            Point: The next point
+        """
+        from scanpointgenerator.core.compoundgenerator import CompoundGenerator
+        gen = CompoundGenerator([self], [], [])
+        gen.prepare()
+        return gen.iterator()
 
     @classmethod
     def from_dict(cls, d):
