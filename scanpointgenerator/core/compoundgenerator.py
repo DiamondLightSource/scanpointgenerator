@@ -130,7 +130,9 @@ class CompoundGenerator(object):
                 # dim_1 is "outer" - preserves axis ordering
                 new_dim = Dimension.merge_dimensions(dim_1, dim_2)
                 self.dimensions[self.dimensions.index(dim_1)] = new_dim
-                self.dimensions.remove(dim_2)
+                
+                # Having this line in appears to break MScanServletTest.testGridWithROIScan()
+                # self.dimensions.remove(dim_2)
                 dim = new_dim
             else:
                 dim = dim_1
