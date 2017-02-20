@@ -13,7 +13,7 @@ def to_list(value):
 class LineGenerator(Generator):
     """Generate a line of equally spaced N-dimensional points"""
 
-    def __init__(self, name, units, start, stop, num, alternate_direction=False):
+    def __init__(self, name, units, start, stop, size, alternate_direction=False):
         """
         Args:
             name (str/list(str)): The scannable name(s) E.g. "x" or ["x", "y"]
@@ -22,7 +22,7 @@ class LineGenerator(Generator):
                 e.g. 1.0 or [1.0, 2.0]
             stop (float or list(float)): The final position to be generated.
                 e.g. 5.0 or [5.0, 10.0]
-            num (int): The number of points to generate. E.g. 5
+            size (int): The number of points to generate. E.g. 5
             alternate_direction(bool): Specifier to reverse direction if
                 generator is nested
         """
@@ -42,21 +42,21 @@ class LineGenerator(Generator):
             raise ValueError(
                 "Dimensions of name, start and stop do not match")
 
-        self.num = num
+        self.size = size
         self.num_axes = len(self.name)
 
         self.step = []
-        if self.num < 2:
+        if self.size < 2:
             self.step = [0]*len(self.start)
         else:
             for axis in range_(len(self.start)):
                 self.step.append(
-                    (self.stop[axis] - self.start[axis])/(self.num - 1))
+                    (self.stop[axis] - self.start[axis])/(self.size - 1))
 
         self.position_units = dict()
         for dimension in self.name:
             self.position_units[dimension] = units
-        self.index_dims = [self.num]
+        self.index_dims = [self.size]
 
         if len(self.name) > 1:
             gen_name = "Line"
@@ -73,9 +73,9 @@ class LineGenerator(Generator):
         for axis, start, stop in zip(self.name, self.start, self.stop):
             d = stop - start
             step = float(d)
-            # if self.num == 1 then single point case
-            if self.num > 1:
-                step /= (self.num - 1)
+            # if self.size == 1 then single point case
+            if self.size > 1:
+                step /= (self.size - 1)
             f = lambda t: (t * step) + start
             arrays[axis] = f(index_array)
         return arrays
@@ -89,7 +89,7 @@ class LineGenerator(Generator):
         d['units'] = self.units
         d['start'] = self.start
         d['stop'] = self.stop
-        d['num'] = self.num
+        d['size'] = self.size
         d['alternate_direction'] = self.alternate_direction
 
         return d
@@ -110,7 +110,7 @@ class LineGenerator(Generator):
         units = d['units']
         start = d['start']
         stop = d['stop']
-        num = d['num']
+        size = d['size']
         alternate_direction = d['alternate_direction']
 
-        return cls(name, units, start, stop, num, alternate_direction)
+        return cls(name, units, start, stop, size, alternate_direction)

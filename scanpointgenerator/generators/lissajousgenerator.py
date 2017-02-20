@@ -38,17 +38,17 @@ class LissajousGenerator(Generator):
         self.x_max = box['width']/2
         self.y_max = box['height']/2
         self.centre = box['centre']
-        self.num = num_points
+        self.size = num_points
 
         # Phase needs to be 0 for even lobes and pi/2 for odd lobes to start
         # at centre for odd and at right edge for even
         self.phase_diff = m.pi/2 * (num_lobes % 2)
         if num_points is None:
-            self.num = num_lobes * 250
-        self.increment = 2*m.pi/self.num
+            self.size = num_lobes * 250
+        self.increment = 2*m.pi/self.size
 
         self.position_units = {self.names[0]: units, self.names[1]: units}
-        self.index_dims = [self.num]
+        self.index_dims = [self.size]
         gen_name = "Lissajous"
         for axis_name in self.names[::-1]:
             gen_name = axis_name + "_" + gen_name
@@ -62,8 +62,8 @@ class LissajousGenerator(Generator):
         A, B = self.x_max, self.y_max
         a, b = self.x_freq, self.y_freq
         d = self.phase_diff
-        fx = lambda t: x0 + A * np.sin(a * 2*m.pi * t/self.num + d)
-        fy = lambda t: y0 + B * np.sin(b * 2*m.pi * t/self.num)
+        fx = lambda t: x0 + A * np.sin(a * 2*m.pi * t/self.size + d)
+        fy = lambda t: y0 + B * np.sin(b * 2*m.pi * t/self.size)
         arrays[self.names[0]] = fx(index_array)
         arrays[self.names[1]] = fy(index_array)
         return arrays
@@ -82,7 +82,7 @@ class LissajousGenerator(Generator):
         d['units'] = list(self.position_units.values())[0]
         d['box'] = box
         d['num_lobes'] = self.x_freq
-        d['num_points'] = self.num
+        d['num_points'] = self.size
 
         return d
 

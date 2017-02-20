@@ -59,7 +59,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         e = Excluder(r, ["x", "y"])
         g = CompoundGenerator([z, y, x], [e], [])
         g.prepare()
-        points = [g.get_point(n) for n in range(0, g.num)]
+        points = [g.get_point(n) for n in range(0, g.size)]
         pos = [p.positions for p in points]
         idx = [p.indexes for p in points]
         xy_expected = [(x/2., y/2.) for y in range_(-2, 3)
@@ -100,7 +100,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                 (x-1)*(x-1) + (y-1)*(y-1) <= rad1*rad1 and
                 (y-0.5)*(y-0.5) + (z-0.5)*(z-0.5) <= rad2*rad2 and
                 (w-0.5)*(w-0.5) + (t-0.5)*(t-0.5) <= rad3*rad3]
-        points = [g.get_point(n) for n in range_(0, g.num)]
+        points = [g.get_point(n) for n in range_(0, g.size)]
         pos = [p.positions for p in points]
         # assertEqual on a sequence of dicts is *really* slow
         for (e, p) in zip(expected, pos):
@@ -442,12 +442,12 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                     for (s1, s2) in sp:
                         points.append((s1, s2, l1, l2, j1, j2))
 
-        self.assertEqual(lissajous.num * line2.num * line1.num * spiral.num, len(points))
+        self.assertEqual(lissajous.size * line2.size * line1.size * spiral.size, len(points))
         points = [(s1, s2, l1, l2, j1, j2) for (s1, s2, l1, l2, j1, j2) in points if
             (j1-1)**2 + (l2-1)**2 <= 4 and
             (s2+1)**2 + (l1+1)**2 <= 16 and
             (s1-1)**2 + (s2-1)**2 <= 1]
-        self.assertEqual(len(points), g.num)
+        self.assertEqual(len(points), g.size)
         generated_points = list(g.iterator())
         self.assertEqual(len(points), len(generated_points))
 
@@ -537,7 +537,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         e = Excluder(r, ["x", "y"])
         g = CompoundGenerator([yg, xg], [e], [])
         g.prepare()
-        self.assertEqual(49, g.num)
+        self.assertEqual(49, g.size)
         p = g.get_point(8)
         self.assertEqual([1, 1], p.indexes)
         self.assertEqual((4, 4), (p.positions['y'], p.positions['x']))
@@ -556,7 +556,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         y = LineGenerator("y", "mm", 2.0, 2.1, 2, False)
         g = CompoundGenerator([y, x], [], [])
         g.prepare()
-        self.assertEqual(g.num, 6)
+        self.assertEqual(g.size, 6)
 
         self.assertEqual(2, len(g.dimensions))
         dim_0 = g.dimensions[0]

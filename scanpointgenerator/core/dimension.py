@@ -5,7 +5,7 @@ class Dimension(object):
     def __init__(self, generator):
         self.axes = list(generator.axes)
         self.generators = [generator]
-        self.size = generator.num
+        self.size = generator.size
         self.masks = []
         self.alternate = generator.alternate_direction
 
@@ -28,12 +28,12 @@ class Dimension(object):
             points_y = np.append(points_y, points_y[::-1])
         elif self.alternate:
             points_x = np.append(points_x, points_x[::-1])
-            points_x = np.repeat(points_x, gen_outer.num)
+            points_x = np.repeat(points_x, gen_outer.size)
             points_y = np.append(points_y, points_y[::-1])
-            points_y = np.tile(points_y, gen_inner.num)
+            points_y = np.tile(points_y, gen_inner.size)
         elif gen_inner is not gen_outer:
-            points_x = np.repeat(points_x, gen_outer.num)
-            points_y = np.tile(points_y, gen_inner.num)
+            points_x = np.repeat(points_x, gen_outer.size)
+            points_y = np.tile(points_y, gen_inner.size)
         else:
             # copy the point arrays so the excluders can perform
             # array operations in place (advantageous in the other cases)
@@ -52,9 +52,9 @@ class Dimension(object):
                 found_axis = True
             else:
                 if found_axis:
-                    repeat *= g.num
+                    repeat *= g.size
                 else:
-                    tile *= g.num
+                    tile *= g.size
 
         m = {"repeat":repeat, "tile":tile, "mask":mask}
         self.masks.append(m)
@@ -95,12 +95,12 @@ class Dimension(object):
         outer_masks = [m.copy() for m in outer.masks]
         scale = 1
         for g in inner.generators:
-            scale *= g.num
+            scale *= g.size
         for m in outer_masks:
             m["repeat"] *= scale
         scale = 1
         for g in outer.generators:
-            scale *= g.num
+            scale *= g.size
         for m in inner_masks:
             m["tile"] *= scale
         dim.masks = outer_masks + inner_masks

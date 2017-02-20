@@ -21,7 +21,7 @@ class Generator(object):
     index_names = None
     positions = None
     bounds = None
-    num = 0
+    size = 0
     # Lookup table for generator subclasses
     _generator_lookup = {}
     axes = []
@@ -29,8 +29,8 @@ class Generator(object):
     def prepare_arrays(self, index_array):
         """
         Abstract method to create position or bounds array from provided index
-        array. index_array will be np.arange(self.num) for positions and
-        np.arange(self.num + 1) - 0.5 for bounds.
+        array. index_array will be np.arange(self.size) for positions and
+        np.arange(self.size + 1) - 0.5 for bounds.
 
         Args:
             index_array (np.array): Index array to produce parameterised points
@@ -41,10 +41,10 @@ class Generator(object):
         raise NotImplementedError
 
     def prepare_positions(self):
-        self.positions = self.prepare_arrays(np.arange(self.num))
+        self.positions = self.prepare_arrays(np.arange(self.size))
 
     def prepare_bounds(self):
-        self.bounds = self.prepare_arrays(np.arange(self.num + 1) - 0.5)
+        self.bounds = self.prepare_arrays(np.arange(self.size + 1) - 0.5)
 
     def to_dict(self):
         """Abstract method to convert object attributes into a dictionary"""

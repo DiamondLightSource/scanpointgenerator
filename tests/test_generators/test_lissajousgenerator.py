@@ -120,7 +120,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(0.5, gen.x_max)
         self.assertEqual(1.0, gen.y_max)
         self.assertEqual([0.0, 0.0], gen.centre)
-        self.assertEqual(250, gen.num)
+        self.assertEqual(250, gen.size)
 
 if __name__ == "__main__":
     unittest.main()

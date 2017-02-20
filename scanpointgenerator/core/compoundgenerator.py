@@ -30,7 +30,7 @@ class CompoundGenerator(object):
         self.position_units = {}
         self.index_dims = []
         self.dimensions = []
-        self.num = 1
+        self.size = 1
         self.dim_meta = {}
         self.alternate_direction = [g.alternate_direction for g in generators]
         for generator in generators:
@@ -76,12 +76,12 @@ class CompoundGenerator(object):
                     and isinstance(gen_2, LineGenerator):
                 gen_1.prepare_positions()
                 gen_2.prepare_positions()
-                valid = np.full(gen_1.num, True, dtype=np.int8)
+                valid = np.full(gen_1.size, True, dtype=np.int8)
                 valid &= gen_1.positions[axis_1] \
                         <= rect.roi.width + rect.roi.start[0]
                 valid &= gen_1.positions[axis_1] >= rect.roi.start[0]
                 points_1 = gen_1.positions[axis_1][valid.astype(np.bool)]
-                valid = np.full(gen_2.num, True, dtype=np.int8)
+                valid = np.full(gen_2.size, True, dtype=np.int8)
                 valid &= gen_2.positions[axis_2] \
                         <= rect.roi.height + rect.roi.start[1]
                 valid &= gen_2.positions[axis_2] >= rect.roi.start[1]
@@ -138,19 +138,19 @@ class CompoundGenerator(object):
 
             dim.apply_excluder(excluder)
 
-        self.num = 1
+        self.size = 1
         for dim in self.dimensions:
             self.dim_meta[dim] = {}
             mask = dim.create_dimension_mask()
             indicies = np.nonzero(mask)[0]
             if len(indicies) == 0:
                 raise ValueError("Regions would exclude entire scan")
-            self.num *= len(indicies)
+            self.size *= len(indicies)
             self.dim_meta[dim]["mask"] = mask
             self.dim_meta[dim]["indicies"] = indicies
             self.index_dims.append(len(indicies))
 
-        repeat = self.num
+        repeat = self.size
         tile = 1
         for dim in self.dimensions:
             dim_length = len(self.dim_meta[dim]["indicies"])
@@ -163,11 +163,11 @@ class CompoundGenerator(object):
             tile = 1
             repeat = 1
             for g in dim.generators:
-                repeat *= g.num
+                repeat *= g.size
             for g in dim.generators:
-                repeat /= g.num
+                repeat /= g.size
                 d = {"tile":tile, "repeat":repeat}
-                tile *= g.num
+                tile *= g.size
                 self.generator_dim_scaling[g] = d
 
     def iterator(self):
@@ -177,7 +177,7 @@ class CompoundGenerator(object):
         Yields:
             Point: The next point
         """
-        it = (self.get_point(n) for n in range_(self.num))
+        it = (self.get_point(n) for n in range_(self.size))
         for p in it:
             yield p
 
@@ -191,7 +191,7 @@ class CompoundGenerator(object):
             Point: The requested point
         """
 
-        if n >= self.num:
+        if n >= self.size:
             raise IndexError("Requested point is out of range")
         point = Point()
 
@@ -216,14 +216,14 @@ class CompoundGenerator(object):
             point.indexes.append(i)
             for g in dim.generators:
                 j = int(k // self.generator_dim_scaling[g]["repeat"])
-                r = int(j // g.num)
-                j %= g.num
+                r = int(j // g.size)
+                j %= g.size
                 j_lower = j
                 j_upper = j + 1
                 if dim.alternate and g is not dim.generators[0] and r % 2 == 1:
                     # the top level generator's direction is handled by
                     # the fact that the reverse direction was appended
-                    j = g.num - j - 1
+                    j = g.size - j - 1
                     j_lower = j + 1
                     j_upper = j
                 elif dim_reverse and g is dim.generators[0]:

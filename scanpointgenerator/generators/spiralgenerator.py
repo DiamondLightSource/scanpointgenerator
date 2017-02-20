@@ -50,13 +50,13 @@ class SpiralGenerator(Generator):
         # number of possible t is solved by sqrt(t) = max_r / b*k
         self.alpha = m.sqrt(4 * m.pi)  # Theta scale factor = k
         self.beta = scale / (2 * m.pi)  # Radius scale factor = b
-        self.num = int((self.radius / (self.alpha * self.beta)) ** 2) + 1
+        self.size = int((self.radius / (self.alpha * self.beta)) ** 2) + 1
 
     def prepare_arrays(self, index_array):
         arrays = {}
         b = self.beta
         k = self.alpha
-        size = self.num
+        size = self.size
         # parameterise phi with approximation:
         # phi(t) = k * sqrt(t) (for some k)
         phi_t = lambda t: k * np.sqrt(t + 0.5)
