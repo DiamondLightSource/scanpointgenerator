@@ -142,18 +142,18 @@ class CompoundGenerator(object):
         for dim in self.dimensions:
             self.dim_meta[dim] = {}
             mask = dim.create_dimension_mask()
-            indicies = np.nonzero(mask)[0]
-            if len(indicies) == 0:
+            indices = np.nonzero(mask)[0]
+            if len(indices) == 0:
                 raise ValueError("Regions would exclude entire scan")
-            self.size *= len(indicies)
+            self.size *= len(indices)
             self.dim_meta[dim]["mask"] = mask
-            self.dim_meta[dim]["indicies"] = indicies
-            self.index_dims.append(len(indicies))
+            self.dim_meta[dim]["indices"] = indices
+            self.index_dims.append(len(indices))
 
         repeat = self.size
         tile = 1
         for dim in self.dimensions:
-            dim_length = len(self.dim_meta[dim]["indicies"])
+            dim_length = len(self.dim_meta[dim]["indices"])
             repeat /= dim_length
             self.dim_meta[dim]["tile"] = tile
             self.dim_meta[dim]["repeat"] = repeat
@@ -196,21 +196,21 @@ class CompoundGenerator(object):
         point = Point()
 
         # need to know how far along each dimension we are
-        # and, in the case of alternating indicies, how
+        # and, in the case of alternating indices, how
         # many times we've run through them
         kc = 0 # the "cumulative" k for each dimension
         for dim in self.dimensions:
-            indicies = self.dim_meta[dim]["indicies"]
+            indices = self.dim_meta[dim]["indices"]
             i = int(n // self.dim_meta[dim]["repeat"])
-            i %= len(indicies)
-            k = indicies[i]
+            i %= len(indices)
+            k = indices[i]
             dim_reverse = False
             if dim.alternate and kc % 2 == 1:
-                i = len(indicies) - i - 1
+                i = len(indices) - i - 1
                 dim_reverse = True
-            kc *= len(indicies)
+            kc *= len(indices)
             kc += k
-            k = indicies[i]
+            k = indices[i]
             # need point k along each generator in dimension
             # in alternating case, need to sometimes go backward
             point.indexes.append(i)
