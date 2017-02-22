@@ -8,7 +8,7 @@ from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
 from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import LissajousGenerator
-from scanpointgenerator import Excluder
+from scanpointgenerator import ROIExcluder
 from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI
 from scanpointgenerator.mutators import RandomOffsetMutator
 from scanpointgenerator.compat import range_
@@ -79,7 +79,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         y = LineGenerator("y", "mm", -1., 1, 5, False)
         z = LineGenerator("z", "mm", -1., 1, 5, False)
         r = CircularROI([0., 0.], 1)
-        e = Excluder(r, ["x", "y"])
+        e = ROIExcluder([r], ["x", "y"])
         g = CompoundGenerator([z, y, x], [e], [])
         g.prepare()
         points = [g.get_point(n) for n in range(0, g.size)]
@@ -103,13 +103,13 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         t = LineGenerator("t", "mm", 0, 1, 5)
         rad1 = 2.8
         r1 = CircularROI([1., 1.], rad1)
-        e1 = Excluder(r1, ["x", "y"])
+        e1 = ROIExcluder([r1], ["x", "y"])
         rad2 = 2
         r2 = CircularROI([0.5, 0.5], rad2)
-        e2 = Excluder(r2, ["y", "z"])
+        e2 = ROIExcluder([r2], ["y", "z"])
         rad3 = 0.5
         r3 = CircularROI([0.5, 0.5], rad3)
-        e3 = Excluder(r3, ["w", "t"])
+        e3 = ROIExcluder([r3], ["w", "t"])
         g = CompoundGenerator([t, w, z, s], [e1, e2, e3], [])
         g.prepare()
 
@@ -187,7 +187,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         y = LineGenerator("y", "mm", 1, 5, 5, True)
         x = LineGenerator("x", "mm", 1, 5, 5, True)
         r1 = CircularROI([3, 3], 1.5)
-        e1 = Excluder(r1, ["y", "x"])
+        e1 = ROIExcluder([r1], ["y", "x"])
         g = CompoundGenerator([y, x], [e1], [])
         g.prepare()
         expected = []
@@ -210,7 +210,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         y = LineGenerator("y", "mm", 1, 5, 5, alternate=True)
         x = LineGenerator("x", "mm", 1, 5, 5, alternate=True)
         r1 = CircularROI([3, 3], 1.5)
-        e1 = Excluder(r1, ["x", "y"])
+        e1 = ROIExcluder([r1], ["x", "y"])
         g = CompoundGenerator([z, y, x], [e1], [])
         g.prepare()
         expected = []
@@ -246,8 +246,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         xg = LineGenerator("x", "mm", 0, 1, 2, True)
         r1 = EllipticalROI([0, 1], [1, 2])
         r2 = SectorROI([0, 0], [0.2, 1], [0, 7])
-        e1 = Excluder(r1, ['x', 'y'])
-        e2 = Excluder(r2, ['w', 'z'])
+        e1 = ROIExcluder([r1], ['x', 'y'])
+        e2 = ROIExcluder([r2], ['w', 'z'])
         g = CompoundGenerator([wg, zg, yg, xg], [e1, e2], [])
         g.prepare()
         actual = [p.positions for p in g.iterator()]
@@ -264,8 +264,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         yg = LineGenerator("y", "mm", 0, 4, 5)
         xg = LineGenerator("x", "mm", 0, 4, 5)
         r1 = CircularROI([0, 0], 1)
-        e1 = Excluder(r1, ["s1", "z"])
-        e2 = Excluder(r1, ["y", "x"])
+        e1 = ROIExcluder([r1], ["s1", "z"])
+        e2 = ROIExcluder([r1], ["y", "x"])
         g = CompoundGenerator([tg, zg, spiral, yg, xg], [e2, e1], [])
         g.prepare()
 
@@ -297,8 +297,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         xg = LineGenerator("x", "mm", 0, 4, 5, True)
         r1 = RectangularROI([-1, -1], 5.5, 3.5)
         r2 = RectangularROI([1, 0], 2.5, 2.5)
-        e1 = Excluder(r1, ["z", "y"])
-        e2 = Excluder(r2, ["x", "y"])
+        e1 = ROIExcluder([r1], ["z", "y"])
+        e2 = ROIExcluder([r2], ["x", "y"])
         g = CompoundGenerator([tg, zg, yg, xg], [e1, e2], [])
         g.prepare()
         zf = True
@@ -329,8 +329,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         y = LineGenerator("y", "mm", 1, 5, 5, True)
         x = LineGenerator("x", "mm", 1, 5, 5, True)
         r1 = CircularROI([3, 3], 1.5)
-        e1 = Excluder(r1, ["x", "y"])
-        e2 = Excluder(r1, ["z", "y"])
+        e1 = ROIExcluder([r1], ["x", "y"])
+        e2 = ROIExcluder([r1], ["z", "y"])
         g = CompoundGenerator([z, y, x], [e1, e2], []) #20 points
         g.prepare()
         actual = [p.positions for p in list(g.iterator())]
@@ -357,8 +357,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         yg = LineGenerator("y", "mm", 1, 5, 5, True)
         xg = LineGenerator("x", "mm", 1, 5, 5, True)
         r1 = RectangularROI([3., 3.], 2., 2.)
-        e1 = Excluder(r1, ["y", "x"])
-        e2 = Excluder(r1, ["z", "y"])
+        e1 = ROIExcluder([r1], ["y", "x"])
+        e2 = ROIExcluder([r1], ["z", "y"])
         g = CompoundGenerator([tg, zg, yg, xg], [e1, e2], [])
         g.debug = True
         g.prepare()
@@ -440,9 +440,9 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         r1 = CircularROI([1, 1], 2)
         r2 = CircularROI([-1, -1], 4)
         r3 = CircularROI([1, 1], 2)
-        e1 = Excluder(r1, ["j1", "l2"])
-        e2 = Excluder(r2, ["s2", "l1"])
-        e3 = Excluder(r3, ["s1", "s2"])
+        e1 = ROIExcluder([r1], ["j1", "l2"])
+        e2 = ROIExcluder([r2], ["s2", "l1"])
+        e3 = ROIExcluder([r3], ["s1", "s2"])
         g = CompoundGenerator([lissajous, line2, line1, spiral], [e1, e2, e3], [])
         g.prepare()
 
@@ -485,8 +485,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         spiral_t = SpiralGenerator(["t1", "t2"], "mm", [0, 0], 5, 2.5, True)
         line2 = LineGenerator(["l2"], "mm", -1, 2, 5, True)
         r = CircularROI([0, 0], 1)
-        e1 = Excluder(r, ["s1", "l1"])
-        e2 = Excluder(r, ["l2", "t1"])
+        e1 = ROIExcluder([r], ["s1", "l1"])
+        e2 = ROIExcluder([r], ["l2", "t1"])
         g = CompoundGenerator([line1, spiral_s, spiral_t, line2], [e1, e2], [])
         g.prepare()
 
@@ -561,7 +561,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         xg = LineGenerator("x", "mm", 1, 10, 10)
         yg = LineGenerator("y", "mm", 1, 10, 10)
         r = RectangularROI([3, 3], 6, 6)
-        e = Excluder(r, ["x", "y"])
+        e = ROIExcluder([r], ["x", "y"])
         g = CompoundGenerator([yg, xg], [e], [])
         g.prepare()
         self.assertEqual(49, g.size)
@@ -598,7 +598,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         x = LineGenerator("x", "mm", 0, 1, 5, False)
         y = LineGenerator("y", "mm", 0, 1, 5, False)
         circle = CircularROI([0., 0.], 1)
-        excluder = Excluder(circle, ['x', 'y'])
+        excluder = ROIExcluder([circle], ['x', 'y'])
         g = CompoundGenerator([y, x], [excluder], [])
         g.prepare()
         self.assertEqual(1, len(g.dimensions))
@@ -612,7 +612,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         x = LineGenerator("x", "mm", -1.0, 1.0, 5, False)
         y = LineGenerator("y", "mm", -1.0, 1.0, 5, False)
         r = CircularROI([0, 0], 1)
-        e = Excluder(r, ["x", "y"])
+        e = ROIExcluder([r], ["x", "y"])
         g = CompoundGenerator([y, x], [e], [])
         g.prepare()
         p = [(x/2., y/2.) for y in range_(-2, 3) for x in range_(-2, 3)]
@@ -623,7 +623,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         x = LineGenerator("x", "mm", -1.0, 1.0, 5, alternate=True)
         y = LineGenerator("y", "mm", -1.0, 1.0, 5, alternate=True)
         r = CircularROI([0.5, 0], 1)
-        e = Excluder(r, ["x", "y"])
+        e = ROIExcluder([r], ["x", "y"])
         g = CompoundGenerator([y, x], [e], [])
         g.prepare()
         reverse = False
@@ -642,8 +642,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate=True) #29 points
         r1 = RectangularROI([-2, -2], 4, 3)
         r2 = RectangularROI([-2, 0], 4, 3)
-        e1 = Excluder(r1, ["y", "x"])
-        e2 = Excluder(r2, ["y", "z"])
+        e1 = ROIExcluder([r1], ["y", "x"])
+        e2 = ROIExcluder([r2], ["y", "z"])
         g = CompoundGenerator([zgen, spiral], [e1, e2], [])
         g.prepare()
         xy = list(zip(spiral.positions['x'], spiral.positions['y']))
@@ -660,8 +660,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3) #29 points
         r1 = RectangularROI([-2, -2], 4, 3)
         r2 = RectangularROI([-2, 0], 4, 3)
-        e1 = Excluder(r1, ["y", "x"])
-        e2 = Excluder(r2, ["y", "z"])
+        e1 = ROIExcluder([r1], ["y", "x"])
+        e2 = ROIExcluder([r2], ["y", "z"])
         g = CompoundGenerator([zgen, spiral], [e1, e2], [])
         g.prepare()
         p = list(zip(spiral.positions['x'], spiral.positions['y']))
@@ -675,7 +675,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         z = LineGenerator("z", "mm", 0.0, 4.0, 5)
         spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate=True) #29 points
         r = RectangularROI([-2, -2], 3, 4)
-        e = Excluder(r, ["x", "y"])
+        e = ROIExcluder([r], ["x", "y"])
         g = CompoundGenerator([z, spiral], [e], [])
         g.prepare()
         p = list(zip(spiral.positions['x'], spiral.positions['y']))
@@ -689,8 +689,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         y = LineGenerator("y", "mm", -1.0, 1.0, 5, False)
         z = LineGenerator("z", "mm", -1.0, 1.0, 5, False)
         r = CircularROI([0.1, 0.2], 1)
-        e1 = Excluder(r, ["x", "y"])
-        e2 = Excluder(r, ["y", "z"])
+        e1 = ROIExcluder([r], ["x", "y"])
+        e2 = ROIExcluder([r], ["y", "z"])
         g = CompoundGenerator([z, y, x], [e1, e2], [])
         g.prepare()
         p = [(x/2., y/2., z/2.) for z in range_(-2, 3)
@@ -707,8 +707,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         yg = LineGenerator("y", "mm", 1, 5, 5, alternate=True)
         xg = LineGenerator("x", "mm", 2, 6, 5, alternate=True)
         r1 = CircularROI([4., 4.], 1.5)
-        e1 = Excluder(r1, ["y", "x"])
-        e2 = Excluder(r1, ["z", "y"])
+        e1 = ROIExcluder([r1], ["y", "x"])
+        e2 = ROIExcluder([r1], ["z", "y"])
         g = CompoundGenerator([tg, zg, yg, xg], [e1, e2], [])
         g.prepare()
 
@@ -738,11 +738,11 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         x3 = LineGenerator("x3", "mm", 0, 1.0, 5, False)
         y3 = LineGenerator("y3", "mm", 0, 1.0, 5, False)
         r = CircularROI([0, 0], 1)
-        e1 = Excluder(r, ["x1", "y1"])
-        e2 = Excluder(r, ["y1", "z1"])
-        e3 = Excluder(r, ["x1", "y1"])
-        e4 = Excluder(r, ["x2", "y2"])
-        e5 = Excluder(r, ["x3", "y3"])
+        e1 = ROIExcluder([r], ["x1", "y1"])
+        e2 = ROIExcluder([r], ["y1", "z1"])
+        e3 = ROIExcluder([r], ["x1", "y1"])
+        e4 = ROIExcluder([r], ["x2", "y2"])
+        e5 = ROIExcluder([r], ["x3", "y3"])
         g = CompoundGenerator(
                 [x3, y3, y2, x2, z1, y1, x1],
                 [e1, e2, e3, e4, e5],

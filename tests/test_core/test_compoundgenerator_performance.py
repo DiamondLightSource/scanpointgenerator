@@ -8,7 +8,7 @@ from test_util import ScanPointGeneratorTest
 from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
 from scanpointgenerator import SpiralGenerator
-from scanpointgenerator import Excluder
+from scanpointgenerator import ROIExcluder
 from scanpointgenerator.rois import CircularROI
 from scanpointgenerator.mutators import RandomOffsetMutator
 
@@ -23,9 +23,9 @@ class CompoundGeneratorPerformanceTest(ScanPointGeneratorTest):
         r1 = CircularROI([-0.7, 4], 0.5)
         r2 = CircularROI([0.5, 0.5], 0.3)
         r3 = CircularROI([0.2, 4], 0.5)
-        e1 = Excluder(r1, ["x", "y"])
-        e2 = Excluder(r2, ["w", "z"])
-        e3 = Excluder(r3, ["z", "y"])
+        e1 = ROIExcluder([r1], ["x", "y"])
+        e2 = ROIExcluder([r2], ["w", "z"])
+        e3 = ROIExcluder([r3], ["z", "y"])
         om = RandomOffsetMutator(0, ["x", "y"], {"x":0.2, "y":0.2})
         g = CompoundGenerator([w, z, s], [e1, e3, e2], [om])
         g.prepare() # g.size ~3e5

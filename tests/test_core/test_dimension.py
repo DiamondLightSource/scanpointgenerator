@@ -119,7 +119,7 @@ class DimensionTests(ScanPointGeneratorTest):
         g = Mock(axes=["x", "y"], positions={"x":x_pos, "y":y_pos})
         g.alternate = False
         mask = np.array([1, 1, 0, 1, 0, 0], dtype=np.int8)
-        e = Mock(scannables=["x", "y"], create_mask=Mock(return_value=mask))
+        e = Mock(axes=["x", "y"], create_mask=Mock(return_value=mask))
         d = Dimension(g)
         d.apply_excluder(e)
         d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
@@ -133,7 +133,7 @@ class DimensionTests(ScanPointGeneratorTest):
         hx_pos = np.zeros(5)
         hy_pos = np.array([-1, -2, -3])
         mask = np.full(15, 1, dtype=np.int8)
-        e = Mock(scannables=["gx", "hy"], create_mask=Mock(return_value=mask))
+        e = Mock(axes=["gx", "hy"], create_mask=Mock(return_value=mask))
         g = Mock(axes=["gx", "gy"], positions={"gx":gx_pos, "gy":gy_pos}, size=len(gx_pos), alternate=False)
         h = Mock(axes=["hx", "hy"], positions={"hx":hx_pos, "hy":hy_pos}, size=len(hy_pos), alternate=False)
         d = Dimension(g)
@@ -151,7 +151,7 @@ class DimensionTests(ScanPointGeneratorTest):
         g = Mock(axes=["x", "y"], positions={"x":x_pos, "y":y_pos})
         g.alternate = True
         mask = np.array([1, 1, 0, 1, 0, 0], dtype=np.int8)
-        e = Mock(scannables=["x", "y"], create_mask=Mock(return_value=mask))
+        e = Mock(axes=["x", "y"], create_mask=Mock(return_value=mask))
         d = Dimension(g)
         d.apply_excluder(e)
         d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
@@ -165,7 +165,7 @@ class DimensionTests(ScanPointGeneratorTest):
         mask_func = lambda px, py: np.full(len(px), 1, dtype=np.int8)
         g1 = Mock(axes=["g1"], positions={"g1":g1_pos}, size=len(g1_pos))
         g2 = Mock(axes=["g2"], positions={"g2":g2_pos}, size=len(g2_pos))
-        e = Mock(scannables=["g1", "g2"], create_mask=Mock(side_effect=mask_func))
+        e = Mock(axes=["g1", "g2"], create_mask=Mock(side_effect=mask_func))
         d = Dimension(g1)
         d.alternate = True
         d.generators = [Mock(size=5, axes=[]), g1, g2, Mock(size=7, axes=[])]
@@ -182,7 +182,7 @@ class DimensionTests(ScanPointGeneratorTest):
         gy_pos = np.repeat(np.array([0, 1, 2, 3]), 4)
         mask_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 1
         g = Mock(axes=["gx", "gy"], positions={"gx":gx_pos, "gy":gy_pos}, size=16, alternate=False)
-        e = Mock(scannables=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
+        e = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
         d = Dimension(g)
         d.apply_excluder(e)
         d.prepare()
@@ -195,7 +195,7 @@ class DimensionTests(ScanPointGeneratorTest):
         mask_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 1
         gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=False)
         gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=False)
-        e = Mock(scannables=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
+        e = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
         dx = Dimension(gx)
         dy = Dimension(gy)
         d = Dimension.merge_dimensions(dy, dx)
@@ -210,8 +210,8 @@ class DimensionTests(ScanPointGeneratorTest):
         gz_pos = np.array([0, 1, 2, 3])
         mask_xy_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 2
         mask_yz_func = lambda py, pz: (py-2)**2 + (pz-1)**2 <= 1
-        exy = Mock(scannables=["gx", "gy"], create_mask=Mock(side_effect=mask_xy_func))
-        eyz = Mock(scannables=["gy", "gz"], create_mask=Mock(side_effect=mask_yz_func))
+        exy = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_xy_func))
+        eyz = Mock(axes=["gy", "gz"], create_mask=Mock(side_effect=mask_yz_func))
         gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=True)
         gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=True)
         gz = Mock(axes=["gz"], positions={"gz":gz_pos}, size=4, alternate=True)

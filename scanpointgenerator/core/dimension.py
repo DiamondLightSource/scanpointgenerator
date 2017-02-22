@@ -59,8 +59,8 @@ class Dimension(object):
         if self._prepared:
             raise ValueError("Can not apply excluders after"
                              "prepare has been called")
-        axis_inner = excluder.scannables[0]
-        axis_outer = excluder.scannables[1]
+        axis_inner = excluder.axes[0]
+        axis_outer = excluder.axes[1]
         gen_inner = [g for g in self.generators if axis_inner in g.axes][0]
         gen_outer = [g for g in self.generators if axis_outer in g.axes][0]
         points_x = gen_inner.positions[axis_inner]
@@ -87,7 +87,7 @@ class Dimension(object):
             points_x = np.copy(points_x)
             points_y = np.copy(points_y)
 
-        if axis_inner == excluder.scannables[0]:
+        if axis_inner == excluder.axes[0]:
             excluder_mask = excluder.create_mask(points_x, points_y)
         else:
             excluder_mask = excluder.create_mask(points_y, points_x)
