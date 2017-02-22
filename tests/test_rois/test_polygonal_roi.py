@@ -33,6 +33,7 @@ class PolygonalROITests(unittest.TestCase):
         self.assertEquals([[1, 1], [1, 2], [3, 1]], roi.points)
 
     def test_simple_point_contains(self):
+        vertices = [[0, 0], [1, 0], [2, -1], [2, 1], [-1, 1], [-1, -1]]
         """
         Shape described looks like this:
         _____
@@ -40,7 +41,6 @@ class PolygonalROITests(unittest.TestCase):
         |/ \|
 
         """
-        vertices = [[0, 0], [1, 0], [2, -1], [2, 1], [-1, 1], [-1, -1]]
         roi = PolygonalROI(vertices)
         p = [-0.9, -0.85]
         self.assertTrue(roi.contains_point(p))
@@ -78,4 +78,4 @@ class PolygonalROITests(unittest.TestCase):
         self.assertEquals(expected, mask.tolist())
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
