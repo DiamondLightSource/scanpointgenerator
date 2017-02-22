@@ -6,18 +6,19 @@ Writing new scan point generators
 Let's walk through the simplest generator, :class:`LineGenerator`, and see how
 it is written.
 
-.. literalinclude:: ../scanpointgenerator/linegenerator.py
-    :lines: 2-3
+.. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
+    :lines: 1-2
 
-We import the baseclass :class:`Generator` and the :class:`Point` class
-that we will be generating instances of.
+We import the baseclass :class:`Generator` and the compatibility wrappers
+around the Python :py:func:`range` function and the :py:mod:`numpy` module
 
-.. literalinclude:: ../scanpointgenerator/linegenerator.py
-    :lines: 14-15
+.. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
+    :lines: 12-14
 
 Our new subclass includes a docstring giving a short explanation of what it does
+and registers itself as a subclass of Generator for deserialization purposes.
 
-.. literalinclude:: ../scanpointgenerator/linegenerator.py
+.. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
     :pyobject: LineGenerator.__init__
 
 The initialiser stores the arguments given to it, then generates the three
@@ -33,30 +34,14 @@ non grid based scans (like SpiralGenerator), index_dims will typically have
 less elements, because the last two or more dimensions will be unrolled into
 one long array. This avoids sparse datasets.
 
-.. literalinclude:: ../scanpointgenerator/linegenerator.py
-    :pyobject: LineGenerator._calc
+.. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
+    :pyobject: LineGenerator.prepare_arrays
 
-We have a repeated bit of code here, so have pulled it out into a function. It
-calculates the position of a point given an index
+This is used by CompoundGenerator to create the points for this generator.
+This method should create, for each axis the generator defines, an array of
+positions by transforming the input index array.
+The index array will be the numpy array [0, 1, 2, ..., n-1, n] for normal
+positions, and [-0.5, 0.5, 1.5, ..., n-0.5, n+0.5] when used to calculate
+boundary positions.
 
-.. literalinclude:: ../scanpointgenerator/linegenerator.py
-    :pyobject: LineGenerator.iterator
-
-This is the entry point for external code. It is expecting us to produce a
-number of :class:`Point` instances, one for each point in the scan. We are
-required to fill in the following dictionaries of str position_name -> float
-position:
-
-- positions: The capture position corresponding to the centre of the scan frame
-- lower: The lower bound of the scan frame if the scan is to be used for
-  continuous scanning
-- upper: The upper bound of the scan frame if the scan is to be used for
-  continuous scanning
-
-We also fill in the list of datapoint indexes:
-
-- indexes: The index into the dataset that the data frame should be stored in
-
-The `yield` keyword turns the python function into a generator, which can then
-be used by the external program to iterate through points without evaluating
-them all at the start.
+The arrays are returned as a dictionary of {axis_name : numpy float array}

@@ -11,20 +11,20 @@ class FixedDurationMutator(Mutator):
         """
         self.duration = duration
 
-    def mutate(self, iterator):
+    def mutate(self, point, index):
         """
         Applies duration to points in the given iterator, yielding them
 
         Args:
-            iterator: Iterator to mutate
+            Point: Point to mutate
+            Index: one-dimensional index of point
 
-        Yields:
-            Point: Mutated points
+        Returns:
+            Point: Mutated point
         """
 
-        for p in iterator:
-            p.duration = self.duration
-            yield p
+        point.duration = self.duration
+        return point
 
     def to_dict(self):
         return {"typeid": self.typeid, "duration": self.duration}

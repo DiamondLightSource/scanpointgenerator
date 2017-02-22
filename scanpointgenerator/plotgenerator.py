@@ -1,3 +1,5 @@
+from scanpointgenerator import CompoundGenerator, RectangularROI, CircularROI
+
 MARKER_SIZE = 10
 
 
@@ -10,11 +12,15 @@ def plot_generator(gen, excluder=None, show_indexes=True):
     if excluder is not None:
         roi = excluder.roi
         overlay = plt.subplot(111, aspect='equal')
-        if roi.name == "Rectangle":
-            lower_left = (roi.centre[0] - roi.width/2, roi.centre[1] - roi.height/2)
-            overlay.add_patch(Rectangle(lower_left, roi.width, roi.height, fill=False))
-        if roi.name == "Circle":
+        if isinstance(roi, RectangularROI):
+            overlay.add_patch(Rectangle(roi.start, roi.width, roi.height, fill=False))
+        if isinstance(roi, CircularROI):
             overlay.add_patch(Circle(roi.centre, roi.radius, fill=False))
+
+    if not isinstance(gen, CompoundGenerator):
+        excluders = [] if excluder is None else [excluder]
+        gen = CompoundGenerator([gen], excluders, [])
+    gen.prepare()
 
     # points for spline generation
     x, y = [], []
@@ -100,6 +106,6 @@ def plot_generator(gen, excluder=None, show_indexes=True):
         for i, x, y in zip(capi, capx, capy):
             plt.annotate(i, (x, y), xytext=(MARKER_SIZE/2, MARKER_SIZE/2),
                          textcoords='offset points')
-        indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
-        plt.title("Dataset: [%s]" % (", ".join(indexes)))
+        #indexes = ["%s (size %d)" % z for z in zip(gen.index_names, gen.index_dims)]
+        #plt.title("Dataset: [%s]" % (", ".join(indexes)))
     plt.show()

@@ -5,6 +5,7 @@ import unittest
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.polygonal_roi import PolygonalROI
+from scanpointgenerator.compat import np
 
 
 class PolygonalROITests(unittest.TestCase):
@@ -32,6 +33,7 @@ class PolygonalROITests(unittest.TestCase):
         self.assertEquals([[1, 1], [1, 2], [3, 1]], roi.points)
 
     def test_simple_point_contains(self):
+        vertices = [[0, 0], [1, 0], [2, -1], [2, 1], [-1, 1], [-1, -1]]
         """
         Shape described looks like this:
         _____
@@ -39,7 +41,6 @@ class PolygonalROITests(unittest.TestCase):
         |/ \|
 
         """
-        vertices = [[0, 0], [1, 0], [2, -1], [2, 1], [-1, 1], [-1, -1]]
         roi = PolygonalROI(vertices)
         p = [-0.9, -0.85]
         self.assertTrue(roi.contains_point(p))
@@ -64,5 +65,17 @@ class PolygonalROITests(unittest.TestCase):
         p = [1.5, 1.5] # has winding number -2
         self.assertFalse(roi.contains_point(p))
 
+    def test_mask_points(self):
+        vertices = [[0, 0], [0, 2], [2, 2], [2, 1],
+                    [1, 1], [1, 3], [3, 3], [3, 0]]
+        roi = PolygonalROI(vertices)
+        px = [0.5, 0.5, 1.5, 1.5, 2.5,  2.5, 3.5, -0.5, 3.5, 2, 3, 0]
+        py = [0.5, 2.5, 1.5, 2.5, 2.5, -0.5, 1.5,  0.5, 0.5, 0, 2, 1.5]
+        p = [np.array(px), np.array(py)]
+        expected = [True, False, False, True, True, False, False, False, False,
+                    True, False, True]
+        mask = roi.mask_points(p)
+        self.assertEquals(expected, mask.tolist())
+
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)

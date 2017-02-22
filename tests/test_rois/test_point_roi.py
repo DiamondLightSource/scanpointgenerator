@@ -5,6 +5,7 @@ import unittest
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.point_roi import PointROI
+from scanpointgenerator.compat import np
 
 
 class PointROITest(unittest.TestCase):
@@ -30,6 +31,18 @@ class PointROITest(unittest.TestCase):
         self.assertTrue(roi.contains_point(p, 1e-14))
         p = [1 + 1e-14, 1 + 1e-14]
         self.assertFalse(roi.contains_point(p, 1e-14))
+
+    def test_mask_points(self):
+        roi = PointROI([1, 2])
+        px = [1, 0, 1+1e-15, 1,       1]
+        py = [2, 0, 2,       2+1e-15, 2+1e-14]
+        expected = [True, False, True, True, False]
+        mask = roi.mask_points([np.array(px), np.array(py)], 2e-15)
+        self.assertEqual(expected, mask.tolist())
+
+        mask = roi.mask_points([np.array(px), np.array(py)], 0)
+        expected = [True, False, False, False, False]
+        self.assertEqual(expected, mask.tolist())
 
     def test_to_dict(self):
         roi = PointROI([1.1, 2.2])

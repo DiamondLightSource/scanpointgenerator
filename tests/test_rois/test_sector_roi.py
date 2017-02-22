@@ -6,6 +6,7 @@ from math import pi
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.sector_roi import SectorROI
+from scanpointgenerator.compat import np
 
 
 class SectorInitTest(unittest.TestCase):
@@ -143,6 +144,18 @@ class SectorContainsTest(unittest.TestCase):
         self.assertTrue(s.contains_point(p))
         p = (0, -1)
         self.assertTrue(s.contains_point(p))
+
+    def test_mask_points(self):
+        s = SectorROI((0, 0), (1, 2), (-pi/2, pi/2))
+        p = [np.array([0, 1, 0, 2.05, 1, 0.7, -1.5, 0.00]),
+             np.array([0, 0, 1, 0.00, 1, 0.7, 0.00, 2.05])]
+        expected = [False, True, True, False, True, False, False, False]
+        mask = s.mask_points(p)
+        self.assertEquals(expected, mask.tolist())
+
+        s2 = SectorROI((0, 0), (1, 2), (-5*pi/2, -3*pi/2)) #the same sector
+        mask = s.mask_points(p)
+        self.assertEquals(expected, mask.tolist())
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,7 @@
-from scanpointgenerator.core import ROI
 from math import hypot, atan2, pi
+
+from scanpointgenerator.core import ROI
+from scanpointgenerator.compat import np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/SectorROI:1.0")
@@ -14,16 +16,21 @@ class SectorROI(ROI):
         self.angles = self.constrain_angles(angles)
 
     def constrain_angles(self, angles):
-        # sort out tricky angles (i.e. make sure angle[0] < angle[1])
+        # constrain angles such that angles[0] < angles[1],
+        # angles[0] in [0, 2pi), and angles[1] <= angles[0] + 2pi
         a1 = angles[0]
         a2 = angles[1]
         if a2 < a1:
             a2 += 2 * pi
             if a2 < a1:
                 # input describes the full circle
-                a1 = 0
-                a2 = 2 * pi
-        return [a1, a2]
+                return [0, 2*pi]
+        # a1 <= a2
+        diff = a2 - a1
+        if diff >= 2*pi:
+            return [0, 2*pi]
+        a1 = (a1 + 2*pi) % (2*pi)
+        return [a1, a1+diff]
 
     def contains_point(self, point):
         angles = self.constrain_angles(self.angles)
@@ -32,21 +39,33 @@ class SectorROI(ROI):
         y = point[1] - self.centre[1]
         r = hypot(x, y)
         phi = atan2(y, x)
-        if phi < 0:
-            phi += 2 * pi
+        phi = (2*pi + phi) % (2*pi)
 
-        # Easy checks first
         if r < self.radii[0] or r > self.radii[1]:
             return False
-        if phi >= self.angles[0] and phi < self.angles[1]:
-            return True
-
         sweep = angles[1] - angles[0]
-        if sweep >= 2 * pi:
-            return True
-        if phi < angles[0]:
-            phi += 2 * pi
-        return phi <= angles[0] + sweep
+        # angle along starting at angles[0]
+        theta = (phi - angles[0] + 2*pi) % (2*pi)
+        return theta <= sweep
+
+    def mask_points(self, points):
+        x = points[0]
+        y = points[1]
+        x -= self.centre[0]
+        y -= self.centre[1]
+        r2 = (np.square(x) + np.square(y))
+        phi_0, phi_1 = self.constrain_angles(self.angles)
+        # phi_0 <= phi_1, phi_0 in [0, 2pi), phi_1 < 4pi
+        phi_x = np.arctan2(y, x)
+        # translate phi_x to range [0, 2pi]
+        phi_x = (2*pi + phi_x) % (2*pi)
+        # define phi_s and phi_x "offset from phi_0"
+        phi_s = phi_1 - phi_0
+        phi_x -= phi_0 + 2*pi
+        phi_x %= 2*pi
+        mask = (r2 <= self.radii[1]) & (r2 >= self.radii[0])
+        mask &= (phi_x <= phi_s)
+        return mask
 
     def to_dict(self):
         d = super(SectorROI, self).to_dict()

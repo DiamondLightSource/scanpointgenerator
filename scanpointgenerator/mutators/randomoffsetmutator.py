@@ -1,5 +1,4 @@
 from scanpointgenerator.core import Mutator
-from scanpointgenerator.core import random
 
 
 @Mutator.register_subclass("scanpointgenerator:mutator/RandomOffsetMutator:1.0")
@@ -18,92 +17,49 @@ class RandomOffsetMutator(Mutator):
         """
 
         self.seed = seed
-        self.RNG = random.Random(seed)
         self.axes = axes
         self.max_offset = max_offset
 
-    def get_random_number(self):
-        """
-        Return a random number between -1.0 and 1.0 with Gaussian distribution
+    def calc_offset(self, axis, idx):
+        m = self.max_offset[axis]
+        x = (idx << 4) + (0 if len(axis) == 0 else ord(axis[0]))
+        x ^= (self.seed << 12)
+        # Apply hash algorithm to x for pseudo-randomness
+        # Robert Jenkins 32 bit hash (avalanches well)
+        x = (x + 0x7ED55D16) + (x << 12)
+        x &= 0xFFFFFFFF # act as 32 bit unsigned before doing any right-shifts
+        x = (x ^ 0xC761C23C) ^ (x >> 19)
+        x = (x + 0x165667B1) + (x << 5)
+        x = (x + 0xD3A2646C) ^ (x << 9)
+        x = (x + 0xFD7046C5) + (x << 3)
+        x &= 0xFFFFFFFF
+        x = (x ^ 0xB55A4F09) ^ (x >> 16)
+        x &= 0xFFFFFFFF
+        r = float(x) / float(0xFFFFFFFF) # r in interval [0, 1]
+        r = r * 2 - 1 # r in [-1, 1]
+        return m * r
 
-        Returns:
-            Float: Random number
-        """
-        random_number = 2.0
-        while abs(random_number) > 1.0:
-            random_number = self.RNG.random()
-
-        return random_number
-
-    def apply_offset(self, point):
-        """
-        Apply a random offset to the Point
-
-        Args:
-            point(Point): Point to apply random offset to
-
-        Returns:
-            bool: Whether point was changed
-        """
-
-        changed = False
+    def mutate(self, point, idx):
+        inner_meta = None
+        point_offset = None
         for axis in self.axes:
-            offset = self.max_offset[axis]
-            if offset == 0.0:
-                pass
-            else:
-                random_offset = self.get_random_number() * offset
-                point.positions[axis] += random_offset
-                changed = True
-                
-        return changed
-
-    @staticmethod
-    def calculate_new_bounds(current_point, next_point):
-        """
-        Take two adjacent points and recalculate their shared bound
-
-        Args:
-            next_point(Point): Next point
-            current_point(Point): Current point
-        """
-
-        for axis in current_point.positions.keys():
-            new_bound = (current_point.positions[axis] +
-                         next_point.positions[axis]) / 2
-
-            current_point.upper[axis] = new_bound
-            next_point.lower[axis] = new_bound
-
-    def mutate(self, iterator):
-        """
-        An iterator that takes another iterator, applies a random offset to
-        each point and then yields it
-
-        Args:
-            iterator: Iterator to mutate
-
-        Yields:
-            Point: Mutated points
-        """
-
-        next_point = current_point = None
-
-        for next_point in iterator:
-            changed = self.apply_offset(next_point)
-
-            if current_point is not None:
-                if changed:
-                    # If point wasn't changed don't update bounds
-                    if next_point.lower == current_point.upper:
-                        # If leaving and re-entering ROI don't update bounds
-                        self.calculate_new_bounds(current_point, next_point)
-
-                yield current_point
-
-            current_point = next_point
-
-        yield next_point
+            offset = self.calc_offset(axis, idx)
+            point.positions[axis] += offset
+            if axis in point.lower and axis in point.upper:
+                inner_axis = axis
+                point_offset = offset
+        if inner_axis is not None:
+            # recalculate lower bounds
+            idx -= 1
+            prev_offset = self.calc_offset(inner_axis, idx)
+            offset = (point_offset + prev_offset) / 2
+            point.lower[inner_axis] += offset
+            # recalculate upper bounds
+            idx += 2
+            next_offset = self.calc_offset(inner_axis, idx)
+            offset = (point_offset + next_offset) / 2
+            point.upper[inner_axis] += offset
+        return point
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""

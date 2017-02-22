@@ -6,6 +6,7 @@ from math import pi
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator.rois.elliptical_roi import EllipticalROI
+from scanpointgenerator.compat import np
 
 
 class EllipticalROITest(unittest.TestCase):
@@ -42,9 +43,6 @@ class EllipticalROITest(unittest.TestCase):
         self.assertFalse(roi.contains_point(p))
 
     def test_rotated_point_contains(self):
-        r = EllipticalROI([1, 2], [2, 1], 0)
-        p = (1, 3)
-        self.assertTrue(r.contains_point(p))
         roi = EllipticalROI([1, 2], [2, 1], pi/6)
         p = (3, 1)
         self.assertFalse(roi.contains_point(p))
@@ -56,6 +54,13 @@ class EllipticalROITest(unittest.TestCase):
         self.assertFalse(roi.contains_point(p))
         p = (-0.73, 1)
         self.assertTrue(roi.contains_point(p))
+
+    def test_mask_points(self):
+        roi = EllipticalROI([1, 2], [2, 1], pi/6)
+        points = [np.array([3, 1, 2.73, 3.00, -0.73]),
+                  np.array([1, 0, 3.00, 4.27, 1.000])]
+        expected = [False, False, True, False, True]
+        self.assertEquals(expected, roi.mask_points(points).tolist())
 
     def test_to_dict(self):
         roi = EllipticalROI([1.1, 2.2], [3.3, 4.4], pi/4)

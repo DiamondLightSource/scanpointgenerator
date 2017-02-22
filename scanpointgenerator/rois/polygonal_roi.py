@@ -1,4 +1,5 @@
 from scanpointgenerator.core import ROI
+from scanpointgenerator.compat import range_, np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/PolygonalROI:1.0")
@@ -29,6 +30,24 @@ class PolygonalROI(ROI):
                     inside = not inside
             v1 = v2
         return inside
+
+    def mask_points(self, points):
+        x = points[0]
+        y = points[1]
+        v1 = self.points[-1]
+        mask = np.full(len(x), False, dtype=bool)
+        for i in range_(0, len(self.points)):
+            v2 = self.points[i]
+            if (v2[1] == v1[1]):
+                # skip horizontal edges
+                v1 = v2
+                continue
+            vmask = ((y < v2[1]) & (y >= v1[1])) | ((y < v1[1]) & (y >= v2[1]))
+            t = (y - v2[1]) / (v2[1] - v1[1])
+            vmask &= x < v1[0] + t * (v2[0] - v1[0])
+            mask ^= vmask
+            v1 = v2
+        return mask
 
     def to_dict(self):
         d = super(PolygonalROI, self).to_dict()

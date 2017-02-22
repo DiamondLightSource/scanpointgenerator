@@ -123,8 +123,8 @@ As an example of serialising, here is a simple snake scan.
 .. plot::
     :include-source:
 
-    from scanpointgenerator import LineGenerator, CompoundGenerator, \
-        plot_generator
+    from scanpointgenerator import LineGenerator, CompoundGenerator
+    from scanpointgenerator.plotgenerator import plot_generator
 
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
@@ -137,8 +137,8 @@ It is the same after being serialised and deserialised.
 .. plot::
     :include-source:
 
-    from scanpointgenerator import LineGenerator, CompoundGenerator, \
-        plot_generator
+    from scanpointgenerator import LineGenerator, CompoundGenerator
+    from scanpointgenerator.plotgenerator import plot_generator
 
     x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)

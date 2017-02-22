@@ -1,6 +1,7 @@
 from math import cos, sin
 
 from scanpointgenerator.core import ROI
+from scanpointgenerator.compat import np
 
 
 @ROI.register_subclass("scanpointgenerator:roi/RectangularROI:1.0")
@@ -27,8 +28,23 @@ class RectangularROI(ROI):
             ry = x * sin(phi) + y * cos(phi)
             x = rx
             y = ry
-        return (x >= 0 and x < self.width) \
-                and (y >= 0 and y < self.height)
+        return (x >= 0 and x <= self.width) \
+                and (y >= 0 and y <= self.height)
+
+    def mask_points(self, points):
+        x = points[0]
+        x -= self.start[0]
+        y = points[1]
+        y -= self.start[1]
+        if self.angle != 0:
+            phi = -self.angle
+            rx = x * cos(phi) - y * sin(phi)
+            ry = x * sin(phi) + y * cos(phi)
+            x = rx
+            y = ry
+        mask_x = np.logical_and(x >= 0, x <= self.width)
+        mask_y = np.logical_and(y >= 0, y <= self.height)
+        return np.logical_and(mask_x, mask_y)
 
     def to_dict(self):
         d = super(RectangularROI, self).to_dict()
