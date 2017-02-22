@@ -39,6 +39,24 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         with self.assertRaises(ValueError):
             CompoundGenerator([y, x], [], [])
 
+    def test_raise_before_prepare(self):
+        x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
+        g = CompoundGenerator([x], [], [])
+        with self.assertRaises(ValueError):
+            g.get_point(0)
+        with self.assertRaises(ValueError):
+            for p in g.iterator(): pass
+
+    def test_prepare_idempotent(self):
+        x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
+        g = CompoundGenerator([x], [], [])
+        x.prepare_positions = MagicMock(return_value=x.prepare_positions())
+        g.prepare()
+        x.prepare_positions.assert_called_once_with()
+        x.prepare_positions.reset_mock()
+        g.prepare()
+        x.prepare_positions.assert_not_called()
+
     def test_iterator(self):
         x = LineGenerator("x", "mm", 1.0, 2.0, 5, False)
         y = LineGenerator("y", "mm", 1.0, 2.0, 5, False)

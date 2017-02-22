@@ -32,7 +32,7 @@ class CompoundGenerator(object):
         self.dimensions = []
         self.size = 1
         self.dim_meta = {}
-        self.alternate_direction = [g.alternate_direction for g in generators]
+        self.prepared = False
         for generator in generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
@@ -52,6 +52,8 @@ class CompoundGenerator(object):
         Prepare data structures and masks required for point generation.
         Must be called before get_point or iterator are called.
         """
+        if self.prepared:
+            return
         self.dimensions = []
         self.index_dims = []
         self.dim_meta = {}
@@ -170,6 +172,8 @@ class CompoundGenerator(object):
                 tile *= g.size
                 self.generator_dim_scaling[g] = d
 
+        self.prepared = True
+
     def iterator(self):
         """
         Iterator yielding generator positions at each scan point
@@ -177,6 +181,8 @@ class CompoundGenerator(object):
         Yields:
             Point: The next point
         """
+        if not self.prepared:
+            raise ValueError("CompoundGenerator has not been prepared")
         it = (self.get_point(n) for n in range_(self.size))
         for p in it:
             yield p
@@ -191,6 +197,8 @@ class CompoundGenerator(object):
             Point: The requested point
         """
 
+        if not self.prepared:
+            raise ValueError("CompoundGenerator has not been prepared")
         if n >= self.size:
             raise IndexError("Requested point is out of range")
         point = Point()
