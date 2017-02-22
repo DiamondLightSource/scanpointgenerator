@@ -93,14 +93,10 @@ class Dimension(object):
         # repeated by the size of inner generators
         inner_masks = [m.copy() for m in inner.masks]
         outer_masks = [m.copy() for m in outer.masks]
-        scale = 1
-        for g in inner.generators:
-            scale *= g.size
+        scale = inner.size
         for m in outer_masks:
             m["repeat"] *= scale
-        scale = 1
-        for g in outer.generators:
-            scale *= g.size
+        scale = outer.size
         for m in inner_masks:
             m["tile"] *= scale
         dim.masks = outer_masks + inner_masks

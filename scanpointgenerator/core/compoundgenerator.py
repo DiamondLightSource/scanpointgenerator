@@ -163,9 +163,7 @@ class CompoundGenerator(object):
 
         for dim in self.dimensions:
             tile = 1
-            repeat = 1
-            for g in dim.generators:
-                repeat *= g.size
+            repeat = dim.size
             for g in dim.generators:
                 repeat /= g.size
                 d = {"tile":tile, "repeat":repeat}
