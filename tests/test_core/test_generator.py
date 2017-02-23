@@ -17,7 +17,7 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
         self.g = Generator()
 
     def test_init(self):
-        self.assertEqual(self.g.position_units, None)
+        self.assertEqual(self.g.units, None)
         self.assertEqual(self.g.index_dims, None)
         self.assertEqual(self.g.index_names, None)
 

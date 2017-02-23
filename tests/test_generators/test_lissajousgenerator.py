@@ -14,7 +14,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         self.g = LissajousGenerator(["x", "y"], "mm", self.bounding_box, 1)
 
     def test_init(self):
-        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
+        self.assertEqual(self.g.units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.index_dims, [250])
         self.assertEqual(self.g.index_names, ["x_y_Lissajous"])
         self.assertEqual(self.g.axes, ["x", "y"])
@@ -115,7 +115,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
 
         self.assertEqual(["x", "y"], gen.names)
         self.assertEqual(["x_y_Lissajous"], gen.index_names)
-        self.assertEqual(units_dict, gen.position_units)
+        self.assertEqual(units_dict, gen.units)
         self.assertEqual(5, gen.x_freq)
         self.assertEqual(0.5, gen.x_max)
         self.assertEqual(1.0, gen.y_max)

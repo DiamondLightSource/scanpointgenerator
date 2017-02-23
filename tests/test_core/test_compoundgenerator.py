@@ -25,7 +25,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g = CompoundGenerator([y, x], [], [])
         self.assertEqual(g.generators[0], y)
         self.assertEqual(g.generators[1], x)
-        self.assertEqual(g.position_units, dict(y="mm", x="mm"))
+        self.assertEqual(g.units, dict(y="mm", x="mm"))
         self.assertEqual(g.axes, ["y", "x"])
 
     def test_given_compound_raise_error(self):

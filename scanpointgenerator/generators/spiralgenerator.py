@@ -24,7 +24,6 @@ class SpiralGenerator(Generator):
         """
 
         self.names = names
-        self.units = units
         self.centre = centre
         self.radius = radius
         self.scale = scale
@@ -35,7 +34,7 @@ class SpiralGenerator(Generator):
                              names)
 
 
-        self.position_units = {names[0]: units, names[1]: units}
+        self.units = {names[0]: units, names[1]: units}
         gen_name = "Spiral"
         for axis_name in self.names[::-1]:
             gen_name = axis_name + "_" + gen_name
@@ -73,7 +72,7 @@ class SpiralGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['names'] = self.names
-        d['units'] = list(self.position_units.values())[0]
+        d['units'] = list(self.units.values())[0]
         d['centre'] = self.centre
         d['radius'] = self.radius
         d['scale'] = self.scale

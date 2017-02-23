@@ -13,7 +13,7 @@ class SpiralGeneratorTest(unittest.TestCase):
         self.g = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 1.4, alternate_direction=True)
 
     def test_init(self):
-        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
+        self.assertEqual(self.g.units, dict(x="mm", y="mm"))
         self.assertEqual(self.g.axes, ["x", "y"])
 
     def test_duplicate_name_raises(self):
@@ -75,7 +75,7 @@ class SpiralGeneratorTest(unittest.TestCase):
 
         self.assertEqual(["x", "y"], gen.names)
         self.assertEqual(["x_y_Spiral"], gen.index_names)
-        self.assertEqual(units_dict, gen.position_units)
+        self.assertEqual(units_dict, gen.units)
         self.assertEqual([0.0, 0.0], gen.centre)
         self.assertEqual(1.4, gen.radius)
         self.assertEqual(1, gen.scale)

@@ -31,7 +31,6 @@ class LineGenerator(Generator):
         self.start = to_list(start)
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
-        self.units = units
 
         if len(self.name) != len(set(self.name)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -52,9 +51,7 @@ class LineGenerator(Generator):
                 self.step.append(
                     (self.stop[axis] - self.start[axis])/(self.size - 1))
 
-        self.position_units = dict()
-        for dimension in self.name:
-            self.position_units[dimension] = units
+        self.units = {d:units for d in self.name}
         self.index_dims = [self.size]
 
         if len(self.name) > 1:
@@ -85,7 +82,7 @@ class LineGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['name'] = self.name
-        d['units'] = self.units
+        d['units'] = list(self.units.values())[0]
         d['start'] = self.start
         d['stop'] = self.stop
         d['size'] = self.size

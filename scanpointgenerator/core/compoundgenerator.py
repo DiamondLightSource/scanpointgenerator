@@ -27,7 +27,7 @@ class CompoundGenerator(object):
         self.excluders = excluders
         self.mutators = mutators
         self.axes = []
-        self.position_units = {}
+        self.units = {}
         self.dimensions = []
         self.size = 1
         self._dim_meta = {}
@@ -39,7 +39,7 @@ class CompoundGenerator(object):
                 raise TypeError("CompoundGenerators cannot be nested, nest"
                                 "its constituent parts instead")
             self.axes += generator.axes
-            self.position_units.update(generator.position_units)
+            self.units.update(generator.units)
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated")
 

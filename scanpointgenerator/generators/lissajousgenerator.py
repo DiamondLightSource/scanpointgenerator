@@ -24,7 +24,6 @@ class LissajousGenerator(Generator):
         """
 
         self.names = names
-        self.units = units
         self.alternate_direction = alternate_direction
 
         if len(self.names) != len(set(self.names)):
@@ -47,7 +46,7 @@ class LissajousGenerator(Generator):
             self.size = num_lobes * 250
         self.increment = 2*m.pi/self.size
 
-        self.position_units = {self.names[0]: units, self.names[1]: units}
+        self.units = {self.names[0]: units, self.names[1]: units}
         self.index_dims = [self.size]
         gen_name = "Lissajous"
         for axis_name in self.names[::-1]:
@@ -79,7 +78,7 @@ class LissajousGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['names'] = self.names
-        d['units'] = list(self.position_units.values())[0]
+        d['units'] = list(self.units.values())[0]
         d['box'] = box
         d['num_lobes'] = self.x_freq
         d['num_points'] = self.size
