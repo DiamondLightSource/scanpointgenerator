@@ -84,7 +84,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         box['width'] = 1.0
         box['height'] = 1.0
 
-        expected_dict['names'] = ["x", "y"]
+        expected_dict['axes'] = ["x", "y"]
         expected_dict['units'] = "mm"
         expected_dict['box'] = box
         expected_dict['num_lobes'] = 1
@@ -101,7 +101,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         box['height'] = 2.0
 
         _dict = dict()
-        _dict['names'] = ["x", "y"]
+        _dict['axes'] = ["x", "y"]
         _dict['units'] = "mm"
         _dict['box'] = box
         _dict['num_lobes'] = 5
@@ -113,7 +113,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
 
         gen = LissajousGenerator.from_dict(_dict)
 
-        self.assertEqual(["x", "y"], gen.names)
+        self.assertEqual(["x", "y"], gen.axes)
         self.assertEqual(["x_y_Lissajous"], gen.index_names)
         self.assertEqual(units_dict, gen.units)
         self.assertEqual(5, gen.x_freq)

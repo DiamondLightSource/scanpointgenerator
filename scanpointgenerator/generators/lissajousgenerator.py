@@ -9,11 +9,11 @@ from scanpointgenerator.core import Point
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
-    def __init__(self, names, units, box, num_lobes,
+    def __init__(self, axes, units, box, num_lobes,
             num_points=None, alternate_direction=False):
         """
         Args:
-            names (list(str)): The scannable names e.g. ["x", "y"]
+            axes (list(str)): The scannable axes e.g. ["x", "y"]
             units (str): The scannable units e.g. "mm"
             box(dict): Dictionary of centre, width and height representing
                 box to fill with points
@@ -23,12 +23,12 @@ class LissajousGenerator(Generator):
                 curve. Default is 250 * num_lobes
         """
 
-        self.names = names
+        self.axes = axes
         self.alternate_direction = alternate_direction
 
-        if len(self.names) != len(set(self.names)):
+        if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
-                             names)
+                             axes)
 
         num_lobes = int(num_lobes)
 
@@ -46,14 +46,12 @@ class LissajousGenerator(Generator):
             self.size = num_lobes * 250
         self.increment = 2*m.pi/self.size
 
-        self.units = {self.names[0]: units, self.names[1]: units}
+        self.units = {self.axes[0]: units, self.axes[1]: units}
         self.index_dims = [self.size]
         gen_name = "Lissajous"
-        for axis_name in self.names[::-1]:
+        for axis_name in self.axes[::-1]:
             gen_name = axis_name + "_" + gen_name
         self.index_names = [gen_name]
-
-        self.axes = self.names  # For GDA
 
     def prepare_arrays(self, index_array):
         arrays = {}
@@ -63,8 +61,8 @@ class LissajousGenerator(Generator):
         d = self.phase_diff
         fx = lambda t: x0 + A * np.sin(a * 2*m.pi * t/self.size + d)
         fy = lambda t: y0 + B * np.sin(b * 2*m.pi * t/self.size)
-        arrays[self.names[0]] = fx(index_array)
-        arrays[self.names[1]] = fy(index_array)
+        arrays[self.axes[0]] = fx(index_array)
+        arrays[self.axes[1]] = fy(index_array)
         return arrays
 
     def to_dict(self):
@@ -77,7 +75,7 @@ class LissajousGenerator(Generator):
 
         d = dict()
         d['typeid'] = self.typeid
-        d['names'] = self.names
+        d['axes'] = self.axes
         d['units'] = list(self.units.values())[0]
         d['box'] = box
         d['num_lobes'] = self.x_freq
@@ -97,10 +95,10 @@ class LissajousGenerator(Generator):
             LissajousGenerator: New LissajousGenerator instance
         """
 
-        names = d['names']
+        axes = d['axes']
         units = d['units']
         box = d['box']
         num_lobes = d['num_lobes']
         num_points = d['num_points']
 
-        return cls(names, units, box, num_lobes, num_points)
+        return cls(axes, units, box, num_lobes, num_points)

@@ -87,10 +87,10 @@ class CompoundGenerator(object):
                 valid &= gen_2.positions[axis_2] >= rect.roi.start[1]
                 points_2 = gen_2.positions[axis_2][valid.astype(np.bool)]
                 new_gen1 = LineGenerator(
-                    gen_1.name, gen_1.units, points_1[0], points_1[-1],
+                    gen_1.axes, gen_1.units, points_1[0], points_1[-1],
                     len(points_1), gen_1.alternate_direction)
                 new_gen2 = LineGenerator(
-                    gen_2.name, gen_2.units, points_2[0], points_2[-1],
+                    gen_2.axes, gen_2.units, points_2[0], points_2[-1],
                     len(points_2), gen_2.alternate_direction)
                 generators[generators.index(gen_1)] = new_gen1
                 generators[generators.index(gen_2)] = new_gen2

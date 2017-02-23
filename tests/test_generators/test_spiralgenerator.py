@@ -46,7 +46,7 @@ class SpiralGeneratorTest(unittest.TestCase):
     def test_to_dict(self):
         expected_dict = dict()
         expected_dict['typeid'] = "scanpointgenerator:generator/SpiralGenerator:1.0"
-        expected_dict['names'] = ['x', 'y']
+        expected_dict['axes'] = ['x', 'y']
         expected_dict['units'] = 'mm'
         expected_dict['centre'] = [0.0, 0.0]
         expected_dict['radius'] = 1.4
@@ -60,7 +60,7 @@ class SpiralGeneratorTest(unittest.TestCase):
     def test_from_dict(self):
         _dict = dict()
         _dict['type'] = "SpiralGenerator"
-        _dict['names'] = ["x", "y"]
+        _dict['axes'] = ["x", "y"]
         _dict['units'] = "mm"
         _dict['centre'] = [0.0, 0.0]
         _dict['radius'] = 1.4
@@ -73,7 +73,7 @@ class SpiralGeneratorTest(unittest.TestCase):
 
         gen = SpiralGenerator.from_dict(_dict)
 
-        self.assertEqual(["x", "y"], gen.names)
+        self.assertEqual(["x", "y"], gen.axes)
         self.assertEqual(["x_y_Spiral"], gen.index_names)
         self.assertEqual(units_dict, gen.units)
         self.assertEqual([0.0, 0.0], gen.centre)

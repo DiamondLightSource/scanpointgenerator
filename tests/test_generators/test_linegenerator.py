@@ -50,7 +50,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate_direction=True)
         expected_dict = dict()
         expected_dict['typeid'] = "scanpointgenerator:generator/LineGenerator:1.0"
-        expected_dict['name'] = ["x"]
+        expected_dict['axes'] = ["x"]
         expected_dict['units'] = "mm"
         expected_dict['start'] = [1.0]
         expected_dict['stop'] = [9.0]
@@ -62,7 +62,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
     def test_from_dict(self):
         _dict = dict()
-        _dict['name'] = ["x"]
+        _dict['axes'] = ["x"]
         _dict['units'] = "mm"
         _dict['start'] = [1.0]
         _dict['stop'] = [9.0]
@@ -74,7 +74,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
         gen = LineGenerator.from_dict(_dict)
 
-        self.assertEqual(["x"], gen.name)
+        self.assertEqual(["x"], gen.axes)
         self.assertEqual(units_dict, gen.units)
         self.assertEqual([1.0], gen.start)
         self.assertEqual([9.0], gen.stop)
