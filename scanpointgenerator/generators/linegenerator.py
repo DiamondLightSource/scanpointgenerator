@@ -43,7 +43,6 @@ class LineGenerator(Generator):
                 "Dimensions of name, start and stop do not match")
 
         self.size = size
-        self.num_axes = len(self.name)
 
         self.step = []
         if self.size < 2:

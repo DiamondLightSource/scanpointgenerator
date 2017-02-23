@@ -6,8 +6,8 @@ class Dimension(object):
         self.axes = list(generator.axes)
         self.generators = [generator]
         self.size = generator.size
-        self.masks = []
         self.alternate = generator.alternate_direction
+        self._masks = []
 
     def apply_excluder(self, excluder):
         """Apply an excluder with axes matching some axes in the dimension to
@@ -57,7 +57,7 @@ class Dimension(object):
                     tile *= g.size
 
         m = {"repeat":repeat, "tile":tile, "mask":mask}
-        self.masks.append(m)
+        self._masks.append(m)
 
     def create_dimension_mask(self):
         """
@@ -72,7 +72,7 @@ class Dimension(object):
             np.array(int8): One dimensional mask array
         """
         mask = np.full(self.size, True, dtype=np.int8)
-        for m in self.masks:
+        for m in self._masks:
             assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
                 "Mask lengths are not consistent"
             expanded = np.repeat(m["mask"], m["repeat"])
@@ -91,15 +91,15 @@ class Dimension(object):
         # masks in the inner generator are tiled by the size of
         # outer generators and outer generators have their elements
         # repeated by the size of inner generators
-        inner_masks = [m.copy() for m in inner.masks]
-        outer_masks = [m.copy() for m in outer.masks]
+        inner_masks = [m.copy() for m in inner._masks]
+        outer_masks = [m.copy() for m in outer._masks]
         scale = inner.size
         for m in outer_masks:
             m["repeat"] *= scale
         scale = outer.size
         for m in inner_masks:
             m["tile"] *= scale
-        dim.masks = outer_masks + inner_masks
+        dim._masks = outer_masks + inner_masks
         dim.axes = outer.axes + inner.axes
         dim.generators = outer.generators + inner.generators
         dim.alternate = outer.alternate or inner.alternate

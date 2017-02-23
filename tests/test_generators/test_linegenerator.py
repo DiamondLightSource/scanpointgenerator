@@ -112,7 +112,4 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
         self.assertEqual(y_bounds, g.bounds['y'].tolist())
 
 if __name__ == "__main__":
-    unittest.main()
-
-
-
+    unittest.main(verbosity=2)

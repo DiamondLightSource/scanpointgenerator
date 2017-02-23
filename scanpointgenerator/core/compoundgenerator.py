@@ -28,11 +28,10 @@ class CompoundGenerator(object):
         self.mutators = mutators
         self.axes = []
         self.position_units = {}
-        self.index_dims = []
         self.dimensions = []
         self.size = 1
-        self.dim_meta = {}
-        self.prepared = False
+        self._dim_meta = {}
+        self._prepared = False
         for generator in generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
@@ -45,19 +44,18 @@ class CompoundGenerator(object):
             raise ValueError("Axis names cannot be duplicated")
 
         self.generators = generators
-        self.generator_dim_scaling = {}
+        self._generator_dim_scaling = {}
 
     def prepare(self):
         """
         Prepare data structures and masks required for point generation.
         Must be called before get_point or iterator are called.
         """
-        if self.prepared:
+        if self._prepared:
             return
         self.dimensions = []
-        self.index_dims = []
-        self.dim_meta = {}
-        self.generator_dim_scaling = {}
+        self._dim_meta = {}
+        self._generator_dim_scaling = {}
 
         # we're going to mutate these structures
         excluders = list(self.excluders)
@@ -142,23 +140,22 @@ class CompoundGenerator(object):
 
         self.size = 1
         for dim in self.dimensions:
-            self.dim_meta[dim] = {}
+            self._dim_meta[dim] = {}
             mask = dim.create_dimension_mask()
             indices = np.nonzero(mask)[0]
             if len(indices) == 0:
                 raise ValueError("Regions would exclude entire scan")
             self.size *= len(indices)
-            self.dim_meta[dim]["mask"] = mask
-            self.dim_meta[dim]["indices"] = indices
-            self.index_dims.append(len(indices))
+            self._dim_meta[dim]["mask"] = mask
+            self._dim_meta[dim]["indices"] = indices
 
         repeat = self.size
         tile = 1
         for dim in self.dimensions:
-            dim_length = len(self.dim_meta[dim]["indices"])
+            dim_length = len(self._dim_meta[dim]["indices"])
             repeat /= dim_length
-            self.dim_meta[dim]["tile"] = tile
-            self.dim_meta[dim]["repeat"] = repeat
+            self._dim_meta[dim]["tile"] = tile
+            self._dim_meta[dim]["repeat"] = repeat
             tile *= dim_length
 
         for dim in self.dimensions:
@@ -168,9 +165,9 @@ class CompoundGenerator(object):
                 repeat /= g.size
                 d = {"tile":tile, "repeat":repeat}
                 tile *= g.size
-                self.generator_dim_scaling[g] = d
+                self._generator_dim_scaling[g] = d
 
-        self.prepared = True
+        self._prepared = True
 
     def iterator(self):
         """
@@ -179,7 +176,7 @@ class CompoundGenerator(object):
         Yields:
             Point: The next point
         """
-        if not self.prepared:
+        if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
         it = (self.get_point(n) for n in range_(self.size))
         for p in it:
@@ -195,7 +192,7 @@ class CompoundGenerator(object):
             Point: The requested point
         """
 
-        if not self.prepared:
+        if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
         if n >= self.size:
             raise IndexError("Requested point is out of range")
@@ -206,8 +203,8 @@ class CompoundGenerator(object):
         # many times we've run through them
         kc = 0 # the "cumulative" k for each dimension
         for dim in self.dimensions:
-            indices = self.dim_meta[dim]["indices"]
-            i = int(n // self.dim_meta[dim]["repeat"])
+            indices = self._dim_meta[dim]["indices"]
+            i = int(n // self._dim_meta[dim]["repeat"])
             i %= len(indices)
             k = indices[i]
             dim_reverse = False
@@ -221,7 +218,7 @@ class CompoundGenerator(object):
             # in alternating case, need to sometimes go backward
             point.indexes.append(i)
             for g in dim.generators:
-                j = int(k // self.generator_dim_scaling[g]["repeat"])
+                j = int(k // self._generator_dim_scaling[g]["repeat"])
                 r = int(j // g.size)
                 j %= g.size
                 j_lower = j
