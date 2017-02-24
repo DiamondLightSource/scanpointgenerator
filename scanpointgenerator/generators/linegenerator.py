@@ -17,7 +17,7 @@ class LineGenerator(Generator):
         """
         Args:
             axes (str/list(str)): The scannable axes E.g. "x" or ["x", "y"]
-            units (str): The scannable units. E.g. "mm"
+            units (str/list(str)): The scannable units. E.g. "mm" or ["mm", "mm"]
             start (float/list(float)): The first position to be generated.
                 e.g. 1.0 or [1.0, 2.0]
             stop (float or list(float)): The final position to be generated.
@@ -31,6 +31,7 @@ class LineGenerator(Generator):
         self.start = to_list(start)
         self.stop = to_list(stop)
         self.alternate_direction = alternate_direction
+        self.units = {d:u for (d, u) in zip(self.axes, to_list(units))}
 
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
@@ -51,7 +52,6 @@ class LineGenerator(Generator):
                 self.step.append(
                     (self.stop[axis] - self.start[axis])/(self.size - 1))
 
-        self.units = {d:units for d in self.axes}
         self.index_dims = [self.size]
 
         if len(self.axes) > 1:
@@ -80,7 +80,7 @@ class LineGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['axes'] = self.axes
-        d['units'] = list(self.units.values())[0]
+        d['units'] = [self.units[a] for a in self.axes]
         d['start'] = self.start
         d['stop'] = self.stop
         d['size'] = self.size

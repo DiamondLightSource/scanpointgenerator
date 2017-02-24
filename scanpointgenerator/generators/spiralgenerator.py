@@ -14,7 +14,7 @@ class SpiralGenerator(Generator):
         """
         Args:
             axes (list(str)): The scannable axes e.g. ["x", "y"]
-            units (str): The scannable units e.g. "mm"
+            units (list(str)): The scannable units e.g. ["mm", "mm"]
             centre(list): List of two coordinates of centre point of spiral
             radius(float): Maximum radius of spiral
             scale(float): Gap between spiral arcs; higher scale gives
@@ -28,13 +28,12 @@ class SpiralGenerator(Generator):
         self.radius = radius
         self.scale = scale
         self.alternate_direction = alternate_direction
+        self.units = {d:u for d,u in zip(axes, units)}
 
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
                              axes)
 
-
-        self.units = {axes[0]: units, axes[1]: units}
         gen_name = "Spiral"
         for axis_name in self.axes[::-1]:
             gen_name = axis_name + "_" + gen_name
@@ -70,7 +69,7 @@ class SpiralGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['axes'] = self.axes
-        d['units'] = list(self.units.values())[0]
+        d['units'] = [self.units[a] for a in self.axes]
         d['centre'] = self.centre
         d['radius'] = self.radius
         d['scale'] = self.scale

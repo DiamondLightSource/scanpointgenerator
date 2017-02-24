@@ -14,7 +14,7 @@ class LissajousGenerator(Generator):
         """
         Args:
             axes (list(str)): The scannable axes e.g. ["x", "y"]
-            units (str): The scannable units e.g. "mm"
+            units (list(str)): The scannable units e.g. ["mm", "mm"]
             box(dict): Dictionary of centre, width and height representing
                 box to fill with points
             num_lobes(int): Number of x-direction lobes for curve; will
@@ -24,6 +24,7 @@ class LissajousGenerator(Generator):
         """
 
         self.axes = axes
+        self.units = {d:u for d,u in zip(axes, units)}
         self.alternate_direction = alternate_direction
 
         if len(self.axes) != len(set(self.axes)):
@@ -46,7 +47,6 @@ class LissajousGenerator(Generator):
             self.size = num_lobes * 250
         self.increment = 2*m.pi/self.size
 
-        self.units = {self.axes[0]: units, self.axes[1]: units}
         self.index_dims = [self.size]
         gen_name = "Lissajous"
         for axis_name in self.axes[::-1]:
@@ -76,7 +76,7 @@ class LissajousGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['axes'] = self.axes
-        d['units'] = list(self.units.values())[0]
+        d['units'] = [self.units[a] for a in self.axes]
         d['box'] = box
         d['num_lobes'] = self.x_freq
         d['num_points'] = self.size
