@@ -128,7 +128,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_alternating_simple(self):
         y = LineGenerator("y", "mm", 1, 5, 5)
-        x = LineGenerator("x", "mm", 1, 5, 5, alternate_direction=True)
+        x = LineGenerator("x", "mm", 1, 5, 5, alternate=True)
         g = CompoundGenerator([y, x], [], [])
         g.prepare()
         expected = []
@@ -201,8 +201,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_inner_alternating(self):
         z = LineGenerator("z", "mm", 1, 5, 5)
-        y = LineGenerator("y", "mm", 1, 5, 5, alternate_direction=True)
-        x = LineGenerator("x", "mm", 1, 5, 5, alternate_direction=True)
+        y = LineGenerator("y", "mm", 1, 5, 5, alternate=True)
+        x = LineGenerator("x", "mm", 1, 5, 5, alternate=True)
         r1 = CircularROI([3, 3], 1.5)
         e1 = Excluder(r1, ["x", "y"])
         g = CompoundGenerator([z, y, x], [e1], [])
@@ -389,7 +389,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                      {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 4.0},
                      ]
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate_direction=True)
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate=True)
         g = CompoundGenerator([z, spiral], [], [])
         g.prepare()
         self.assertEqual(g.axes, ["z", "x", "y"])
@@ -609,8 +609,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         self.assertEqual(expected_mask, g._dim_meta[g.dimensions[0]]["mask"].tolist())
 
     def test_simple_mask_alternating(self):
-        x = LineGenerator("x", "mm", -1.0, 1.0, 5, alternate_direction=True)
-        y = LineGenerator("y", "mm", -1.0, 1.0, 5, alternate_direction=True)
+        x = LineGenerator("x", "mm", -1.0, 1.0, 5, alternate=True)
+        y = LineGenerator("y", "mm", -1.0, 1.0, 5, alternate=True)
         r = CircularROI([0.5, 0], 1)
         e = Excluder(r, ["x", "y"])
         g = CompoundGenerator([y, x], [e], [])
@@ -627,8 +627,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         self.assertEqual(expected_mask, g._dim_meta[g.dimensions[0]]["mask"].tolist())
 
     def test_double_mask_alternating_spiral(self):
-        zgen = LineGenerator("z", "mm", 0.0, 4.0, 5, alternate_direction=True)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate_direction=True) #29 points
+        zgen = LineGenerator("z", "mm", 0.0, 4.0, 5, alternate=True)
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate=True) #29 points
         r1 = RectangularROI([-2, -2], 4, 3)
         r2 = RectangularROI([-2, 0], 4, 3)
         e1 = Excluder(r1, ["y", "x"])
@@ -662,7 +662,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
 
     def test_simple_mask_alternating_spiral(self):
         z = LineGenerator("z", "mm", 0.0, 4.0, 5)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate_direction=True) #29 points
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate=True) #29 points
         r = RectangularROI([-2, -2], 3, 4)
         e = Excluder(r, ["x", "y"])
         g = CompoundGenerator([z, spiral], [e], [])
@@ -692,9 +692,9 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
 
     def test_complex_masks(self):
         tg = LineGenerator("t", "mm", 1, 5, 5)
-        zg = LineGenerator("z", "mm", 0, 4, 5, alternate_direction=True)
-        yg = LineGenerator("y", "mm", 1, 5, 5, alternate_direction=True)
-        xg = LineGenerator("x", "mm", 2, 6, 5, alternate_direction=True)
+        zg = LineGenerator("z", "mm", 0, 4, 5, alternate=True)
+        yg = LineGenerator("y", "mm", 1, 5, 5, alternate=True)
+        xg = LineGenerator("x", "mm", 2, 6, 5, alternate=True)
         r1 = CircularROI([4., 4.], 1.5)
         e1 = Excluder(r1, ["y", "x"])
         e2 = Excluder(r1, ["z", "y"])

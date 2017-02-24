@@ -13,7 +13,7 @@ def to_list(value):
 class LineGenerator(Generator):
     """Generate a line of equally spaced N-dimensional points"""
 
-    def __init__(self, axes, units, start, stop, size, alternate_direction=False):
+    def __init__(self, axes, units, start, stop, size, alternate=False):
         """
         Args:
             axes (str/list(str)): The scannable axes E.g. "x" or ["x", "y"]
@@ -23,14 +23,14 @@ class LineGenerator(Generator):
             stop (float or list(float)): The final position to be generated.
                 e.g. 5.0 or [5.0, 10.0]
             size (int): The number of points to generate. E.g. 5
-            alternate_direction(bool): Specifier to reverse direction if
+            alternate(bool): Specifier to reverse direction if
                 generator is nested
         """
 
         self.axes = to_list(axes)
         self.start = to_list(start)
         self.stop = to_list(stop)
-        self.alternate_direction = alternate_direction
+        self.alternate = alternate
         self.units = {d:u for (d, u) in zip(self.axes, to_list(units))}
 
         if len(self.axes) != len(set(self.axes)):
@@ -84,7 +84,7 @@ class LineGenerator(Generator):
         d['start'] = self.start
         d['stop'] = self.stop
         d['size'] = self.size
-        d['alternate_direction'] = self.alternate_direction
+        d['alternate'] = self.alternate
 
         return d
 
@@ -105,6 +105,6 @@ class LineGenerator(Generator):
         start = d['start']
         stop = d['stop']
         size = d['size']
-        alternate_direction = d['alternate_direction']
+        alternate = d['alternate']
 
-        return cls(axes, units, start, stop, size, alternate_direction)
+        return cls(axes, units, start, stop, size, alternate)

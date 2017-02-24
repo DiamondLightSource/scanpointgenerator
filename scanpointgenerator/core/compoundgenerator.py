@@ -88,10 +88,10 @@ class CompoundGenerator(object):
                 points_2 = gen_2.positions[axis_2][valid.astype(np.bool)]
                 new_gen1 = LineGenerator(
                     gen_1.axes, gen_1.units, points_1[0], points_1[-1],
-                    len(points_1), gen_1.alternate_direction)
+                    len(points_1), gen_1.alternate)
                 new_gen2 = LineGenerator(
                     gen_2.axes, gen_2.units, points_2[0], points_2[-1],
-                    len(points_2), gen_2.alternate_direction)
+                    len(points_2), gen_2.alternate)
                 generators[generators.index(gen_1)] = new_gen1
                 generators[generators.index(gen_2)] = new_gen2
                 excluders.remove(rect)
@@ -125,7 +125,7 @@ class CompoundGenerator(object):
                     and dim_1 is not self.dimensions[0]:
                 raise ValueError(
                     "Generators tied by regions must have the same " \
-                            "alternate_direction setting")
+                            "alternate setting")
             # merge "inner" into "outer"
             if dim_diff == -1:
                 # dim_1 is "outer" - preserves axis ordering

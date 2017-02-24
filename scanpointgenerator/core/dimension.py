@@ -6,7 +6,7 @@ class Dimension(object):
         self.axes = list(generator.axes)
         self.generators = [generator]
         self.size = generator.size
-        self.alternate = generator.alternate_direction
+        self.alternate = generator.alternate
         self._masks = []
 
     def apply_excluder(self, excluder):

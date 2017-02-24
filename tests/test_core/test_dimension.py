@@ -21,7 +21,7 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual([g], d.generators)
         self.assertEqual(["x", "y"], d.axes)
         self.assertEqual([], d._masks)
-        self.assertEqual(g.alternate_direction, d.alternate)
+        self.assertEqual(g.alternate, d.alternate)
         self.assertEqual(g.size, d.size)
 
     def test_merge_dimensions(self):
@@ -95,7 +95,7 @@ class DimensionTests(ScanPointGeneratorTest):
         x_pos = np.array([1, 2, 3, 4, 5])
         y_pos = np.array([10, 11, 12, 13, 14, 15])
         g = Mock(axes=["x", "y"], positions={"x":x_pos, "y":y_pos})
-        g.alternate_direction = False
+        g.alternate = False
         mask = np.array([1, 1, 0, 1, 0, 0], dtype=np.int8)
         e = Mock(scannables=["x", "y"], create_mask=Mock(return_value=mask))
         d = Dimension(g)
@@ -110,8 +110,8 @@ class DimensionTests(ScanPointGeneratorTest):
         hy_pos = np.array([-1, -2, -3])
         mask = np.full(15, 1, dtype=np.int8)
         e = Mock(scannables=["gx", "hy"], create_mask=Mock(return_value=mask))
-        g = Mock(axes=["gx", "gy"], positions={"gx":gx_pos}, size=len(gx_pos), alternate_direction=False)
-        h = Mock(axes=["hx", "hy"], positions={"hy":hy_pos}, size=len(hy_pos), alternate_direction=False)
+        g = Mock(axes=["gx", "gy"], positions={"gx":gx_pos}, size=len(gx_pos), alternate=False)
+        h = Mock(axes=["hx", "hy"], positions={"hy":hy_pos}, size=len(hy_pos), alternate=False)
         d = Dimension(g)
         d.generators = [g, h]
         d.size = g.size * h.size
@@ -125,7 +125,7 @@ class DimensionTests(ScanPointGeneratorTest):
         x_pos = np.array([1, 2, 3, 4, 5])
         y_pos = np.array([10, 11, 12, 13, 14, 15])
         g = Mock(axes=["x", "y"], positions={"x":x_pos, "y":y_pos})
-        g.alternate_direction = True
+        g.alternate = True
         mask = np.array([1, 1, 0, 1, 0, 0], dtype=np.int8)
         e = Mock(scannables=["x", "y"], create_mask=Mock(return_value=mask))
         d = Dimension(g)

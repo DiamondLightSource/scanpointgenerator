@@ -10,7 +10,7 @@ class SpiralGenerator(Generator):
     """Generate the points of an Archimedean spiral"""
 
     def __init__(self, axes, units, centre, radius, scale=1.0,
-                 alternate_direction=False):
+                 alternate=False):
         """
         Args:
             axes (list(str)): The scannable axes e.g. ["x", "y"]
@@ -19,7 +19,7 @@ class SpiralGenerator(Generator):
             radius(float): Maximum radius of spiral
             scale(float): Gap between spiral arcs; higher scale gives
                 fewer points for same radius
-            alternate_direction(bool): Specifier to reverse direction if
+            alternate(bool): Specifier to reverse direction if
                 generator is nested
         """
 
@@ -27,7 +27,7 @@ class SpiralGenerator(Generator):
         self.centre = centre
         self.radius = radius
         self.scale = scale
-        self.alternate_direction = alternate_direction
+        self.alternate = alternate
         self.units = {d:u for d,u in zip(axes, units)}
 
         if len(self.axes) != len(set(self.axes)):
@@ -73,7 +73,7 @@ class SpiralGenerator(Generator):
         d['centre'] = self.centre
         d['radius'] = self.radius
         d['scale'] = self.scale
-        d['alternate_direction'] = self.alternate_direction
+        d['alternate'] = self.alternate
 
         return d
 
@@ -94,6 +94,6 @@ class SpiralGenerator(Generator):
         centre = d['centre']
         radius = d['radius']
         scale = d['scale']
-        alternate_direction = d['alternate_direction']
+        alternate = d['alternate']
 
-        return cls(axes, units, centre, radius, scale, alternate_direction)
+        return cls(axes, units, centre, radius, scale, alternate)

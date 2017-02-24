@@ -15,7 +15,7 @@ class Generator(object):
         axes (list): List of scannable names, used in GDA to reconstruct Point
             in CompoundGenerators
     """
-    alternate_direction = False
+    alternate = False
     units = None
     index_dims = None
     index_names = None
