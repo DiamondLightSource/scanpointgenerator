@@ -7,7 +7,14 @@ class Dimension(object):
         self.generators = [generator]
         self.size = generator.size
         self.alternate = generator.alternate
+        self.upper = {}
+        self.lower = {}
         self._masks = []
+
+        for g in self.generators:
+            for a in g.axes:
+                self.upper[a] = g.positions[a].max()
+                self.lower[a] = g.positions[a].min()
 
     def apply_excluder(self, excluder):
         """Apply an excluder with axes matching some axes in the dimension to
@@ -104,4 +111,8 @@ class Dimension(object):
         dim.generators = outer.generators + inner.generators
         dim.alternate = outer.alternate or inner.alternate
         dim.size = outer.size * inner.size
+        dim.upper = outer.upper.copy()
+        dim.upper.update(inner.upper)
+        dim.lower = outer.lower.copy()
+        dim.lower.update(inner.lower)
         return dim
