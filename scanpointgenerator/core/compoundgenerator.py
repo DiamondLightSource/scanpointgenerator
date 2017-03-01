@@ -32,6 +32,7 @@ class CompoundGenerator(object):
         self.dimensions = []
         self.size = 1
         self.duration = duration
+        self.shape = []
         self._dim_meta = {}
         self._prepared = False
         for generator in generators:
@@ -152,9 +153,11 @@ class CompoundGenerator(object):
             self._dim_meta[dim]["indices"] = indices
 
         repeat = self.size
+        self.shape = []
         tile = 1
         for dim in self.dimensions:
             dim_length = len(self._dim_meta[dim]["indices"])
+            self.shape.append(dim_length)
             repeat /= dim_length
             self._dim_meta[dim]["tile"] = tile
             self._dim_meta[dim]["repeat"] = repeat
