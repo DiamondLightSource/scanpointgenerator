@@ -10,7 +10,7 @@ from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import LissajousGenerator
 from scanpointgenerator import Excluder
 from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI
-from scanpointgenerator.mutators import FixedDurationMutator, RandomOffsetMutator
+from scanpointgenerator.mutators import RandomOffsetMutator
 from scanpointgenerator.compat import range_
 
 from pkg_resources import require
@@ -22,11 +22,16 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
     def test_init(self):
         x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
         y = LineGenerator("y", "mm", 2.0, 2.1, 2, False)
-        g = CompoundGenerator([y, x], [], [])
+        g = CompoundGenerator([y, x], [], [], 0.2)
         self.assertEqual(g.generators[0], y)
         self.assertEqual(g.generators[1], x)
         self.assertEqual(g.units, dict(y="mm", x="mm"))
         self.assertEqual(g.axes, ["y", "x"])
+        self.assertEqual(g.duration, 0.2)
+
+    def test_default_duration(self):
+        g = CompoundGenerator([MagicMock()], [], [])
+        self.assertEqual(0.05, g.duration)
 
     def test_given_compound_raise_error(self):
         g = CompoundGenerator([], [], [])
@@ -535,16 +540,21 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_l2_upper, [p.upper["l2"] for p in gpoints])
 
     def test_mutators(self):
-        mutator_1 = FixedDurationMutator(0.2)
+        mutator_1 = MagicMock()
+        mutator_1.mutate = MagicMock(side_effect = lambda x,n:x)
         mutator_2 = RandomOffsetMutator(0, ["x"], {"x":1})
         mutator_2.calc_offset = MagicMock(return_value=0.1)
         x = LineGenerator('x', 'mm', 1, 5, 5)
-        g = CompoundGenerator([x], [], [mutator_1, mutator_2])
+        g = CompoundGenerator([x], [], [mutator_1, mutator_2], 0.2)
         g.prepare()
         x_pos = 1
+        n = 0
         for p in g.iterator():
             self.assertEqual(0.2, p.duration)
             self.assertEqual({"x":x_pos + 0.1}, p.positions)
+            mutator_1.mutate.assert_called_once_with(p, n)
+            mutator_1.mutate.reset_mock()
+            n += 1
             x_pos += 1
         self.assertEqual(6, x_pos)
 
@@ -769,7 +779,7 @@ class TestSerialisation(unittest.TestCase):
         self.e1_dict = MagicMock()
 
     def test_to_dict(self):
-        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1])
+        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1], -1)
 
         self.l1.to_dict.return_value = self.l1_dict
         self.l2.to_dict.return_value = self.l2_dict
@@ -785,6 +795,7 @@ class TestSerialisation(unittest.TestCase):
         expected_dict['generators'] = gen_list
         expected_dict['excluders'] = excluders_list
         expected_dict['mutators'] = mutators_list
+        expected_dict['duration'] = -1
 
         d = self.g.to_dict()
 
@@ -804,6 +815,7 @@ class TestSerialisation(unittest.TestCase):
         _dict['generators'] = [self.l1_dict, self.l2_dict]
         _dict['excluders'] = [self.e1_dict]
         _dict['mutators'] = [self.m1_dict]
+        _dict['duration'] = 12
 
         units_dict = dict()
         units_dict['x'] = 'mm'
@@ -815,6 +827,7 @@ class TestSerialisation(unittest.TestCase):
         self.assertEqual(gen.generators[1], self.l1)
         self.assertEqual(gen.mutators[0], self.m1)
         self.assertEqual(gen.excluders[0], self.e1)
+        self.assertEqual(gen.duration, 12)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

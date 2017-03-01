@@ -16,12 +16,13 @@ class CompoundGenerator(object):
 
     typeid = "scanpointgenerator:generator/CompoundGenerator:1.0"
 
-    def __init__(self, generators, excluders, mutators):
+    def __init__(self, generators, excluders, mutators, duration=0.05):
         """
         Args:
             generators(list(Generator)): List of Generators to nest
             excluders(list(Excluder)): List of Excluders to filter points by
             mutators(list(Mutator)): List of Mutators to apply to each point
+            duration(int): Point durations in seconds (-1 for variable)
         """
 
         self.excluders = excluders
@@ -30,6 +31,7 @@ class CompoundGenerator(object):
         self.units = {}
         self.dimensions = []
         self.size = 1
+        self.duration = duration
         self._dim_meta = {}
         self._prepared = False
         for generator in generators:
@@ -241,6 +243,7 @@ class CompoundGenerator(object):
                     else:
                         point.lower[axis] = g.positions[axis][j]
                         point.upper[axis] = g.positions[axis][j]
+        point.duration = self.duration
         for m in self.mutators:
             point = m.mutate(point, n)
         return point
@@ -252,6 +255,7 @@ class CompoundGenerator(object):
         d['generators'] = [g.to_dict() for g in self.generators]
         d['excluders'] = [e.to_dict() for e in self.excluders]
         d['mutators'] = [m.to_dict() for m in self.mutators]
+        d['duration'] = self.duration
         return d
 
     @classmethod
@@ -267,4 +271,5 @@ class CompoundGenerator(object):
         generators = [Generator.from_dict(g) for g in d['generators']]
         excluders = [Excluder.from_dict(e) for e in d['excluders']]
         mutators = [Mutator.from_dict(m) for m in d['mutators']]
-        return cls(generators, excluders, mutators)
+        duration = d['duration']
+        return cls(generators, excluders, mutators, duration)
