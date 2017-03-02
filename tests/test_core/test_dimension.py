@@ -176,5 +176,64 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertTrue((np.repeat(np.append(g1_pos, g1_pos[::-1]), 2) == e.create_mask.call_args[0][0]).all())
         self.assertTrue((np.tile(np.append(g2_pos, g2_pos[::-1]), 3) == e.create_mask.call_args[0][1]).all())
 
+    def test_get_positions_single_gen(self):
+        gx_pos = np.tile(np.array([0, 1, 2, 3]), 4)
+        gy_pos = np.repeat(np.array([0, 1, 2, 3]), 4)
+        mask_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 1
+        g = Mock(axes=["gx", "gy"], positions={"gx":gx_pos, "gy":gy_pos}, size=16, alternate=False)
+        e = Mock(scannables=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
+        d = Dimension(g)
+        d.apply_excluder(e)
+        self.assertEqual([1, 0, 1, 2, 1], d.get_positions("gx").tolist())
+        self.assertEqual([1, 2, 2, 2, 3], d.get_positions("gy").tolist())
+
+    def test_get_positions_after_merge(self):
+        gx_pos = np.array([0, 1, 2, 3])
+        gy_pos = np.array([0, 1, 2, 3])
+        mask_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 1
+        gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=False)
+        gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=False)
+        e = Mock(scannables=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
+        dx = Dimension(gx)
+        dy = Dimension(gy)
+        d = Dimension.merge_dimensions(dy, dx)
+        d.apply_excluder(e)
+        self.assertEqual([1, 0, 1, 2, 1], d.get_positions("gx").tolist())
+        self.assertEqual([1, 2, 2, 2, 3], d.get_positions("gy").tolist())
+
+    def test_get_positions_with_alternating(self):
+        gx_pos = np.array([0, 1, 2, 3])
+        gy_pos = np.array([0, 1, 2, 3])
+        gz_pos = np.array([0, 1, 2, 3])
+        mask_xy_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 2
+        mask_yz_func = lambda py, pz: (py-2)**2 + (pz-1)**2 <= 1
+        exy = Mock(scannables=["gx", "gy"], create_mask=Mock(side_effect=mask_xy_func))
+        eyz = Mock(scannables=["gy", "gz"], create_mask=Mock(side_effect=mask_yz_func))
+        gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=True)
+        gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=True)
+        gz = Mock(axes=["gz"], positions={"gz":gz_pos}, size=4, alternate=True)
+        dx = Dimension(gx)
+        dy = Dimension(gy)
+        dz = Dimension(gz)
+        self.assertEqual([0, 1, 2, 3], dz.get_positions("gz").tolist())
+        dyx = Dimension.merge_dimensions(dy, dx)
+        dyx.apply_excluder(exy)
+        self.assertEqual([2, 1, 0, 0, 1, 2, 2, 1, 0], dyx.get_positions("gx").tolist())
+        self.assertEqual([1, 1, 1, 2, 2, 2, 3, 3, 3], dyx.get_positions("gy").tolist())
+        d = Dimension.merge_dimensions(dz, dyx)
+        d.apply_excluder(eyz)
+        self.assertEqual(64, d.size)
+        self.assertEqual(15, len(d.create_dimension_mask().nonzero()[0]))
+        self.assertEqual(
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
+            d.get_positions("gz").tolist())
+        self.assertEqual(
+            [2, 2, 2, 3, 3, 3, 2, 2, 2, 1, 1, 1, 2, 2, 2],
+            d.get_positions("gy").tolist())
+        self.assertEqual(
+            [0, 1, 2, 0, 1, 2, 2, 1, 0, 0, 1, 2, 0, 1, 2],
+            d.get_positions("gx").tolist())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

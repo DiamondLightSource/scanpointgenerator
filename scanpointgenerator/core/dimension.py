@@ -10,11 +10,36 @@ class Dimension(object):
         self.upper = {}
         self.lower = {}
         self._masks = []
+        self._full_mask = None
 
         for g in self.generators:
             for a in g.axes:
                 self.upper[a] = g.positions[a].max()
                 self.lower[a] = g.positions[a].min()
+
+    def get_positions(self, axis):
+        # the points for this axis must be scaled and then indexed
+        if self._full_mask is None: self.create_dimension_mask()
+        mask = self._full_mask
+        # scale up points for axis
+        gen = [g for g in self.generators if axis in g.axes][0]
+        points = gen.positions[axis]
+        if self.alternate:
+            points = np.append(points, points[::-1])
+        tile = 0.5 if self.alternate else 1
+        repeat = 1
+        for g in self.generators[:self.generators.index(gen)]:
+            tile *= g.size
+        for g in self.generators[self.generators.index(gen) + 1:]:
+            repeat *= g.size
+        points = np.repeat(points, repeat)
+        if tile % 1 != 0:
+            p = np.tile(points, int(tile))
+            points = np.append(p, points[:int(len(points)//2)])
+        else:
+            points = np.tile(points, int(tile))
+        return points[mask.nonzero()[0]]
+
 
     def apply_excluder(self, excluder):
         """Apply an excluder with axes matching some axes in the dimension to
@@ -65,6 +90,8 @@ class Dimension(object):
 
         m = {"repeat":repeat, "tile":tile, "mask":mask}
         self._masks.append(m)
+        # any stored dimension wide mask has been invalidated
+        self._full_mask = None
 
     def create_dimension_mask(self):
         """
@@ -78,6 +105,9 @@ class Dimension(object):
         Returns:
             np.array(int8): One dimensional mask array
         """
+        if self._full_mask is not None:
+            # return copy to allow editing in place
+            return self._full_mask.copy()
         mask = np.full(self.size, True, dtype=np.int8)
         for m in self._masks:
             assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
@@ -89,6 +119,9 @@ class Dimension(object):
             else:
                 expanded = np.tile(expanded, int(m["tile"]))
             mask &= expanded
+        # we have to assume the "returned" mask may be edited in place
+        # so we have to store a copy
+        self._full_mask = mask.copy()
         return mask
 
     @staticmethod
