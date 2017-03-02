@@ -156,16 +156,15 @@ class CompoundGenerator(object):
         self.shape = []
         tile = 1
         for dim in self.dimensions:
-            dim_length = len(self._dim_meta[dim]["indices"])
-            self.shape.append(dim_length)
-            repeat /= dim_length
+            self.shape.append(dim.size)
+            repeat /= dim.size
             self._dim_meta[dim]["tile"] = tile
             self._dim_meta[dim]["repeat"] = repeat
-            tile *= dim_length
+            tile *= dim.size
 
         for dim in self.dimensions:
             tile = 1
-            repeat = dim.size
+            repeat = dim._max_length
             for g in dim.generators:
                 repeat /= g.size
                 d = {"tile":tile, "repeat":repeat}

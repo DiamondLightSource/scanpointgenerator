@@ -5,12 +5,13 @@ class Dimension(object):
     def __init__(self, generator):
         self.axes = list(generator.axes)
         self.generators = [generator]
-        self.size = generator.size
+        self.size = None
         self.alternate = generator.alternate
         self.upper = {}
         self.lower = {}
         self._masks = []
         self._full_mask = None
+        self._max_length = generator.size
 
         for g in self.generators:
             for a in g.axes:
@@ -108,7 +109,7 @@ class Dimension(object):
         if self._full_mask is not None:
             # return copy to allow editing in place
             return self._full_mask.copy()
-        mask = np.full(self.size, True, dtype=np.int8)
+        mask = np.full(self._max_length, True, dtype=np.int8)
         for m in self._masks:
             assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
                 "Mask lengths are not consistent"
@@ -122,6 +123,7 @@ class Dimension(object):
         # we have to assume the "returned" mask may be edited in place
         # so we have to store a copy
         self._full_mask = mask.copy()
+        self.size = len(self._full_mask.nonzero()[0])
         return mask
 
     @staticmethod
@@ -133,17 +135,17 @@ class Dimension(object):
         # repeated by the size of inner generators
         inner_masks = [m.copy() for m in inner._masks]
         outer_masks = [m.copy() for m in outer._masks]
-        scale = inner.size
+        scale = inner._max_length
         for m in outer_masks:
             m["repeat"] *= scale
-        scale = outer.size
+        scale = outer._max_length
         for m in inner_masks:
             m["tile"] *= scale
         dim._masks = outer_masks + inner_masks
         dim.axes = outer.axes + inner.axes
         dim.generators = outer.generators + inner.generators
         dim.alternate = outer.alternate or inner.alternate
-        dim.size = outer.size * inner.size
+        dim._max_length = outer._max_length * inner._max_length
         dim.upper = outer.upper.copy()
         dim.upper.update(inner.upper)
         dim.lower = outer.lower.copy()
