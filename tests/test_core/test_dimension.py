@@ -20,7 +20,7 @@ class DimensionTests(ScanPointGeneratorTest):
         g.positions = {"x":np.array([0, 1, 2]), "y":np.array([10, 11, 12])}
         g.size = 3
         d = Dimension(g)
-        d.create_dimension_mask()
+        d.prepare()
         self.assertEqual([g], d.generators)
         self.assertEqual(["x", "y"], d.axes)
         self.assertEqual([], d._masks)
@@ -98,7 +98,7 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual([4, 16, -10, 11, 21, 9], combined.upper)
         self.assertEqual([0, 10, -16, 1, 1, 0], combined.lower)
 
-    def test_create_dimension_mask(self):
+    def test_prepare(self):
         d = Dimension(Mock(axes=["x", "y"], positions={"x":np.array(0), "y":np.array(0)}, size=30))
         m1 = np.array([0, 1, 0, 1, 1, 0], dtype=np.int8)
         m2 = np.array([1, 1, 0, 0, 1], dtype=np.int8)
@@ -110,8 +110,8 @@ class DimensionTests(ScanPointGeneratorTest):
         e2 = np.array([1, 1, 1, 1, 0, 0, 0, 0, 1, 1], dtype=np.int8)
         e2 = np.tile(e2, 3)
         expected = e1 & e2
-        mask = d.create_dimension_mask()
-        self.assertEqual(expected.tolist(), mask.tolist())
+        d.prepare()
+        self.assertEqual(expected.tolist(), d.mask.tolist())
 
     def test_apply_excluder_over_single_gen(self):
         x_pos = np.array([1, 2, 3, 4, 5])
@@ -185,6 +185,7 @@ class DimensionTests(ScanPointGeneratorTest):
         e = Mock(scannables=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
         d = Dimension(g)
         d.apply_excluder(e)
+        d.prepare()
         self.assertEqual([1, 0, 1, 2, 1], d.get_positions("gx").tolist())
         self.assertEqual([1, 2, 2, 2, 3], d.get_positions("gy").tolist())
 
@@ -199,6 +200,7 @@ class DimensionTests(ScanPointGeneratorTest):
         dy = Dimension(gy)
         d = Dimension.merge_dimensions(dy, dx)
         d.apply_excluder(e)
+        d.prepare()
         self.assertEqual([1, 0, 1, 2, 1], d.get_positions("gx").tolist())
         self.assertEqual([1, 2, 2, 2, 3], d.get_positions("gy").tolist())
 
@@ -216,14 +218,16 @@ class DimensionTests(ScanPointGeneratorTest):
         dx = Dimension(gx)
         dy = Dimension(gy)
         dz = Dimension(gz)
+        dz.prepare()
         self.assertEqual([0, 1, 2, 3], dz.get_positions("gz").tolist())
         dyx = Dimension.merge_dimensions(dy, dx)
         dyx.apply_excluder(exy)
+        dyx.prepare()
         self.assertEqual([2, 1, 0, 0, 1, 2, 2, 1, 0], dyx.get_positions("gx").tolist())
         self.assertEqual([1, 1, 1, 2, 2, 2, 3, 3, 3], dyx.get_positions("gy").tolist())
         d = Dimension.merge_dimensions(dz, dyx)
         d.apply_excluder(eyz)
-        d.create_dimension_mask()
+        d.prepare()
         self.assertEqual(15, d.size)
         self.assertEqual(
             [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],

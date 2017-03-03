@@ -152,12 +152,11 @@ class CompoundGenerator(object):
         self.size = 1
         for dim in self.dimensions:
             self._dim_meta[dim] = {}
-            mask = dim.create_dimension_mask()
-            indices = np.nonzero(mask)[0]
+            dim.prepare()
+            indices = np.nonzero(dim.mask)[0]
             if len(indices) == 0:
                 raise ValueError("Regions would exclude entire scan")
             self.size *= len(indices)
-            self._dim_meta[dim]["mask"] = mask
             self._dim_meta[dim]["indices"] = indices
 
         self.shape = tuple(dim.size for dim in self.dimensions)

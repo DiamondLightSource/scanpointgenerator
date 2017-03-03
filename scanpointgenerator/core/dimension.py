@@ -18,8 +18,8 @@ class Dimension(object):
         self.alternate = generator.alternate
         self.generators = [generator]
         self._masks = []
-        self._full_mask = None
         self._max_length = generator.size
+        self._prepared = False
 
     def get_positions(self, axis):
         """
@@ -31,8 +31,8 @@ class Dimension(object):
             Positions (np.array): Array of positions
         """
         # the points for this axis must be scaled and then indexed
-        if self._full_mask is None: self.create_dimension_mask()
-        mask = self._full_mask
+        if not self._prepared:
+            raise ValueError("Must call prepare first")
         # scale up points for axis
         gen = [g for g in self.generators if axis in g.axes][0]
         points = gen.positions[axis]
@@ -50,12 +50,15 @@ class Dimension(object):
             points = np.append(p, points[:int(len(points)//2)])
         else:
             points = np.tile(points, int(tile))
-        return points[mask.nonzero()[0]]
+        return points[self.mask.nonzero()[0]]
 
 
     def apply_excluder(self, excluder):
         """Apply an excluder with axes matching some axes in the dimension to
         produce an internal mask"""
+        if self._prepared:
+            raise ValueError("Can not apply excluders after"
+                             "prepare has been called")
         axis_inner = excluder.scannables[0]
         axis_outer = excluder.scannables[1]
         gen_inner = [g for g in self.generators if axis_inner in g.axes][0]
@@ -85,9 +88,9 @@ class Dimension(object):
             points_y = np.copy(points_y)
 
         if axis_inner == excluder.scannables[0]:
-            mask = excluder.create_mask(points_x, points_y)
+            excluder_mask = excluder.create_mask(points_x, points_y)
         else:
-            mask = excluder.create_mask(points_y, points_x)
+            excluder_mask = excluder.create_mask(points_y, points_x)
         tile = 0.5 if self.alternate else 1
         repeat = 1
         found_axis = False
@@ -100,12 +103,10 @@ class Dimension(object):
                 else:
                     tile *= g.size
 
-        m = {"repeat":repeat, "tile":tile, "mask":mask}
+        m = {"repeat":repeat, "tile":tile, "mask":excluder_mask}
         self._masks.append(m)
-        # any stored dimension wide mask has been invalidated
-        self._full_mask = None
 
-    def create_dimension_mask(self):
+    def prepare(self):
         """
         Create and return a mask for every point in the dimension
 
@@ -117,9 +118,8 @@ class Dimension(object):
         Returns:
             np.array(int8): One dimensional mask array
         """
-        if self._full_mask is not None:
-            # return copy to allow editing in place
-            return self._full_mask.copy()
+        if self._prepared:
+            return
         mask = np.full(self._max_length, True, dtype=np.int8)
         for m in self._masks:
             assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
@@ -133,9 +133,9 @@ class Dimension(object):
             mask &= expanded
         # we have to assume the "returned" mask may be edited in place
         # so we have to store a copy
-        self._full_mask = mask.copy()
-        self.size = len(self._full_mask.nonzero()[0])
-        return mask
+        self.mask = mask
+        self.size = len(self.mask.nonzero()[0])
+        self._prepared = True
 
     @staticmethod
     def merge_dimensions(outer, inner):
