@@ -23,7 +23,7 @@ apply it to a snake scan
     from scanpointgenerator import LineGenerator, CompoundGenerator
     from scanpointgenerator.plotgenerator import plot_generator
 
-    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=True)
+    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate=True)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
     gen = CompoundGenerator([ys, xs], [], [])
     plot_generator(gen)
@@ -36,7 +36,7 @@ And with the random offset
     from scanpointgenerator import LineGenerator, CompoundGenerator, RandomOffsetMutator
     from scanpointgenerator.plotgenerator import plot_generator
 
-    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=True)
+    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate=True)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
     random_offset = RandomOffsetMutator(seed=12345, axes = ["x", "y"], max_offset=dict(x=0.05, y=0.05))
     gen = CompoundGenerator([ys, xs], [], [random_offset])
