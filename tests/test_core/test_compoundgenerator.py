@@ -31,7 +31,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_default_duration(self):
         g = CompoundGenerator([MagicMock()], [], [])
-        self.assertEqual(0.05, g.duration)
+        self.assertEqual(-1, g.duration)
 
     def test_given_compound_raise_error(self):
         g = CompoundGenerator([], [], [])

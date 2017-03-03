@@ -16,7 +16,7 @@ class CompoundGenerator(object):
 
     typeid = "scanpointgenerator:generator/CompoundGenerator:1.0"
 
-    def __init__(self, generators, excluders, mutators, duration=0.05):
+    def __init__(self, generators, excluders, mutators, duration=-1):
         """
         Args:
             generators(list(Generator)): List of Generators to nest
