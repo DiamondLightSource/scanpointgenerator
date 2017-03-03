@@ -203,7 +203,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         points = list(g.iterator())
         self.assertEqual(expected, [p.positions for p in points])
         self.assertEqual(expected_idx, [p.indexes for p in points])
-        self.assertEqual([len(expected)], g.shape)
+        self.assertEqual((len(expected),), g.shape)
 
     def test_inner_alternating(self):
         z = LineGenerator("z", "mm", 1, 5, 5)
@@ -480,7 +480,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             for (s1, s2, l1, l2, j1, j2) in points]
         for e, a in zip(expected, actual):
             self.assertEqual(e, a)
-        self.assertEqual([181, 10], g.shape)
+        self.assertEqual((181, 10), g.shape)
 
     def test_double_spiral_scan(self):
         line1 = LineGenerator(["l1"], "mm", -1, 2, 5)
@@ -595,7 +595,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         self.assertEqual([True] * 2, g._dim_meta[dim_0]["mask"].tolist())
         self.assertEqual(["x"], dim_1.axes)
         self.assertEqual([True] * 3, g._dim_meta[dim_1]["mask"].tolist())
-        self.assertEqual([2, 3], g.shape)
+        self.assertEqual((2, 3), g.shape)
 
     def test_prepare_with_regions(self):
         x = LineGenerator("x", "mm", 0, 1, 5, False)
@@ -609,7 +609,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         expected_mask = [(x/4.)**2 + (y/4.)**2 <= 1
             for y in range(0, 5) for x in range(0, 5)]
         self.assertEqual(expected_mask, g._dim_meta[g.dimensions[0]]["mask"].tolist())
-        self.assertEqual([len([v for v in expected_mask if v])], g.shape)
+        self.assertEqual((len([v for v in expected_mask if v]),), g.shape)
 
     def test_simple_mask(self):
         x = LineGenerator("x", "mm", -1.0, 1.0, 5, False)
