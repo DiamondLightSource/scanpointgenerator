@@ -25,14 +25,21 @@ class CompoundGenerator(object):
             duration(int): Point durations in seconds (-1 for variable)
         """
 
+        self.size = 0
+        """int: Final number of points to be generated -
+        valid only after calling prepare"""
+        self.shape = None
+        """tuple(int): Final shape of the scan -
+        valid only after calling prepare"""
+        self.dimensions = []
+        """list(Dimension): Dimension instances -
+        valid only after calling prepare"""
+
         self.excluders = excluders
         self.mutators = mutators
         self.axes = []
         self.units = {}
-        self.dimensions = []
-        self.size = 1
         self.duration = duration
-        self.shape = None
         self._dim_meta = {}
         self._prepared = False
         for generator in generators:
@@ -51,7 +58,8 @@ class CompoundGenerator(object):
 
     def prepare(self):
         """
-        Prepare data structures and masks required for point generation.
+        Prepare data structures required for point generation and
+        initialize size, shape, and dimensions attributes.
         Must be called before get_point or iterator are called.
         """
         if self._prepared:

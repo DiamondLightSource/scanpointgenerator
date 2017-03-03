@@ -1,14 +1,24 @@
 from scanpointgenerator.compat import np
 
 class Dimension(object):
-    """A collapsed set of generators joined by excluders"""
+    """
+    An unrolled set of generators joined by excluders.
+    Represents a single dimension within a scan.
+    """
+
     def __init__(self, generator):
         self.axes = list(generator.axes)
-        self.generators = [generator]
+        """list(int): Unrolled axes within the dimension"""
         self.size = None
-        self.alternate = generator.alternate
+        """int: Size of the dimension"""
         self.upper = {}
+        """dict: Upper bound for the dimension
+        (dict of str axis -> float value)"""
         self.lower = {}
+        """dict: Lower bound for the dimension
+        (dict of str axis -> float value)"""
+        self.alternate = generator.alternate
+        self.generators = [generator]
         self._masks = []
         self._full_mask = None
         self._max_length = generator.size
@@ -19,6 +29,14 @@ class Dimension(object):
                 self.lower[a] = g.positions[a].min()
 
     def get_positions(self, axis):
+        """
+        Retrieve the positions for a given axis within the dimension.
+
+        Args:
+            axis (str): axis to get positions for
+        Returns:
+            Positions (np.array): Array of positions
+        """
         # the points for this axis must be scaled and then indexed
         if self._full_mask is None: self.create_dimension_mask()
         mask = self._full_mask
