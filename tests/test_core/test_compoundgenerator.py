@@ -423,7 +423,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
         box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        liss = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
+        liss = LissajousGenerator(['x', 'y'], "mm", box, 1, size=5)
         g = CompoundGenerator([z, liss], [], [])
         g.prepare()
         self.assertEqual(g.axes, ["z", "x", "y"])

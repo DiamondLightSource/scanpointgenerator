@@ -23,7 +23,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
 
     def test_array_positions(self):
         bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        g = LissajousGenerator(['x', 'y'], ["mm", "mm"], bounding_box, 1, num_points=10)
+        g = LissajousGenerator(['x', 'y'], ["mm", "mm"], bounding_box, 1, size=10)
         positions = [{'y': 0.0, 'x': 0.5},
                      {'y': 0.47552825814757677, 'x': 0.4045084971874737},
                      {'y': 0.2938926261462366, 'x': 0.15450849718747375},
@@ -57,7 +57,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         g = LissajousGenerator(
             ['x', 'y'], ['mm', 'mm'],
             {"centre":[1., 0.], "height":1., "width":2.},
-            1, num_points = 5)
+            1, size = 5)
         g.prepare_positions()
         g.prepare_bounds()
         expected_x = [2.0, 1.3090169943749475, 0.19098300532505266,
@@ -89,7 +89,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         expected_dict['units'] = ["mm", "cm"]
         expected_dict['box'] = box
         expected_dict['num_lobes'] = 1
-        expected_dict['num_points'] = 250
+        expected_dict['size'] = 250
 
         d = g.to_dict()
 
@@ -106,7 +106,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         _dict['units'] = ["cm", "mm"]
         _dict['box'] = box
         _dict['num_lobes'] = 5
-        _dict['num_points'] = 250
+        _dict['size'] = 250
 
         units_dict = dict()
         units_dict['x'] = "cm"
