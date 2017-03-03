@@ -12,8 +12,6 @@ class LineGeneratorTest(ScanPointGeneratorTest):
     def test_init(self):
         g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
         self.assertEqual(dict(x="mm"), g.units)
-        self.assertEqual([5], g.index_dims)
-        self.assertEqual(["x"], g.index_names)
         self.assertEqual(["x"], g.axes)
         self.assertEqual(True, g.alternate)
 
@@ -21,7 +19,6 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         g = LineGenerator(["x", "y"], ["mm", "cm"], [2., -2.], [4., -4.], 3)
         self.assertEqual(["x", "y"], g.axes)
         self.assertEqual({"x":"mm", "y":"cm"}, g.units)
-        self.assertEqual(["x_y_Line"], g.index_names)
         self.assertEqual(False, g.alternate)
 
     def test_array_positions(self):
@@ -94,8 +91,6 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
     def test_init(self):
         g = LineGenerator(["x", "y"], ["mm", "mm"], [1.0, 2.0], [5.0, 10.0], 5)
         self.assertEqual(dict(x="mm", y="mm"), g.units)
-        self.assertEqual([5], g.index_dims)
-        self.assertEqual(["x_y_Line"], g.index_names)
         self.assertEqual(["x", "y"], g.axes)
 
     def test_given_inconsistent_dims_then_raise_error(self):

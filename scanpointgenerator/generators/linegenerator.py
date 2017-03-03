@@ -52,15 +52,10 @@ class LineGenerator(Generator):
                 self.step.append(
                     (self.stop[axis] - self.start[axis])/(self.size - 1))
 
-        self.index_dims = [self.size]
-
         if len(self.axes) > 1:
             gen_name = "Line"
             for axis_name in self.axes[::-1]:
                 gen_name = axis_name + "_" + gen_name
-            self.index_names = [gen_name]
-        else:
-            self.index_names = self.axes
 
     def prepare_arrays(self, index_array):
         arrays = {}

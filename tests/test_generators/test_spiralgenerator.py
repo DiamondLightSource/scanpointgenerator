@@ -74,7 +74,6 @@ class SpiralGeneratorTest(unittest.TestCase):
         gen = SpiralGenerator.from_dict(_dict)
 
         self.assertEqual(["x", "y"], gen.axes)
-        self.assertEqual(["x_y_Spiral"], gen.index_names)
         self.assertEqual(units_dict, gen.units)
         self.assertEqual([0.0, 0.0], gen.centre)
         self.assertEqual(1.4, gen.radius)

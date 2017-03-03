@@ -18,8 +18,6 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
 
     def test_init(self):
         self.assertEqual(self.g.units, None)
-        self.assertEqual(self.g.index_dims, None)
-        self.assertEqual(self.g.index_names, None)
 
     def test_prepare_positions_raises(self):
         with self.assertRaises(NotImplementedError):
