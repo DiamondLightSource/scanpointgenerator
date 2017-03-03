@@ -26,8 +26,8 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual([], d._masks)
         self.assertEqual(g.alternate, d.alternate)
         self.assertEqual(g.size, d.size)
-        self.assertEqual({"x":2, "y":12}, d.upper)
-        self.assertEqual({"x":0, "y":10}, d.lower)
+        self.assertEqual([2, 12], d.upper)
+        self.assertEqual([0, 10], d.lower)
 
     def test_merge_dimensions(self):
         g, h = Mock(), Mock()
@@ -47,8 +47,8 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual(g.size * h.size, combined._max_length)
         self.assertEqual(outer.alternate or inner.alternate, combined.alternate)
         self.assertEqual(["gx", "gy", "hx", "hy"], combined.axes)
-        self.assertEqual({"gx":2, "gy":12, "hx":0, "hy":-10}, combined.upper)
-        self.assertEqual({"gx":0, "gy":10, "hx":-2, "hy":-12}, combined.lower)
+        self.assertEqual([2, 12, 0, -10], combined.upper)
+        self.assertEqual([0, 10, -2, -12], combined.lower)
         expected_masks = [
             {"repeat":128, "tile":3, "mask":om1},
             {"repeat":320, "tile":7, "mask":om2},
@@ -83,10 +83,10 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual(11 * 13, inner._max_length)
         self.assertEqual([{"repeat":1, "tile":5, "mask":g2mask}], outer._masks)
         self.assertEqual([{"repeat":13, "tile":1, "mask":h1mask}], inner._masks)
-        self.assertEqual({"g1x":4, "g2x":16, "g2y":-10}, outer.upper)
-        self.assertEqual({"g1x":0, "g2x":10, "g2y":-16}, outer.lower)
-        self.assertEqual({"h1x":11, "h1y":21, "h2x":9}, inner.upper)
-        self.assertEqual({"h1x":1, "h1y":1, "h2x":0}, inner.lower)
+        self.assertEqual([4, 16, -10], outer.upper)
+        self.assertEqual([0, 10, -16], outer.lower)
+        self.assertEqual([11, 21, 9], inner.upper)
+        self.assertEqual([1, 1, 0], inner.lower)
         combined = Dimension.merge_dimensions(outer, inner)
 
         expected_masks = [
@@ -95,8 +95,8 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual(expected_masks, combined._masks)
         self.assertEqual(5 * 7 * 11 * 13, combined._max_length)
         self.assertEqual(["g1x", "g2x", "g2y", "h1x", "h1y", "h2x"], combined.axes)
-        self.assertEqual({"g1x":4, "g2x":16, "g2y":-10, "h1x":11, "h1y":21, "h2x":9}, combined.upper)
-        self.assertEqual({"g1x":0, "g2x":10, "g2y":-16, "h1x":1, "h1y":1, "h2x":0}, combined.lower)
+        self.assertEqual([4, 16, -10, 11, 21, 9], combined.upper)
+        self.assertEqual([0, 10, -16, 1, 1, 0], combined.lower)
 
     def test_create_dimension_mask(self):
         d = Dimension(Mock(axes=["x", "y"], positions={"x":np.array(0), "y":np.array(0)}, size=30))

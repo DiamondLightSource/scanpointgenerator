@@ -11,22 +11,15 @@ class Dimension(object):
         """list(int): Unrolled axes within the dimension"""
         self.size = None
         """int: Size of the dimension"""
-        self.upper = {}
-        """dict: Upper bound for the dimension
-        (dict of str axis -> float value)"""
-        self.lower = {}
-        """dict: Lower bound for the dimension
-        (dict of str axis -> float value)"""
+        self.upper = [generator.positions[a].max() for a in generator.axes]
+        """list(float): Upper bound for the dimension"""
+        self.lower = [generator.positions[a].min() for a in generator.axes]
+        """list(float): Lower bound for the dimension"""
         self.alternate = generator.alternate
         self.generators = [generator]
         self._masks = []
         self._full_mask = None
         self._max_length = generator.size
-
-        for g in self.generators:
-            for a in g.axes:
-                self.upper[a] = g.positions[a].max()
-                self.lower[a] = g.positions[a].min()
 
     def get_positions(self, axis):
         """
@@ -164,8 +157,6 @@ class Dimension(object):
         dim.generators = outer.generators + inner.generators
         dim.alternate = outer.alternate or inner.alternate
         dim._max_length = outer._max_length * inner._max_length
-        dim.upper = outer.upper.copy()
-        dim.upper.update(inner.upper)
-        dim.lower = outer.lower.copy()
-        dim.lower.update(inner.lower)
+        dim.upper = outer.upper + inner.upper
+        dim.lower = outer.lower + inner.lower
         return dim
