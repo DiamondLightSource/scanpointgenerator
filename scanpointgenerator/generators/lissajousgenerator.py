@@ -9,13 +9,13 @@ from scanpointgenerator.core import Point
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
-    def __init__(self, axes, units, box, lobes, size=None, alternate=False):
+    def __init__(self, axes, units, centre, span, lobes, size=None, alternate=False):
         """
         Args:
             axes (list(str)): The scannable axes e.g. ["x", "y"]
             units (list(str)): The scannable units e.g. ["mm", "mm"]
-            box(dict): Dictionary of centre, width and height representing
-                box to fill with points
+            centre (list(float)): The centre of the lissajous curve
+            span (list(float)): The [height, width] of the curve
             num(int): Number of x-direction lobes for curve; will
                 have lobes+1 y-direction lobes
             size(int): The number of points to fill the Lissajous
@@ -34,9 +34,8 @@ class LissajousGenerator(Generator):
 
         self.x_freq = lobes
         self.y_freq = lobes + 1
-        self.x_max = box['width']/2
-        self.y_max = box['height']/2
-        self.centre = box['centre']
+        self.x_max, self.y_max = span[0]/2, span[1]/2
+        self.centre = centre
         self.size = size
 
         # Phase needs to be 0 for even lobes and pi/2 for odd lobes to start
@@ -67,16 +66,12 @@ class LissajousGenerator(Generator):
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        box = dict()
-        box['centre'] = self.centre
-        box['width'] = self.x_max * 2
-        box['height'] = self.y_max * 2
-
         d = dict()
         d['typeid'] = self.typeid
         d['axes'] = self.axes
         d['units'] = [self.units[a] for a in self.axes]
-        d['box'] = box
+        d['centre'] = self.centre
+        d['span'] = [self.x_max * 2, self.y_max * 2]
         d['lobes'] = self.x_freq
         d['size'] = self.size
 
@@ -96,8 +91,9 @@ class LissajousGenerator(Generator):
 
         axes = d['axes']
         units = d['units']
-        box = d['box']
+        centre = d['centre']
+        span = d['span']
         lobes = d['lobes']
         size = d['size']
 
-        return cls(axes, units, box, lobes, size)
+        return cls(axes, units, centre, span, lobes, size)

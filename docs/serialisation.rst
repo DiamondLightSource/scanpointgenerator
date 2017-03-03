@@ -68,11 +68,8 @@ LissajousGenerator::
         typeid: "scanpointgenerator:generator/LissajousGenerator:1.0"
         axes: ["x", "y"]
         units: "mm"
-        box: {
-            centre: [0.0, 0.0]
-            width: 10.0
-            height: 10.0
-        }
+        centre: [0.0, 0.0]
+        span: [10.0, 10.0]
         lobes: 20
         size: 1000
     }

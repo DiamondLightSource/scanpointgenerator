@@ -91,8 +91,8 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         self.assertEqual(ly, ry)
 
     def test_bounds_consistency_in_compound(self):
-        liss = LissajousGenerator(["x", "y"], ["mm", "mm"],
-            {"centre":[0, 0], "width":2, "height":2}, 4, 100, True)
+        liss = LissajousGenerator(["x", "y"], ["mm", "mm"], [0., 0.], [2., 2.],
+             4, 100, True)
         line = LineGenerator("z", "mm", 0, 1, 3)
         m = RandomOffsetMutator(1, ["x", "y"], {"x":0.1, "y":0.1})
         g = CompoundGenerator([line, liss], [], [])

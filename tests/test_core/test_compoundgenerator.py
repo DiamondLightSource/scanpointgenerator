@@ -422,8 +422,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                      {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 4.0}]
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
-        box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        liss = LissajousGenerator(['x', 'y'], "mm", box, 1, size=5)
+        liss = LissajousGenerator(['x', 'y'], "mm", [0., 0.], [1., 1.], 1, size=5)
         g = CompoundGenerator([z, liss], [], [])
         g.prepare()
         self.assertEqual(g.axes, ["z", "x", "y"])
@@ -434,9 +433,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_horrible_scan(self):
         lissajous = LissajousGenerator(
-            ["j1", "j2"], "mm",
-            {"centre":[-0.5, 0.7], "width":2, "height":3.5},
-            7, 100)
+            ["j1", "j2"], "mm", [-0.5, 0.7], [2, 3.5], 7, 100)
         line2 = LineGenerator(["l2"], "mm", -3, 3, 7, True)
         line1 = LineGenerator(["l1"], "mm", -1, 2, 5, True)
         spiral = SpiralGenerator(["s1", "s2"], "mm", [1, 2], 5, 2.5, True)
