@@ -73,7 +73,7 @@ LissajousGenerator::
             width: 10.0
             height: 10.0
         }
-        num_lobes: 20
+        lobes: 20
         size: 1000
     }
 

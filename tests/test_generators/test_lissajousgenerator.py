@@ -88,7 +88,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         expected_dict['axes'] = ["x", "y"]
         expected_dict['units'] = ["mm", "cm"]
         expected_dict['box'] = box
-        expected_dict['num_lobes'] = 1
+        expected_dict['lobes'] = 1
         expected_dict['size'] = 250
 
         d = g.to_dict()
@@ -105,7 +105,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         _dict['axes'] = ["x", "y"]
         _dict['units'] = ["cm", "mm"]
         _dict['box'] = box
-        _dict['num_lobes'] = 5
+        _dict['lobes'] = 5
         _dict['size'] = 250
 
         units_dict = dict()

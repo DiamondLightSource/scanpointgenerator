@@ -9,18 +9,17 @@ from scanpointgenerator.core import Point
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
-    def __init__(self, axes, units, box, num_lobes,
-            size=None, alternate=False):
+    def __init__(self, axes, units, box, lobes, size=None, alternate=False):
         """
         Args:
             axes (list(str)): The scannable axes e.g. ["x", "y"]
             units (list(str)): The scannable units e.g. ["mm", "mm"]
             box(dict): Dictionary of centre, width and height representing
                 box to fill with points
-            num_lobes(int): Number of x-direction lobes for curve; will
-                have num_lobes+1 y-direction lobes
+            num(int): Number of x-direction lobes for curve; will
+                have lobes+1 y-direction lobes
             size(int): The number of points to fill the Lissajous
-                curve. Default is 250 * num_lobes
+                curve. Default is 250 * lobes
         """
 
         self.axes = axes
@@ -31,10 +30,10 @@ class LissajousGenerator(Generator):
             raise ValueError("Axis names cannot be duplicated; given %s" %
                              axes)
 
-        num_lobes = int(num_lobes)
+        lobes = int(lobes)
 
-        self.x_freq = num_lobes
-        self.y_freq = num_lobes + 1
+        self.x_freq = lobes
+        self.y_freq = lobes + 1
         self.x_max = box['width']/2
         self.y_max = box['height']/2
         self.centre = box['centre']
@@ -42,9 +41,9 @@ class LissajousGenerator(Generator):
 
         # Phase needs to be 0 for even lobes and pi/2 for odd lobes to start
         # at centre for odd and at right edge for even
-        self.phase_diff = m.pi/2 * (num_lobes % 2)
+        self.phase_diff = m.pi/2 * (lobes % 2)
         if size is None:
-            self.size = num_lobes * 250
+            self.size = lobes * 250
         self.increment = 2*m.pi/self.size
 
         self.index_dims = [self.size]
@@ -78,7 +77,7 @@ class LissajousGenerator(Generator):
         d['axes'] = self.axes
         d['units'] = [self.units[a] for a in self.axes]
         d['box'] = box
-        d['num_lobes'] = self.x_freq
+        d['lobes'] = self.x_freq
         d['size'] = self.size
 
         return d
@@ -98,7 +97,7 @@ class LissajousGenerator(Generator):
         axes = d['axes']
         units = d['units']
         box = d['box']
-        num_lobes = d['num_lobes']
+        lobes = d['lobes']
         size = d['size']
 
-        return cls(axes, units, box, num_lobes, size)
+        return cls(axes, units, box, lobes, size)
