@@ -21,6 +21,7 @@ Table of Contents
    :caption: Compound Generators
 
    compoundgenerator
+   dimension
    excluders
    mutators
 
