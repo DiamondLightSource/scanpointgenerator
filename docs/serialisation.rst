@@ -56,7 +56,7 @@ LineGenerator (axes, start and stop can be N-dimensional to create and ND scan):
     {
         typeid: "scanpointgenerator:generator/LineGenerator:1.0"
         axes: "x" or ["x", "y"]
-        units: "mm"
+        units: "mm" or ["mm", "mm"]
         start: 0.0 or [0.0, 0.0]
         size: 5
         alternate = True
@@ -67,19 +67,20 @@ LissajousGenerator::
     {
         typeid: "scanpointgenerator:generator/LissajousGenerator:1.0"
         axes: ["x", "y"]
-        units: "mm"
+        units: ["mm", "mm"]
         centre: [0.0, 0.0]
         span: [10.0, 10.0]
         lobes: 20
         size: 1000
+        alternate = False
     }
 
-SpiralGenerator (where scale is optional)::
+SpiralGenerator::
 
     {
         typeid: "scanpointgenerator:generator/SpiralGenerator:1.0"
         axes: ["x", "y"]
-        units: "mm"
+        units: ["mm", "mm"]
         centre: [0.0, 0.0]
         radius: 5.0
         scale: 2.0
