@@ -16,23 +16,32 @@ class CompoundGenerator(object):
 
     typeid = "scanpointgenerator:generator/CompoundGenerator:1.0"
 
-    def __init__(self, generators, excluders, mutators):
+    def __init__(self, generators, excluders, mutators, duration=-1):
         """
         Args:
             generators(list(Generator)): List of Generators to nest
             excluders(list(Excluder)): List of Excluders to filter points by
             mutators(list(Mutator)): List of Mutators to apply to each point
+            duration(int): Point durations in seconds (-1 for variable)
         """
+
+        self.size = 0
+        """int: Final number of points to be generated -
+        valid only after calling prepare"""
+        self.shape = None
+        """tuple(int): Final shape of the scan -
+        valid only after calling prepare"""
+        self.dimensions = []
+        """list(Dimension): Dimension instances -
+        valid only after calling prepare"""
 
         self.excluders = excluders
         self.mutators = mutators
         self.axes = []
-        self.position_units = {}
-        self.index_dims = []
-        self.dimensions = []
-        self.size = 1
-        self.dim_meta = {}
-        self.prepared = False
+        self.units = {}
+        self.duration = duration
+        self._dim_meta = {}
+        self._prepared = False
         for generator in generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
@@ -40,24 +49,24 @@ class CompoundGenerator(object):
                 raise TypeError("CompoundGenerators cannot be nested, nest"
                                 "its constituent parts instead")
             self.axes += generator.axes
-            self.position_units.update(generator.position_units)
+            self.units.update(generator.units)
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated")
 
         self.generators = generators
-        self.generator_dim_scaling = {}
+        self._generator_dim_scaling = {}
 
     def prepare(self):
         """
-        Prepare data structures and masks required for point generation.
+        Prepare data structures required for point generation and
+        initialize size, shape, and dimensions attributes.
         Must be called before get_point or iterator are called.
         """
-        if self.prepared:
+        if self._prepared:
             return
         self.dimensions = []
-        self.index_dims = []
-        self.dim_meta = {}
-        self.generator_dim_scaling = {}
+        self._dim_meta = {}
+        self._generator_dim_scaling = {}
 
         # we're going to mutate these structures
         excluders = list(self.excluders)
@@ -89,11 +98,11 @@ class CompoundGenerator(object):
                 valid &= gen_2.positions[axis_2] >= rect.roi.start[1]
                 points_2 = gen_2.positions[axis_2][valid.astype(np.bool)]
                 new_gen1 = LineGenerator(
-                    gen_1.name, gen_1.units, points_1[0], points_1[-1],
-                    len(points_1), gen_1.alternate_direction)
+                    gen_1.axes, gen_1.units, points_1[0], points_1[-1],
+                    len(points_1), gen_1.alternate)
                 new_gen2 = LineGenerator(
-                    gen_2.name, gen_2.units, points_2[0], points_2[-1],
-                    len(points_2), gen_2.alternate_direction)
+                    gen_2.axes, gen_2.units, points_2[0], points_2[-1],
+                    len(points_2), gen_2.alternate)
                 generators[generators.index(gen_1)] = new_gen1
                 generators[generators.index(gen_2)] = new_gen2
                 excluders.remove(rect)
@@ -127,7 +136,7 @@ class CompoundGenerator(object):
                     and dim_1 is not self.dimensions[0]:
                 raise ValueError(
                     "Generators tied by regions must have the same " \
-                            "alternate_direction setting")
+                            "alternate setting")
             # merge "inner" into "outer"
             if dim_diff == -1:
                 # dim_1 is "outer" - preserves axis ordering
@@ -142,35 +151,33 @@ class CompoundGenerator(object):
 
         self.size = 1
         for dim in self.dimensions:
-            self.dim_meta[dim] = {}
-            mask = dim.create_dimension_mask()
-            indices = np.nonzero(mask)[0]
+            self._dim_meta[dim] = {}
+            dim.prepare()
+            indices = np.nonzero(dim.mask)[0]
             if len(indices) == 0:
                 raise ValueError("Regions would exclude entire scan")
             self.size *= len(indices)
-            self.dim_meta[dim]["mask"] = mask
-            self.dim_meta[dim]["indices"] = indices
-            self.index_dims.append(len(indices))
+            self._dim_meta[dim]["indices"] = indices
 
+        self.shape = tuple(dim.size for dim in self.dimensions)
         repeat = self.size
         tile = 1
         for dim in self.dimensions:
-            dim_length = len(self.dim_meta[dim]["indices"])
-            repeat /= dim_length
-            self.dim_meta[dim]["tile"] = tile
-            self.dim_meta[dim]["repeat"] = repeat
-            tile *= dim_length
+            repeat /= dim.size
+            self._dim_meta[dim]["tile"] = tile
+            self._dim_meta[dim]["repeat"] = repeat
+            tile *= dim.size
 
         for dim in self.dimensions:
             tile = 1
-            repeat = dim.size
+            repeat = dim._max_length
             for g in dim.generators:
                 repeat /= g.size
                 d = {"tile":tile, "repeat":repeat}
                 tile *= g.size
-                self.generator_dim_scaling[g] = d
+                self._generator_dim_scaling[g] = d
 
-        self.prepared = True
+        self._prepared = True
 
     def iterator(self):
         """
@@ -179,7 +186,7 @@ class CompoundGenerator(object):
         Yields:
             Point: The next point
         """
-        if not self.prepared:
+        if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
         it = (self.get_point(n) for n in range_(self.size))
         for p in it:
@@ -195,7 +202,7 @@ class CompoundGenerator(object):
             Point: The requested point
         """
 
-        if not self.prepared:
+        if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
         if n >= self.size:
             raise IndexError("Requested point is out of range")
@@ -206,8 +213,8 @@ class CompoundGenerator(object):
         # many times we've run through them
         kc = 0 # the "cumulative" k for each dimension
         for dim in self.dimensions:
-            indices = self.dim_meta[dim]["indices"]
-            i = int(n // self.dim_meta[dim]["repeat"])
+            indices = self._dim_meta[dim]["indices"]
+            i = int(n // self._dim_meta[dim]["repeat"])
             i %= len(indices)
             k = indices[i]
             dim_reverse = False
@@ -221,7 +228,7 @@ class CompoundGenerator(object):
             # in alternating case, need to sometimes go backward
             point.indexes.append(i)
             for g in dim.generators:
-                j = int(k // self.generator_dim_scaling[g]["repeat"])
+                j = int(k // self._generator_dim_scaling[g]["repeat"])
                 r = int(j // g.size)
                 j %= g.size
                 j_lower = j
@@ -244,6 +251,7 @@ class CompoundGenerator(object):
                     else:
                         point.lower[axis] = g.positions[axis][j]
                         point.upper[axis] = g.positions[axis][j]
+        point.duration = self.duration
         for m in self.mutators:
             point = m.mutate(point, n)
         return point
@@ -255,6 +263,7 @@ class CompoundGenerator(object):
         d['generators'] = [g.to_dict() for g in self.generators]
         d['excluders'] = [e.to_dict() for e in self.excluders]
         d['mutators'] = [m.to_dict() for m in self.mutators]
+        d['duration'] = self.duration
         return d
 
     @classmethod
@@ -270,4 +279,5 @@ class CompoundGenerator(object):
         generators = [Generator.from_dict(g) for g in d['generators']]
         excluders = [Excluder.from_dict(e) for e in d['excluders']]
         mutators = [Mutator.from_dict(m) for m in d['mutators']]
-        return cls(generators, excluders, mutators)
+        duration = d['duration']
+        return cls(generators, excluders, mutators, duration)

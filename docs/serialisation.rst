@@ -9,21 +9,21 @@ for the CompoundGenerator is as follows::
         generators: [
             {
                 typeid: "scanpointgenerator:generator/LineGenerator:1.0"
-                name: "y"
+                axes: "y"
                 units: "mm"
                 start: 0.0
                 stop: 1.0
-                num: 5
-                alternate_direction = False
+                size: 5
+                alternate = False
             },
             {
                 typeid: "scanpointgenerator:generator/LineGenerator:1.0"
-                name: "x"
+                axes: "x"
                 units: "mm"
                 start: 0.0
                 stop: 5.0
-                num: 5
-                alternate_direction = True
+                size: 5
+                alternate = True
             }
         ],
         excluders: [
@@ -51,53 +51,39 @@ for the CompoundGenerator is as follows::
 
 The models for each base generator are:
 
-ArrayGenerator (where name and points can be N-dimensional and upper_bounds and lower_bounds are optional)::
-
-    {
-        typeid: "scanpointgenerator:generator/ArrayGenerator:1.0"
-        name: "x" or ["x", "y"]
-        units: "mm"
-        points: [1.0, 2.0, 3.0] or [[1.0, 2.0], [2.0, 4.0], [3.0, 6.0]]
-        upper_bounds: [1.5, 2.5, 3.5]
-        lower_bounds: [0.5, 1.5, 2.5]
-    }
-
-LineGenerator (name, start and stop can be N-dimensional to create and ND scan)::
+LineGenerator (axes, start and stop can be N-dimensional to create and ND scan)::
 
     {
         typeid: "scanpointgenerator:generator/LineGenerator:1.0"
-        name: "x" or ["x", "y"]
+        axes: "x" or ["x", "y"]
         units: "mm"
         start: 0.0 or [0.0, 0.0]
-        num: 5
-        alternate_direction = True
+        size: 5
+        alternate = True
     }
 
-LissajousGenerator (where num_points is optional)::
+LissajousGenerator::
 
     {
         typeid: "scanpointgenerator:generator/LissajousGenerator:1.0"
-        names: ["x", "y"]
+        axes: ["x", "y"]
         units: "mm"
-        box: {
-            centre: [0.0, 0.0]
-            width: 10.0
-            height: 10.0
-        }
-        num_lobes: 20
-        num_points: 1000
+        centre: [0.0, 0.0]
+        span: [10.0, 10.0]
+        lobes: 20
+        size: 1000
     }
 
 SpiralGenerator (where scale is optional)::
 
     {
         typeid: "scanpointgenerator:generator/SpiralGenerator:1.0"
-        names: ["x", "y"]
+        axes: ["x", "y"]
         units: "mm"
         centre: [0.0, 0.0]
         radius: 5.0
         scale: 2.0
-        alternate_direction = True
+        alternate = True
     }
 
 And for the mutators:
@@ -126,7 +112,7 @@ As an example of serialising, here is a simple snake scan.
     from scanpointgenerator import LineGenerator, CompoundGenerator
     from scanpointgenerator.plotgenerator import plot_generator
 
-    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
+    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
     gen = CompoundGenerator([y, x], [], [])
 
@@ -140,7 +126,7 @@ It is the same after being serialised and deserialised.
     from scanpointgenerator import LineGenerator, CompoundGenerator
     from scanpointgenerator.plotgenerator import plot_generator
 
-    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
+    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
     gen = CompoundGenerator([y, x], [], [])
 

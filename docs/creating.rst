@@ -18,7 +18,7 @@ points in the y direction
     from scanpointgenerator.plotgenerator import plot_generator
 
     spiral = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 10.0,
-                             alternate_direction=True)
+                             alternate=True)
     rectangle = Excluder(RectangularROI([1.0, 1.0], 8.0, 8.0), ["x", "y"])
     mutator = RandomOffsetMutator(2, ["x", "y"], dict(x=0.0, y=0.25))
     gen = CompoundGenerator([spiral], [rectangle], [mutator])
@@ -35,7 +35,7 @@ A spiral scan at each point of a line scan with alternating direction
 
     line = LineGenerator("z", "mm", 0.0, 20.0, 3)
     spiral = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 1.2,
-                             alternate_direction=True)
+                             alternate=True)
     gen = CompoundGenerator([line, spiral], [], [])
     gen.prepare()
 

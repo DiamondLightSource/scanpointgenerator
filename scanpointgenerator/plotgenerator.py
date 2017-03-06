@@ -67,9 +67,9 @@ def plot_generator(gen, excluder=None, show_indexes=True):
         y.append(point.upper.get("y", 0))
 
     # # Plot labels
-    plt.xlabel("X (%s)" % gen.position_units["x"])
-    if "y" in gen.position_units:
-        plt.ylabel("Y (%s)" % gen.position_units["y"])
+    plt.xlabel("X (%s)" % gen.units["x"])
+    if "y" in gen.units:
+        plt.ylabel("Y (%s)" % gen.units["y"])
     else:
         plt.tick_params(left='off', labelleft='off')
 

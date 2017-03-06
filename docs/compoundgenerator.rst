@@ -21,7 +21,7 @@ line scan inside it with 5 points.
     from scanpointgenerator import LineGenerator, CompoundGenerator
     from scanpointgenerator.plotgenerator import plot_generator
 
-    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=False)
+    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate=False)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
     gen = CompoundGenerator([ys, xs], [], [])
     plot_generator(gen)
@@ -40,7 +40,7 @@ be run in reverse to give a snake scan.
     from scanpointgenerator import LineGenerator, CompoundGenerator
     from scanpointgenerator.plotgenerator import plot_generator
 
-    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate_direction=True)
+    xs = LineGenerator("x", "mm", 0.0, 0.5, 5, alternate=True)
     ys = LineGenerator("y", "mm", 0.0, 0.5, 4)
     gen = CompoundGenerator([ys, xs], [], [])
     plot_generator(gen)
@@ -53,7 +53,7 @@ Restrictions
 
 :ref:`excluders` must be defined on axes that are given by consecutive
 generators. Generators with axes filtered by an excluder must also have a
-common ``alternate_direction`` setting. An exception is made for the outermost
+common ``alternate`` setting. An exception is made for the outermost
 generator as it is not repeated.
 
 The following is `not` legal::

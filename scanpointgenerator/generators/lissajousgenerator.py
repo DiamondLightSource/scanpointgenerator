@@ -9,52 +9,45 @@ from scanpointgenerator.core import Point
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
-    def __init__(self, names, units, box, num_lobes,
-            num_points=None, alternate_direction=False):
+    def __init__(self, axes, units, centre, span, lobes, size=None, alternate=False):
         """
         Args:
-            names (list(str)): The scannable names e.g. ["x", "y"]
-            units (str): The scannable units e.g. "mm"
-            box(dict): Dictionary of centre, width and height representing
-                box to fill with points
-            num_lobes(int): Number of x-direction lobes for curve; will
-                have num_lobes+1 y-direction lobes
-            num_points(int): The number of points to fill the Lissajous
-                curve. Default is 250 * num_lobes
+            axes (list(str)): The scannable axes e.g. ["x", "y"]
+            units (list(str)): The scannable units e.g. ["mm", "mm"]
+            centre (list(float)): The centre of the lissajous curve
+            span (list(float)): The [height, width] of the curve
+            num(int): Number of x-direction lobes for curve; will
+                have lobes+1 y-direction lobes
+            size(int): The number of points to fill the Lissajous
+                curve. Default is 250 * lobes
         """
 
-        self.names = names
-        self.units = units
-        self.alternate_direction = alternate_direction
+        self.axes = axes
+        self.units = {d:u for d,u in zip(axes, units)}
+        self.alternate = alternate
 
-        if len(self.names) != len(set(self.names)):
+        if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
-                             names)
+                             axes)
 
-        num_lobes = int(num_lobes)
+        lobes = int(lobes)
 
-        self.x_freq = num_lobes
-        self.y_freq = num_lobes + 1
-        self.x_max = box['width']/2
-        self.y_max = box['height']/2
-        self.centre = box['centre']
-        self.size = num_points
+        self.x_freq = lobes
+        self.y_freq = lobes + 1
+        self.x_max, self.y_max = span[0]/2, span[1]/2
+        self.centre = centre
+        self.size = size
 
         # Phase needs to be 0 for even lobes and pi/2 for odd lobes to start
         # at centre for odd and at right edge for even
-        self.phase_diff = m.pi/2 * (num_lobes % 2)
-        if num_points is None:
-            self.size = num_lobes * 250
+        self.phase_diff = m.pi/2 * (lobes % 2)
+        if size is None:
+            self.size = lobes * 250
         self.increment = 2*m.pi/self.size
 
-        self.position_units = {self.names[0]: units, self.names[1]: units}
-        self.index_dims = [self.size]
         gen_name = "Lissajous"
-        for axis_name in self.names[::-1]:
+        for axis_name in self.axes[::-1]:
             gen_name = axis_name + "_" + gen_name
-        self.index_names = [gen_name]
-
-        self.axes = self.names  # For GDA
 
     def prepare_arrays(self, index_array):
         arrays = {}
@@ -64,25 +57,21 @@ class LissajousGenerator(Generator):
         d = self.phase_diff
         fx = lambda t: x0 + A * np.sin(a * 2*m.pi * t/self.size + d)
         fy = lambda t: y0 + B * np.sin(b * 2*m.pi * t/self.size)
-        arrays[self.names[0]] = fx(index_array)
-        arrays[self.names[1]] = fy(index_array)
+        arrays[self.axes[0]] = fx(index_array)
+        arrays[self.axes[1]] = fy(index_array)
         return arrays
 
     def to_dict(self):
         """Convert object attributes into a dictionary"""
 
-        box = dict()
-        box['centre'] = self.centre
-        box['width'] = self.x_max * 2
-        box['height'] = self.y_max * 2
-
         d = dict()
         d['typeid'] = self.typeid
-        d['names'] = self.names
-        d['units'] = list(self.position_units.values())[0]
-        d['box'] = box
-        d['num_lobes'] = self.x_freq
-        d['num_points'] = self.size
+        d['axes'] = self.axes
+        d['units'] = [self.units[a] for a in self.axes]
+        d['centre'] = self.centre
+        d['span'] = [self.x_max * 2, self.y_max * 2]
+        d['lobes'] = self.x_freq
+        d['size'] = self.size
 
         return d
 
@@ -98,10 +87,11 @@ class LissajousGenerator(Generator):
             LissajousGenerator: New LissajousGenerator instance
         """
 
-        names = d['names']
+        axes = d['axes']
         units = d['units']
-        box = d['box']
-        num_lobes = d['num_lobes']
-        num_points = d['num_points']
+        centre = d['centre']
+        span = d['span']
+        lobes = d['lobes']
+        size = d['size']
 
-        return cls(names, units, box, num_lobes, num_points)
+        return cls(axes, units, centre, span, lobes, size)

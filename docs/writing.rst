@@ -21,18 +21,8 @@ and registers itself as a subclass of Generator for deserialization purposes.
 .. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
     :pyobject: LineGenerator.__init__
 
-The initialiser stores the arguments given to it, then generates the three
-properties that are required by the baseclass:
-
-- position_units: Dict of str position_name -> str position_unit
-- index_dims: List of int dimension sizes for the dataset
-- index_names: List of str dimension names for the dataset
-
-It is important to note that the position_units property will have the same
-number of elements as index_dims for grid based scans (like LineGenerator). For
-non grid based scans (like SpiralGenerator), index_dims will typically have
-less elements, because the last two or more dimensions will be unrolled into
-one long array. This avoids sparse datasets.
+The initializer performs some basic validation on the parameters and stores
+them. The units get stored as a dictionary attribute of axis->unit:
 
 .. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
     :pyobject: LineGenerator.prepare_arrays

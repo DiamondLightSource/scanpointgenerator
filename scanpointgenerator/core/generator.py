@@ -5,20 +5,13 @@ class Generator(object):
     """Base class for all malcolm scan point generators
 
     Attributes:
-        position_units (dict): Dict of str position_name -> str position_unit
+        units (dict): Dict of str position_name -> str position_unit
             for each scannable dimension. E.g. {"x": "mm", "y": "mm"}
-        index_dims (list): List of the int dimension sizes for the dataset. This
-            will have the same length as the position_units list for square
-            scans but will be shorter for things like spiral scans. E.g. [15]
-        index_names (list): List of the str dimension names for the dataset.
-            This will have the same length as the index_dims. E.g. ["spiral_i"]
         axes (list): List of scannable names, used in GDA to reconstruct Point
             in CompoundGenerators
     """
-    alternate_direction = False
-    position_units = None
-    index_dims = None
-    index_names = None
+    alternate = False
+    units = None
     positions = None
     bounds = None
     size = 0

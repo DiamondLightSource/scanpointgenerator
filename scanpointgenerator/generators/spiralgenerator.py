@@ -9,39 +9,34 @@ from scanpointgenerator.core import Point
 class SpiralGenerator(Generator):
     """Generate the points of an Archimedean spiral"""
 
-    def __init__(self, names, units, centre, radius, scale=1.0,
-                 alternate_direction=False):
+    def __init__(self, axes, units, centre, radius, scale=1.0,
+                 alternate=False):
         """
         Args:
-            names (list(str)): The scannable names e.g. ["x", "y"]
-            units (str): The scannable units e.g. "mm"
+            axes (list(str)): The scannable axes e.g. ["x", "y"]
+            units (list(str)): The scannable units e.g. ["mm", "mm"]
             centre(list): List of two coordinates of centre point of spiral
             radius(float): Maximum radius of spiral
             scale(float): Gap between spiral arcs; higher scale gives
                 fewer points for same radius
-            alternate_direction(bool): Specifier to reverse direction if
+            alternate(bool): Specifier to reverse direction if
                 generator is nested
         """
 
-        self.names = names
-        self.units = units
+        self.axes = axes
         self.centre = centre
         self.radius = radius
         self.scale = scale
-        self.alternate_direction = alternate_direction
+        self.alternate = alternate
+        self.units = {d:u for d,u in zip(axes, units)}
 
-        if len(self.names) != len(set(self.names)):
+        if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
-                             names)
+                             axes)
 
-
-        self.position_units = {names[0]: units, names[1]: units}
         gen_name = "Spiral"
-        for axis_name in self.names[::-1]:
+        for axis_name in self.axes[::-1]:
             gen_name = axis_name + "_" + gen_name
-        self.index_names = [gen_name]
-
-        self.axes = self.names  # For GDA
 
         # spiral equation : r = b * phi
         # scale = 2 * pi * b
@@ -63,8 +58,8 @@ class SpiralGenerator(Generator):
         phi = phi_t(index_array)
         x = self.centre[0] + b * phi * np.sin(phi)
         y = self.centre[1] + b * phi * np.cos(phi)
-        arrays[self.names[0]] = x
-        arrays[self.names[1]] = y
+        arrays[self.axes[0]] = x
+        arrays[self.axes[1]] = y
         return arrays
 
     def to_dict(self):
@@ -72,12 +67,12 @@ class SpiralGenerator(Generator):
 
         d = dict()
         d['typeid'] = self.typeid
-        d['names'] = self.names
-        d['units'] = list(self.position_units.values())[0]
+        d['axes'] = self.axes
+        d['units'] = [self.units[a] for a in self.axes]
         d['centre'] = self.centre
         d['radius'] = self.radius
         d['scale'] = self.scale
-        d['alternate_direction'] = self.alternate_direction
+        d['alternate'] = self.alternate
 
         return d
 
@@ -93,11 +88,11 @@ class SpiralGenerator(Generator):
             SpiralGenerator: New SpiralGenerator instance
         """
 
-        names = d['names']
+        axes = d['axes']
         units = d['units']
         centre = d['centre']
         radius = d['radius']
         scale = d['scale']
-        alternate_direction = d['alternate_direction']
+        alternate = d['alternate']
 
-        return cls(names, units, centre, radius, scale, alternate_direction)
+        return cls(axes, units, centre, radius, scale, alternate)

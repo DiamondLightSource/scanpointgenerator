@@ -1,17 +1,64 @@
 from scanpointgenerator.compat import np
 
 class Dimension(object):
-    """A collapsed set of generators joined by excluders"""
+    """
+    An unrolled set of generators joined by excluders.
+    Represents a single dimension within a scan.
+    """
+
     def __init__(self, generator):
         self.axes = list(generator.axes)
+        """list(int): Unrolled axes within the dimension"""
+        self.size = None
+        """int: Size of the dimension"""
+        self.upper = [generator.positions[a].max() for a in generator.axes]
+        """list(float): Upper bound for the dimension"""
+        self.lower = [generator.positions[a].min() for a in generator.axes]
+        """list(float): Lower bound for the dimension"""
+        self.alternate = generator.alternate
         self.generators = [generator]
-        self.size = generator.size
-        self.masks = []
-        self.alternate = generator.alternate_direction
+        self._masks = []
+        self._max_length = generator.size
+        self._prepared = False
+
+    def get_positions(self, axis):
+        """
+        Retrieve the positions for a given axis within the dimension.
+
+        Args:
+            axis (str): axis to get positions for
+        Returns:
+            Positions (np.array): Array of positions
+        """
+        # the points for this axis must be scaled and then indexed
+        if not self._prepared:
+            raise ValueError("Must call prepare first")
+        # scale up points for axis
+        gen = [g for g in self.generators if axis in g.axes][0]
+        points = gen.positions[axis]
+        if self.alternate:
+            points = np.append(points, points[::-1])
+        tile = 0.5 if self.alternate else 1
+        repeat = 1
+        for g in self.generators[:self.generators.index(gen)]:
+            tile *= g.size
+        for g in self.generators[self.generators.index(gen) + 1:]:
+            repeat *= g.size
+        points = np.repeat(points, repeat)
+        if tile % 1 != 0:
+            p = np.tile(points, int(tile))
+            points = np.append(p, points[:int(len(points)//2)])
+        else:
+            points = np.tile(points, int(tile))
+        return points[self.mask.nonzero()[0]]
+
 
     def apply_excluder(self, excluder):
         """Apply an excluder with axes matching some axes in the dimension to
         produce an internal mask"""
+        if self._prepared:
+            raise ValueError("Can not apply excluders after"
+                             "prepare has been called")
         axis_inner = excluder.scannables[0]
         axis_outer = excluder.scannables[1]
         gen_inner = [g for g in self.generators if axis_inner in g.axes][0]
@@ -41,9 +88,9 @@ class Dimension(object):
             points_y = np.copy(points_y)
 
         if axis_inner == excluder.scannables[0]:
-            mask = excluder.create_mask(points_x, points_y)
+            excluder_mask = excluder.create_mask(points_x, points_y)
         else:
-            mask = excluder.create_mask(points_y, points_x)
+            excluder_mask = excluder.create_mask(points_y, points_x)
         tile = 0.5 if self.alternate else 1
         repeat = 1
         found_axis = False
@@ -56,10 +103,10 @@ class Dimension(object):
                 else:
                     tile *= g.size
 
-        m = {"repeat":repeat, "tile":tile, "mask":mask}
-        self.masks.append(m)
+        m = {"repeat":repeat, "tile":tile, "mask":excluder_mask}
+        self._masks.append(m)
 
-    def create_dimension_mask(self):
+    def prepare(self):
         """
         Create and return a mask for every point in the dimension
 
@@ -71,8 +118,10 @@ class Dimension(object):
         Returns:
             np.array(int8): One dimensional mask array
         """
-        mask = np.full(self.size, True, dtype=np.int8)
-        for m in self.masks:
+        if self._prepared:
+            return
+        mask = np.full(self._max_length, True, dtype=np.int8)
+        for m in self._masks:
             assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
                 "Mask lengths are not consistent"
             expanded = np.repeat(m["mask"], m["repeat"])
@@ -82,7 +131,11 @@ class Dimension(object):
             else:
                 expanded = np.tile(expanded, int(m["tile"]))
             mask &= expanded
-        return mask
+        # we have to assume the "returned" mask may be edited in place
+        # so we have to store a copy
+        self.mask = mask
+        self.size = len(self.mask.nonzero()[0])
+        self._prepared = True
 
     @staticmethod
     def merge_dimensions(outer, inner):
@@ -91,17 +144,19 @@ class Dimension(object):
         # masks in the inner generator are tiled by the size of
         # outer generators and outer generators have their elements
         # repeated by the size of inner generators
-        inner_masks = [m.copy() for m in inner.masks]
-        outer_masks = [m.copy() for m in outer.masks]
-        scale = inner.size
+        inner_masks = [m.copy() for m in inner._masks]
+        outer_masks = [m.copy() for m in outer._masks]
+        scale = inner._max_length
         for m in outer_masks:
             m["repeat"] *= scale
-        scale = outer.size
+        scale = outer._max_length
         for m in inner_masks:
             m["tile"] *= scale
-        dim.masks = outer_masks + inner_masks
+        dim._masks = outer_masks + inner_masks
         dim.axes = outer.axes + inner.axes
         dim.generators = outer.generators + inner.generators
         dim.alternate = outer.alternate or inner.alternate
-        dim.size = outer.size * inner.size
+        dim._max_length = outer._max_length * inner._max_length
+        dim.upper = outer.upper + inner.upper
+        dim.lower = outer.lower + inner.lower
         return dim

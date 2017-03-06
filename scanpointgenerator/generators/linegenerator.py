@@ -13,37 +13,36 @@ def to_list(value):
 class LineGenerator(Generator):
     """Generate a line of equally spaced N-dimensional points"""
 
-    def __init__(self, name, units, start, stop, size, alternate_direction=False):
+    def __init__(self, axes, units, start, stop, size, alternate=False):
         """
         Args:
-            name (str/list(str)): The scannable name(s) E.g. "x" or ["x", "y"]
-            units (str): The scannable units. E.g. "mm"
+            axes (str/list(str)): The scannable axes E.g. "x" or ["x", "y"]
+            units (str/list(str)): The scannable units. E.g. "mm" or ["mm", "mm"]
             start (float/list(float)): The first position to be generated.
                 e.g. 1.0 or [1.0, 2.0]
             stop (float or list(float)): The final position to be generated.
                 e.g. 5.0 or [5.0, 10.0]
             size (int): The number of points to generate. E.g. 5
-            alternate_direction(bool): Specifier to reverse direction if
+            alternate(bool): Specifier to reverse direction if
                 generator is nested
         """
 
-        self.name = to_list(name)
+        self.axes = to_list(axes)
         self.start = to_list(start)
         self.stop = to_list(stop)
-        self.alternate_direction = alternate_direction
-        self.units = units
+        self.alternate = alternate
+        self.units = {d:u for (d, u) in zip(self.axes, to_list(units))}
 
-        if len(self.name) != len(set(self.name)):
+        if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated; given %s" %
-                             name)
+                             axes)
 
-        if len(self.name) != len(self.start) or \
-           len(self.name) != len(self.stop):
+        if len(self.axes) != len(self.start) or \
+           len(self.axes) != len(self.stop):
             raise ValueError(
-                "Dimensions of name, start and stop do not match")
+                "Dimensions of axes, start and stop do not match")
 
         self.size = size
-        self.num_axes = len(self.name)
 
         self.step = []
         if self.size < 2:
@@ -53,24 +52,14 @@ class LineGenerator(Generator):
                 self.step.append(
                     (self.stop[axis] - self.start[axis])/(self.size - 1))
 
-        self.position_units = dict()
-        for dimension in self.name:
-            self.position_units[dimension] = units
-        self.index_dims = [self.size]
-
-        if len(self.name) > 1:
+        if len(self.axes) > 1:
             gen_name = "Line"
-            for axis_name in self.name[::-1]:
+            for axis_name in self.axes[::-1]:
                 gen_name = axis_name + "_" + gen_name
-            self.index_names = [gen_name]
-        else:
-            self.index_names = self.name
-
-        self.axes = self.name  # For GDA
 
     def prepare_arrays(self, index_array):
         arrays = {}
-        for axis, start, stop in zip(self.name, self.start, self.stop):
+        for axis, start, stop in zip(self.axes, self.start, self.stop):
             d = stop - start
             step = float(d)
             # if self.size == 1 then single point case
@@ -85,12 +74,12 @@ class LineGenerator(Generator):
 
         d = dict()
         d['typeid'] = self.typeid
-        d['name'] = self.name
-        d['units'] = self.units
+        d['axes'] = self.axes
+        d['units'] = [self.units[a] for a in self.axes]
         d['start'] = self.start
         d['stop'] = self.stop
         d['size'] = self.size
-        d['alternate_direction'] = self.alternate_direction
+        d['alternate'] = self.alternate
 
         return d
 
@@ -106,11 +95,11 @@ class LineGenerator(Generator):
             LineGenerator: New LineGenerator instance
         """
 
-        name = d['name']
+        axes = d['axes']
         units = d['units']
         start = d['start']
         stop = d['stop']
         size = d['size']
-        alternate_direction = d['alternate_direction']
+        alternate = d['alternate']
 
-        return cls(name, units, start, stop, size, alternate_direction)
+        return cls(axes, units, start, stop, size, alternate)

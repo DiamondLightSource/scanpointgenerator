@@ -10,7 +10,7 @@ from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import LissajousGenerator
 from scanpointgenerator import Excluder
 from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI
-from scanpointgenerator.mutators import FixedDurationMutator, RandomOffsetMutator
+from scanpointgenerator.mutators import RandomOffsetMutator
 from scanpointgenerator.compat import range_
 
 from pkg_resources import require
@@ -22,11 +22,16 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
     def test_init(self):
         x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
         y = LineGenerator("y", "mm", 2.0, 2.1, 2, False)
-        g = CompoundGenerator([y, x], [], [])
+        g = CompoundGenerator([y, x], [], [], 0.2)
         self.assertEqual(g.generators[0], y)
         self.assertEqual(g.generators[1], x)
-        self.assertEqual(g.position_units, dict(y="mm", x="mm"))
+        self.assertEqual(g.units, dict(y="mm", x="mm"))
         self.assertEqual(g.axes, ["y", "x"])
+        self.assertEqual(g.duration, 0.2)
+
+    def test_default_duration(self):
+        g = CompoundGenerator([MagicMock()], [], [])
+        self.assertEqual(-1, g.duration)
 
     def test_given_compound_raise_error(self):
         g = CompoundGenerator([], [], [])
@@ -128,7 +133,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_alternating_simple(self):
         y = LineGenerator("y", "mm", 1, 5, 5)
-        x = LineGenerator("x", "mm", 1, 5, 5, alternate_direction=True)
+        x = LineGenerator("x", "mm", 1, 5, 5, alternate=True)
         g = CompoundGenerator([y, x], [], [])
         g.prepare()
         expected = []
@@ -198,11 +203,12 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         points = list(g.iterator())
         self.assertEqual(expected, [p.positions for p in points])
         self.assertEqual(expected_idx, [p.indexes for p in points])
+        self.assertEqual((len(expected),), g.shape)
 
     def test_inner_alternating(self):
         z = LineGenerator("z", "mm", 1, 5, 5)
-        y = LineGenerator("y", "mm", 1, 5, 5, alternate_direction=True)
-        x = LineGenerator("x", "mm", 1, 5, 5, alternate_direction=True)
+        y = LineGenerator("y", "mm", 1, 5, 5, alternate=True)
+        x = LineGenerator("x", "mm", 1, 5, 5, alternate=True)
         r1 = CircularROI([3, 3], 1.5)
         e1 = Excluder(r1, ["x", "y"])
         g = CompoundGenerator([z, y, x], [e1], [])
@@ -389,7 +395,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                      {'y': 0.6946549630820702, 'x': -0.5596688286164636, 'z': 4.0},
                      ]
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate_direction=True)
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 0.8, alternate=True)
         g = CompoundGenerator([z, spiral], [], [])
         g.prepare()
         self.assertEqual(g.axes, ["z", "x", "y"])
@@ -416,8 +422,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                      {'y': -0.2938926261462364, 'x': 0.1545084971874736, 'z': 4.0}]
 
         z = LineGenerator("z", "mm", 0.0, 4.0, 3)
-        box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        liss = LissajousGenerator(['x', 'y'], "mm", box, 1, num_points=5)
+        liss = LissajousGenerator(['x', 'y'], "mm", [0., 0.], [1., 1.], 1, size=5)
         g = CompoundGenerator([z, liss], [], [])
         g.prepare()
         self.assertEqual(g.axes, ["z", "x", "y"])
@@ -428,15 +433,13 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
     def test_horrible_scan(self):
         lissajous = LissajousGenerator(
-            ["j1", "j2"], "mm",
-            {"centre":[-0.5, 0.7], "width":2, "height":3.5},
-            7, 100)
+            ["j1", "j2"], "mm", [-0.5, 0.7], [2, 3.5], 7, 100)
         line2 = LineGenerator(["l2"], "mm", -3, 3, 7, True)
         line1 = LineGenerator(["l1"], "mm", -1, 2, 5, True)
         spiral = SpiralGenerator(["s1", "s2"], "mm", [1, 2], 5, 2.5, True)
         r1 = CircularROI([1, 1], 2)
         r2 = CircularROI([-1, -1], 4)
-        r3 = CircularROI([1, 1], 1)
+        r3 = CircularROI([1, 1], 2)
         e1 = Excluder(r1, ["j1", "l2"])
         e2 = Excluder(r2, ["s2", "l1"])
         e3 = Excluder(r3, ["s1", "s2"])
@@ -464,7 +467,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         points = [(s1, s2, l1, l2, j1, j2) for (s1, s2, l1, l2, j1, j2) in points if
             (j1-1)**2 + (l2-1)**2 <= 4 and
             (s2+1)**2 + (l1+1)**2 <= 16 and
-            (s1-1)**2 + (s2-1)**2 <= 1]
+            (s1-1)**2 + (s2-1)**2 <= 4]
         self.assertEqual(len(points), g.size)
         generated_points = list(g.iterator())
         self.assertEqual(len(points), len(generated_points))
@@ -474,6 +477,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             for (s1, s2, l1, l2, j1, j2) in points]
         for e, a in zip(expected, actual):
             self.assertEqual(e, a)
+        self.assertEqual((181, 10), g.shape)
 
     def test_double_spiral_scan(self):
         line1 = LineGenerator(["l1"], "mm", -1, 2, 5)
@@ -535,16 +539,21 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_l2_upper, [p.upper["l2"] for p in gpoints])
 
     def test_mutators(self):
-        mutator_1 = FixedDurationMutator(0.2)
+        mutator_1 = MagicMock()
+        mutator_1.mutate = MagicMock(side_effect = lambda x,n:x)
         mutator_2 = RandomOffsetMutator(0, ["x"], {"x":1})
         mutator_2.calc_offset = MagicMock(return_value=0.1)
         x = LineGenerator('x', 'mm', 1, 5, 5)
-        g = CompoundGenerator([x], [], [mutator_1, mutator_2])
+        g = CompoundGenerator([x], [], [mutator_1, mutator_2], 0.2)
         g.prepare()
         x_pos = 1
+        n = 0
         for p in g.iterator():
             self.assertEqual(0.2, p.duration)
             self.assertEqual({"x":x_pos + 0.1}, p.positions)
+            mutator_1.mutate.assert_called_once_with(p, n)
+            mutator_1.mutate.reset_mock()
+            n += 1
             x_pos += 1
         self.assertEqual(6, x_pos)
 
@@ -580,9 +589,10 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         dim_0 = g.dimensions[0]
         dim_1 = g.dimensions[1]
         self.assertEqual(["y"], dim_0.axes)
-        self.assertEqual([True] * 2, g.dim_meta[dim_0]["mask"].tolist())
+        self.assertEqual([True] * 2, dim_0.mask.tolist())
         self.assertEqual(["x"], dim_1.axes)
-        self.assertEqual([True] * 3, g.dim_meta[dim_1]["mask"].tolist())
+        self.assertEqual([True] * 3, dim_1.mask.tolist())
+        self.assertEqual((2, 3), g.shape)
 
     def test_prepare_with_regions(self):
         x = LineGenerator("x", "mm", 0, 1, 5, False)
@@ -595,7 +605,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         self.assertEqual(["y", "x"], g.dimensions[0].axes)
         expected_mask = [(x/4.)**2 + (y/4.)**2 <= 1
             for y in range(0, 5) for x in range(0, 5)]
-        self.assertEqual(expected_mask, g.dim_meta[g.dimensions[0]]["mask"].tolist())
+        self.assertEqual(expected_mask, g.dimensions[0].mask.tolist())
+        self.assertEqual((len([v for v in expected_mask if v]),), g.shape)
 
     def test_simple_mask(self):
         x = LineGenerator("x", "mm", -1.0, 1.0, 5, False)
@@ -606,11 +617,11 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         g.prepare()
         p = [(x/2., y/2.) for y in range_(-2, 3) for x in range_(-2, 3)]
         expected_mask = [x*x + y*y <= 1 for (x, y) in p]
-        self.assertEqual(expected_mask, g.dim_meta[g.dimensions[0]]["mask"].tolist())
+        self.assertEqual(expected_mask, g.dimensions[0].mask.tolist())
 
     def test_simple_mask_alternating(self):
-        x = LineGenerator("x", "mm", -1.0, 1.0, 5, alternate_direction=True)
-        y = LineGenerator("y", "mm", -1.0, 1.0, 5, alternate_direction=True)
+        x = LineGenerator("x", "mm", -1.0, 1.0, 5, alternate=True)
+        y = LineGenerator("y", "mm", -1.0, 1.0, 5, alternate=True)
         r = CircularROI([0.5, 0], 1)
         e = Excluder(r, ["x", "y"])
         g = CompoundGenerator([y, x], [e], [])
@@ -624,11 +635,11 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
                 p += [(x/2., y/2.) for x in range_(-2, 3)]
             reverse = not reverse
         expected_mask = [(x-0.5)**2 + y**2 <= 1**2 for (x, y) in p]
-        self.assertEqual(expected_mask, g.dim_meta[g.dimensions[0]]["mask"].tolist())
+        self.assertEqual(expected_mask, g.dimensions[0].mask.tolist())
 
     def test_double_mask_alternating_spiral(self):
-        zgen = LineGenerator("z", "mm", 0.0, 4.0, 5, alternate_direction=True)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate_direction=True) #29 points
+        zgen = LineGenerator("z", "mm", 0.0, 4.0, 5, alternate=True)
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate=True) #29 points
         r1 = RectangularROI([-2, -2], 4, 3)
         r2 = RectangularROI([-2, 0], 4, 3)
         e1 = Excluder(r1, ["y", "x"])
@@ -641,7 +652,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
             p += [(x, y, z) for (x, y) in (xy if z % 2 == 0 else xy[::-1])]
         expected = [x >= -2 and x <= 1 and y >= -2 and y <= 2
                 and z >= 0 and z <= 3 for (x, y, z) in p]
-        actual = g.dim_meta[g.dimensions[0]]["mask"].tolist()
+        actual = g.dimensions[0].mask.tolist()
         self.assertEqual(expected, actual)
 
     def test_double_mask_spiral(self):
@@ -657,12 +668,12 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         p = [(x, y, z) for z in range_(0, 5) for (x, y) in p]
         expected = [x >= -2 and x <= 1 and y >= -2 and y <= 2
                 and z >= 0 and z <= 3 for (x, y, z) in p]
-        actual = g.dim_meta[g.dimensions[0]]["mask"].tolist()
+        actual = g.dimensions[0].mask.tolist()
         self.assertEqual(expected, actual)
 
     def test_simple_mask_alternating_spiral(self):
         z = LineGenerator("z", "mm", 0.0, 4.0, 5)
-        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate_direction=True) #29 points
+        spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 3, alternate=True) #29 points
         r = RectangularROI([-2, -2], 3, 4)
         e = Excluder(r, ["x", "y"])
         g = CompoundGenerator([z, spiral], [e], [])
@@ -670,7 +681,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         p = list(zip(spiral.positions['x'], spiral.positions['y']))
         expected = [x >= -2 and x < 1 and y >= -2 and y < 2 for (x, y) in p]
         expected_r = [x >= -2 and x < 1 and y >= -2 and y < 2 for (x, y) in p[::-1]]
-        actual = g.dim_meta[g.dimensions[1]]["mask"].tolist()
+        actual = g.dimensions[1].mask.tolist()
         self.assertEqual(expected, actual)
 
     def test_double_mask(self):
@@ -688,13 +699,13 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         m1 = [(x-0.1)**2 + (y-0.2)**2 <= 1 for (x, y, z) in p]
         m2 = [(y-0.1)**2 + (z-0.2)**2 <= 1 for (x, y, z) in p]
         expected_mask = [(b1 and b2) for (b1, b2) in zip(m1, m2)]
-        self.assertEqual(expected_mask, g.dim_meta[g.dimensions[0]]["mask"].tolist())
+        self.assertEqual(expected_mask, g.dimensions[0].mask.tolist())
 
     def test_complex_masks(self):
         tg = LineGenerator("t", "mm", 1, 5, 5)
-        zg = LineGenerator("z", "mm", 0, 4, 5, alternate_direction=True)
-        yg = LineGenerator("y", "mm", 1, 5, 5, alternate_direction=True)
-        xg = LineGenerator("x", "mm", 2, 6, 5, alternate_direction=True)
+        zg = LineGenerator("z", "mm", 0, 4, 5, alternate=True)
+        yg = LineGenerator("y", "mm", 1, 5, 5, alternate=True)
+        xg = LineGenerator("x", "mm", 2, 6, 5, alternate=True)
         r1 = CircularROI([4., 4.], 1.5)
         e1 = Excluder(r1, ["y", "x"])
         e2 = Excluder(r1, ["z", "y"])
@@ -715,8 +726,8 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
                     ix += 1
                 iy += 1
 
-        self.assertEqual(t_mask, g.dim_meta[g.dimensions[0]]["mask"].tolist())
-        self.assertEqual(xyz_mask, g.dim_meta[g.dimensions[1]]["mask"].tolist())
+        self.assertEqual(t_mask, g.dimensions[0].mask.tolist())
+        self.assertEqual(xyz_mask, g.dimensions[1].mask.tolist())
 
     def test_separate_indexes(self):
         x1 = LineGenerator("x1", "mm", -1.0, 1.0, 5, False)
@@ -743,13 +754,13 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         m1 = [x*x + y*y <= 1 for (x, y, z) in p]
         m2 = [y*y + z*z <= 1 for (x, y, z) in p]
         expected_mask = [(b1 and b2) for (b1, b2) in zip(m1, m2)]
-        self.assertEqual(expected_mask, g.dim_meta[g.dimensions[2]]["mask"].tolist())
+        self.assertEqual(expected_mask, g.dimensions[2].mask.tolist())
         p = [(x/2., y/2.) for y in range_(-2, 3) for x in range_(-2, 3)]
         expected_mask = [x*x + y*y <= 1 for (x, y) in p]
-        self.assertEqual(expected_mask, g.dim_meta[g.dimensions[1]]["mask"].tolist())
+        self.assertEqual(expected_mask, g.dimensions[1].mask.tolist())
         p = [(x/4., y/4.) for y in range_(0, 5) for x in range_(0, 5)]
         expected_mask = [x*x + y*y <= 1 for (x, y) in p]
-        self.assertEqual(expected_mask, g.dim_meta[g.dimensions[0]]["mask"].tolist())
+        self.assertEqual(expected_mask, g.dimensions[0].mask.tolist())
 
 class TestSerialisation(unittest.TestCase):
 
@@ -769,7 +780,7 @@ class TestSerialisation(unittest.TestCase):
         self.e1_dict = MagicMock()
 
     def test_to_dict(self):
-        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1])
+        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1], -1)
 
         self.l1.to_dict.return_value = self.l1_dict
         self.l2.to_dict.return_value = self.l2_dict
@@ -785,6 +796,7 @@ class TestSerialisation(unittest.TestCase):
         expected_dict['generators'] = gen_list
         expected_dict['excluders'] = excluders_list
         expected_dict['mutators'] = mutators_list
+        expected_dict['duration'] = -1
 
         d = self.g.to_dict()
 
@@ -804,6 +816,7 @@ class TestSerialisation(unittest.TestCase):
         _dict['generators'] = [self.l1_dict, self.l2_dict]
         _dict['excluders'] = [self.e1_dict]
         _dict['mutators'] = [self.m1_dict]
+        _dict['duration'] = 12
 
         units_dict = dict()
         units_dict['x'] = 'mm'
@@ -815,6 +828,7 @@ class TestSerialisation(unittest.TestCase):
         self.assertEqual(gen.generators[1], self.l1)
         self.assertEqual(gen.mutators[0], self.m1)
         self.assertEqual(gen.excluders[0], self.e1)
+        self.assertEqual(gen.duration, 12)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

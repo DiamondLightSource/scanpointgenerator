@@ -10,7 +10,7 @@ from scanpointgenerator import LineGenerator
 from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import Excluder
 from scanpointgenerator.rois import CircularROI
-from scanpointgenerator.mutators import FixedDurationMutator, RandomOffsetMutator
+from scanpointgenerator.mutators import RandomOffsetMutator
 
 class CompoundGeneratorPerformanceTest(ScanPointGeneratorTest):
     def test_200_million_time_constraint(self):
@@ -26,9 +26,8 @@ class CompoundGeneratorPerformanceTest(ScanPointGeneratorTest):
         e1 = Excluder(r1, ["x", "y"])
         e2 = Excluder(r2, ["w", "z"])
         e3 = Excluder(r3, ["z", "y"])
-        fm = FixedDurationMutator(0.1)
         om = RandomOffsetMutator(0, ["x", "y"], {"x":0.2, "y":0.2})
-        g = CompoundGenerator([w, z, s], [e1, e3, e2], [fm, om])
+        g = CompoundGenerator([w, z, s], [e1, e3, e2], [om])
         g.prepare() # g.size ~3e5
 
         end_time = time.time()

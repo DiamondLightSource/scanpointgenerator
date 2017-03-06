@@ -5,3 +5,4 @@ from scanpointgenerator.core.mutator import Mutator
 from scanpointgenerator.core.excluder import Excluder
 from scanpointgenerator.core.generator import Generator
 from scanpointgenerator.core.compoundgenerator import CompoundGenerator
+from scanpointgenerator.core.dimension import Dimension

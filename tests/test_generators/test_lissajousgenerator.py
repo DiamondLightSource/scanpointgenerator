@@ -9,22 +9,17 @@ from scanpointgenerator import LissajousGenerator
 
 class LissajousGeneratorTest(ScanPointGeneratorTest):
 
-    def setUp(self):
-        self.bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-        self.g = LissajousGenerator(["x", "y"], "mm", self.bounding_box, 1)
-
     def test_init(self):
-        self.assertEqual(self.g.position_units, dict(x="mm", y="mm"))
-        self.assertEqual(self.g.index_dims, [250])
-        self.assertEqual(self.g.index_names, ["x_y_Lissajous"])
-        self.assertEqual(self.g.axes, ["x", "y"])
+        g = LissajousGenerator(["x", "y"], ["mm", "cm"], [0., 0.], [1., 1.], 1)
+        self.assertEqual(g.units, dict(x="mm", y="cm"))
+        self.assertEqual(g.axes, ["x", "y"])
 
     def test_duplicate_name_raises(self):
         with self.assertRaises(ValueError):
-            LissajousGenerator(["x", "x"], "mm", dict(), 1)
+            LissajousGenerator(["x", "x"], ["mm", "mm"], [0., 0,], [1., 1.], 1)
 
     def test_array_positions(self):
-        g = LissajousGenerator(['x', 'y'], "mm", self.bounding_box, 1, num_points=10)
+        g = LissajousGenerator(['x', 'y'], ["mm", "mm"], [0., 0.], [1., 1.], 1, size=10)
         positions = [{'y': 0.0, 'x': 0.5},
                      {'y': 0.47552825814757677, 'x': 0.4045084971874737},
                      {'y': 0.2938926261462366, 'x': 0.15450849718747375},
@@ -56,9 +51,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
 
     def test_array_positions_with_offset(self):
         g = LissajousGenerator(
-            ['x', 'y'], 'mm',
-            {"centre":[1., 0.], "height":1., "width":2.},
-            1, num_points = 5)
+            ['x', 'y'], ['mm', 'mm'], [1., 0.,], [2., 1.], 1, size=5)
         g.prepare_positions()
         g.prepare_bounds()
         expected_x = [2.0, 1.3090169943749475, 0.19098300532505266,
@@ -77,45 +70,40 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         self.assertListAlmostEqual(expected_by, g.bounds['y'].tolist())
 
     def test_to_dict(self):
+        bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
+        g = LissajousGenerator(["x", "y"], ["mm", "cm"], [0., 0.], [1., 1.], 1)
         expected_dict = dict()
         box = dict()
         expected_dict['typeid'] = "scanpointgenerator:generator/LissajousGenerator:1.0"
-        box['centre'] = [0.0, 0.0]
-        box['width'] = 1.0
-        box['height'] = 1.0
 
-        expected_dict['names'] = ["x", "y"]
-        expected_dict['units'] = "mm"
-        expected_dict['box'] = box
-        expected_dict['num_lobes'] = 1
-        expected_dict['num_points'] = 250
+        expected_dict['axes'] = ["x", "y"]
+        expected_dict['units'] = ["mm", "cm"]
+        expected_dict['centre'] = [0., 0.]
+        expected_dict['span'] = [1., 1.]
+        expected_dict['lobes'] = 1
+        expected_dict['size'] = 250
 
-        d = self.g.to_dict()
+        d = g.to_dict()
 
         self.assertEqual(expected_dict, d)
 
     def test_from_dict(self):
-        box = dict()
-        box['centre'] = [0.0, 0.0]
-        box['width'] = 1.0
-        box['height'] = 2.0
-
         _dict = dict()
-        _dict['names'] = ["x", "y"]
-        _dict['units'] = "mm"
-        _dict['box'] = box
-        _dict['num_lobes'] = 5
-        _dict['num_points'] = 250
+        _dict['axes'] = ["x", "y"]
+        _dict['units'] = ["cm", "mm"]
+        _dict['centre'] = [0.0, 0.0]
+        _dict['span'] = [1., 2.]
+        _dict['lobes'] = 5
+        _dict['size'] = 250
 
         units_dict = dict()
-        units_dict['x'] = "mm"
+        units_dict['x'] = "cm"
         units_dict['y'] = "mm"
 
         gen = LissajousGenerator.from_dict(_dict)
 
-        self.assertEqual(["x", "y"], gen.names)
-        self.assertEqual(["x_y_Lissajous"], gen.index_names)
-        self.assertEqual(units_dict, gen.position_units)
+        self.assertEqual(["x", "y"], gen.axes)
+        self.assertEqual(units_dict, gen.units)
         self.assertEqual(5, gen.x_freq)
         self.assertEqual(0.5, gen.x_max)
         self.assertEqual(1.0, gen.y_max)
@@ -123,4 +111,4 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(250, gen.size)
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
