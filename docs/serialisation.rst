@@ -87,6 +87,16 @@ SpiralGenerator::
         alternate = True
     }
 
+ArrayGenerator::
+
+    {
+        typeid: "scanpointgenerator:generator/ArrayGenerator:1.0"
+        axis: "x"
+        units: "mm"
+        points: [0., 1., 1.5, 2.]
+        alternate = True
+    }
+
 And for the mutators:
 
 RandomOffsetMutator::

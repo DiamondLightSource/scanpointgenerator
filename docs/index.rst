@@ -15,6 +15,7 @@ Table of Contents
    linegenerator
    spiralgenerator
    lissajousgenerator
+   arraygenerator
 
 .. toctree::
    :maxdepth: 1
