@@ -34,10 +34,6 @@ class SpiralGenerator(Generator):
             raise ValueError("Axis names cannot be duplicated; given %s" %
                              axes)
 
-        gen_name = "Spiral"
-        for axis_name in self.axes[::-1]:
-            gen_name = axis_name + "_" + gen_name
-
         # spiral equation : r = b * phi
         # scale = 2 * pi * b
         # parameterise phi with approximation:

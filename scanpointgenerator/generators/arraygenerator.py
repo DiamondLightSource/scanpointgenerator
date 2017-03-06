@@ -21,10 +21,6 @@ class ArrayGenerator(Generator):
         self.axes = [axis]
         self.units = {axis:units}
 
-        gen_name = "Array"
-        for axis_name in self.axes[::-1]:
-            gen_name = axis_name + "_" + gen_name
-
     def prepare_arrays(self, index_array):
         points = self.points
         # add linear extension to ends of points, representing t=-1 and t=N+1

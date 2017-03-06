@@ -52,11 +52,6 @@ class LineGenerator(Generator):
                 self.step.append(
                     (self.stop[axis] - self.start[axis])/(self.size - 1))
 
-        if len(self.axes) > 1:
-            gen_name = "Line"
-            for axis_name in self.axes[::-1]:
-                gen_name = axis_name + "_" + gen_name
-
     def prepare_arrays(self, index_array):
         arrays = {}
         for axis, start, stop in zip(self.axes, self.start, self.stop):

@@ -45,10 +45,6 @@ class LissajousGenerator(Generator):
             self.size = lobes * 250
         self.increment = 2*m.pi/self.size
 
-        gen_name = "Lissajous"
-        for axis_name in self.axes[::-1]:
-            gen_name = axis_name + "_" + gen_name
-
     def prepare_arrays(self, index_array):
         arrays = {}
         x0, y0 = self.centre[0], self.centre[1]
