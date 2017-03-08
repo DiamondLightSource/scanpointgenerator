@@ -21,6 +21,8 @@ class ROIExcluder(Excluder):
     def create_mask(self, x_points, y_points):
         """Create a boolean array specifying the points to exclude.
 
+        The resulting mask is created from the union of all ROIs.
+
         Args:
             x_points(list(float)): List of points for x-axis
             y_points(list(float)): List of points for y-axis

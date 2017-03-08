@@ -4,7 +4,7 @@ class Excluder(object):
 
     """Base class for objects that filter points based on their attributes."""
 
-    # Lookup table for mutator subclasses
+    # Lookup table for excluder subclasses
     _excluder_lookup = {}
 
     def __init__(self, axes):
@@ -33,7 +33,7 @@ class Excluder(object):
             d(dict): Dictionary of attributes
 
         Returns:
-            Mutator: New Mutator instance
+            Excluder: New Excluder instance
 
         """
         excluder_type = d["typeid"]
