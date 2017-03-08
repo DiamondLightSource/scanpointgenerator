@@ -17,7 +17,7 @@ class TestCreateMask(unittest.TestCase):
         self.r2 = MagicMock()
         self.e = ROIExcluder([self.r1, self.r2], ["x", "y"])
 
-    def test_mask_points_called_on_rois(self):
+    def test_create_mask_returns_union_of_ROIs(self):
         x_points = [1, 2, 3, 4]
         y_points = [10, 10, 20, 20]
         self.r1.mask_points.return_value = \
@@ -30,7 +30,7 @@ class TestCreateMask(unittest.TestCase):
 
         self.r1.mask_points.assert_called_once_with([x_points, y_points])
         self.r2.mask_points.assert_called_once_with([x_points, y_points])
-        np.testing.assert_array_equal(expected_mask, mask)
+        self.assertEqual(expected_mask.tolist(), mask.tolist())
 
 
 class TestSerialisation(unittest.TestCase):
