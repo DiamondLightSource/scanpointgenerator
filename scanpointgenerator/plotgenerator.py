@@ -10,12 +10,12 @@ def plot_generator(gen, excluder=None, show_indexes=True):
     from scipy import interpolate
 
     if excluder is not None:
-        roi = excluder.roi
-        overlay = plt.subplot(111, aspect='equal')
-        if isinstance(roi, RectangularROI):
-            overlay.add_patch(Rectangle(roi.start, roi.width, roi.height, fill=False))
-        if isinstance(roi, CircularROI):
-            overlay.add_patch(Circle(roi.centre, roi.radius, fill=False))
+        for roi in excluder.rois:
+            overlay = plt.subplot(111, aspect='equal')
+            if isinstance(roi, RectangularROI):
+                overlay.add_patch(Rectangle(roi.start, roi.width, roi.height, fill=False))
+            if isinstance(roi, CircularROI):
+                overlay.add_patch(Circle(roi.centre, roi.radius, fill=False))
 
     if not isinstance(gen, CompoundGenerator):
         excluders = [] if excluder is None else [excluder]
