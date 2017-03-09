@@ -17,9 +17,9 @@ class TestCreateMask(unittest.TestCase):
         self.r2 = MagicMock()
         self.e = ROIExcluder([self.r1, self.r2], ["x", "y"])
 
-    def test_create_mask_returns_union_of_ROIs(self):
-        x_points = [1, 2, 3, 4]
-        y_points = [10, 10, 20, 20]
+    def test_create_mask_returns_union_of_rois(self):
+        x_points = np.array([1, 2, 3, 4])
+        y_points = np.array([10, 10, 20, 20])
         self.r1.mask_points.return_value = \
             np.array([True, False, False, True])
         self.r2.mask_points.return_value = \
@@ -28,8 +28,12 @@ class TestCreateMask(unittest.TestCase):
 
         mask = self.e.create_mask(x_points, y_points)
 
-        self.r1.mask_points.assert_called_once_with([x_points, y_points])
-        self.r2.mask_points.assert_called_once_with([x_points, y_points])
+        r1_call_list = self.r1.mask_points.call_args_list[0][0][0]
+        r2_call_list = self.r2.mask_points.call_args_list[0][0][0]
+        self.assertEqual(x_points.tolist(), r1_call_list[0].tolist())
+        self.assertEqual(y_points.tolist(), r1_call_list[1].tolist())
+        self.assertEqual(x_points.tolist(), r2_call_list[0].tolist())
+        self.assertEqual(y_points.tolist(), r2_call_list[1].tolist())
         self.assertEqual(expected_mask.tolist(), mask.tolist())
 
 

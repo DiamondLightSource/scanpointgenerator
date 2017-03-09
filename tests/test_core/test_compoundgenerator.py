@@ -575,6 +575,31 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([2, 0], p.indexes)
         self.assertEqual((5, 3), (p.positions['y'], p.positions['x']))
 
+    def test_multi_roi_excluder(self):
+        x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
+        y = LineGenerator("y", "mm", 0.0, 3.0, 4)
+        circles = ROIExcluder([CircularROI([1.0, 2.0], 2.0),
+                               CircularROI([1.0, 2.0], 2.0)], ["x", "y"])
+        expected_positions = [{'x': 1.0, 'y': 0.0},
+                              {'x': 2.0, 'y': 1.0},
+                              {'x': 1.0, 'y': 1.0},
+                              {'x': 0.0, 'y': 1.0},
+                              {'x': 0.0, 'y': 2.0},
+                              {'x': 1.0, 'y': 2.0},
+                              {'x': 2.0, 'y': 2.0},
+                              {'x': 3.0, 'y': 2.0},
+                              {'x': 2.0, 'y': 3.0},
+                              {'x': 1.0, 'y': 3.0},
+                              {'x': 0.0, 'y': 3.0}]
+# Write two tests above
+# Ask if each excluder can have rect
+# Ask best solution to masking in place
+        g = CompoundGenerator([y, x], [circles], [])
+        g.prepare()
+        positions = [point.positions for point in list(g.iterator())]
+
+        self.assertEqual(positions, expected_positions)
+
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""
 
