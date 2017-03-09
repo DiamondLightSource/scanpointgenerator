@@ -36,14 +36,8 @@ class ROIExcluder(Excluder):
 
         mask = np.zeros_like(x_points, dtype=bool)
         for roi in self.rois:
-            if roi is self.rois[-1]:
-                # Allow operating in place if this is the final ROI
-                x = x_points
-                y = y_points
-            else:
-                # Otherwise use copies of the arrays
-                x = x_points.copy()
-                y = y_points.copy()
+            x = x_points.copy()
+            y = y_points.copy()
 
             # Accumulate all True entries
             # Points outside of all ROIs will be excluded

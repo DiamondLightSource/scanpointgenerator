@@ -81,11 +81,6 @@ class Dimension(object):
         elif gen_inner is not gen_outer:
             points_x = np.repeat(points_x, gen_outer.size)
             points_y = np.tile(points_y, gen_inner.size)
-        else:
-            # copy the point arrays so the excluders can perform
-            # array operations in place (advantageous in the other cases)
-            points_x = np.copy(points_x)
-            points_y = np.copy(points_y)
 
         if axis_inner == excluder.axes[0]:
             excluder_mask = excluder.create_mask(points_x, points_y)
