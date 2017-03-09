@@ -14,12 +14,12 @@ points in the y direction
     :include-source:
 
     from scanpointgenerator import LineGenerator, SpiralGenerator, \
-    CompoundGenerator, Excluder, RandomOffsetMutator, RectangularROI
+    CompoundGenerator, ROIExcluder, RandomOffsetMutator, RectangularROI
     from scanpointgenerator.plotgenerator import plot_generator
 
     spiral = SpiralGenerator(["x", "y"], "mm", [0.0, 0.0], 10.0,
                              alternate=True)
-    rectangle = Excluder(RectangularROI([1.0, 1.0], 8.0, 8.0), ["x", "y"])
+    rectangle = ROIExcluder([RectangularROI([1.0, 1.0], 8.0, 8.0)], ["x", "y"])
     mutator = RandomOffsetMutator(2, ["x", "y"], dict(x=0.0, y=0.25))
     gen = CompoundGenerator([spiral], [rectangle], [mutator])
 
@@ -65,12 +65,12 @@ Three nested line scans with an excluder operating on the two innermost axes
     :include-source:
 
     from scanpointgenerator import LineGenerator, CompoundGenerator, \
-    Excluder, CircularROI
+    ROIExcluder, CircularROI
 
     line1 = LineGenerator("x", "mm", 0.0, 2.0, 3)
     line2 = LineGenerator("y", "mm", 0.0, 1.0, 2)
     line3 = LineGenerator("z", "mm", 0.0, 1.0, 2)
-    circle = Excluder(CircularROI([1.0, 1.0], 1.0), ["x", "y"])
+    circle = ROIExcluder([CircularROI([1.0, 1.0], 1.0)], ["x", "y"])
     gen = CompoundGenerator([line3, line2, line1], [circle], [])
     gen.prepare()
 

@@ -50,4 +50,4 @@ And with the excluder applied
     circles = ROIExcluder([CircularROI([1.0, 2.0], 2.0),
                            CircularROI([2.0, 1.0], 2.0)], ["x", "y"])
     gen = CompoundGenerator([y, x], [circles], [])
-    plot_generator(gen, circle)
+    plot_generator(gen, circles)
