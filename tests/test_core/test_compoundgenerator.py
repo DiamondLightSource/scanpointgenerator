@@ -575,6 +575,19 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([2, 0], p.indexes)
         self.assertEqual((5, 3), (p.positions['y'], p.positions['x']))
 
+        self.assertEqual(0, len(g.excluders[0].rois))
+
+    def test_grid_double_rect_region_then_not_reduced(self):
+        xg = LineGenerator("x", "mm", 1, 10, 10)
+        yg = LineGenerator("y", "mm", 1, 10, 10)
+        r1 = RectangularROI([3, 3], 6, 6)
+        r2 = RectangularROI([3, 3], 6, 6)
+        e = ROIExcluder([r1, r2], ["x", "y"])
+        g = CompoundGenerator([yg, xg], [e], [])
+        g.prepare()
+
+        self.assertEqual(2, len(g.excluders[0].rois))
+
     def test_multi_roi_excluder(self):
         x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
         y = LineGenerator("y", "mm", 0.0, 3.0, 4)
@@ -591,9 +604,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                               {'x': 2.0, 'y': 3.0},
                               {'x': 1.0, 'y': 3.0},
                               {'x': 0.0, 'y': 3.0}]
-# Write two tests above
-# Ask if each excluder can have rect
-# Ask best solution to masking in place
+
         g = CompoundGenerator([y, x], [circles], [])
         g.prepare()
         positions = [point.positions for point in list(g.iterator())]
