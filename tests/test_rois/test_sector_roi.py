@@ -146,16 +146,18 @@ class SectorContainsTest(unittest.TestCase):
         self.assertTrue(s.contains_point(p))
 
     def test_mask_points(self):
-        s = SectorROI((0, 0), (1, 2), (-pi/2, pi/2))
+        s = SectorROI((0, 1), (1, 2), (-pi/2, pi/2))
         p = [np.array([0, 1, 0, 2.05, 1, 0.7, -1.5, 0.00]),
              np.array([0, 0, 1, 0.00, 1, 0.7, 0.00, 2.05])]
-        expected = [False, True, True, False, True, False, False, False]
+        points_cp = [axis.copy().tolist() for axis in p]
+        expected = [True, True, False, False, True, False, False, True]
         mask = s.mask_points(p)
         self.assertEquals(expected, mask.tolist())
 
         s2 = SectorROI((0, 0), (1, 2), (-5*pi/2, -3*pi/2)) #the same sector
         mask = s.mask_points(p)
         self.assertEquals(expected, mask.tolist())
+        self.assertEqual(points_cp, [axis.tolist() for axis in p])
 
 if __name__ == "__main__":
     unittest.main()

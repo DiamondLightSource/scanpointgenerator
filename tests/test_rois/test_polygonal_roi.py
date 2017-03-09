@@ -72,10 +72,12 @@ class PolygonalROITests(unittest.TestCase):
         px = [0.5, 0.5, 1.5, 1.5, 2.5,  2.5, 3.5, -0.5, 3.5, 2, 3, 0]
         py = [0.5, 2.5, 1.5, 2.5, 2.5, -0.5, 1.5,  0.5, 0.5, 0, 2, 1.5]
         p = [np.array(px), np.array(py)]
+        points_cp = [axis.copy().tolist() for axis in p]
         expected = [True, False, False, True, True, False, False, False, False,
                     True, False, True]
         mask = roi.mask_points(p)
         self.assertEquals(expected, mask.tolist())
+        self.assertEqual(points_cp, [axis.tolist() for axis in p])
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

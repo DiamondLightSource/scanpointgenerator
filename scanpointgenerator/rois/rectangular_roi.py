@@ -32,9 +32,9 @@ class RectangularROI(ROI):
                 and (y >= 0 and y <= self.height)
 
     def mask_points(self, points):
-        x = points[0]
+        x = points[0].copy()
         x -= self.start[0]
-        y = points[1]
+        y = points[1].copy()
         y -= self.start[1]
         if self.angle != 0:
             phi = -self.angle

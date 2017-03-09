@@ -22,9 +22,9 @@ class CircularROI(ROI):
             return True
 
     def mask_points(self, points):
-        x = points[0]
+        x = points[0].copy()
         x -= self.centre[0]
-        y = points[1]
+        y = points[1].copy()
         y -= self.centre[1]
         # use in place operations as much as possible (to save array creation)
         x *= x

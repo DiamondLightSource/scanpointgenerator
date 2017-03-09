@@ -37,12 +37,15 @@ class PointROITest(unittest.TestCase):
         px = [1, 0, 1+1e-15, 1,       1]
         py = [2, 0, 2,       2+1e-15, 2+1e-14]
         expected = [True, False, True, True, False]
-        mask = roi.mask_points([np.array(px), np.array(py)], 2e-15)
+        p = [np.array(px), np.array(py)]
+        points_cp = [axis.copy().tolist() for axis in p]
+        mask = roi.mask_points(p, 2e-15)
         self.assertEqual(expected, mask.tolist())
 
         mask = roi.mask_points([np.array(px), np.array(py)], 0)
         expected = [True, False, False, False, False]
         self.assertEqual(expected, mask.tolist())
+        self.assertEqual(points_cp, [axis.tolist() for axis in p])
 
     def test_to_dict(self):
         roi = PointROI([1.1, 2.2])

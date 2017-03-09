@@ -59,8 +59,10 @@ class EllipticalROITest(unittest.TestCase):
         roi = EllipticalROI([1, 2], [2, 1], pi/6)
         points = [np.array([3, 1, 2.73, 3.00, -0.73]),
                   np.array([1, 0, 3.00, 4.27, 1.000])]
+        points_cp = [axis.copy().tolist() for axis in points]
         expected = [False, False, True, False, True]
         self.assertEquals(expected, roi.mask_points(points).tolist())
+        self.assertEqual(points_cp, [axis.tolist() for axis in points])
 
     def test_to_dict(self):
         roi = EllipticalROI([1.1, 2.2], [3.3, 4.4], pi/4)
