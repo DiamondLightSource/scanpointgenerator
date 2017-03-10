@@ -575,8 +575,6 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([2, 0], p.indexes)
         self.assertEqual((5, 3), (p.positions['y'], p.positions['x']))
 
-        self.assertEqual(0, len(g.excluders[0].rois))
-
     def test_grid_double_rect_region_then_not_reduced(self):
         xg = LineGenerator("x", "mm", 1, 10, 10)
         yg = LineGenerator("y", "mm", 1, 10, 10)

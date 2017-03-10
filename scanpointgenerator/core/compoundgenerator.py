@@ -78,10 +78,10 @@ class CompoundGenerator(object):
         # this changes the alternating case a little (without doing this, we
         # may have started in reverse direction)
         for excluder_ in [e for e in excluders if isinstance(e, ROIExcluder)]:
-            rect_rois = [r for r in excluder_.rois
-                         if isinstance(r, RectangularROI) and r.angle == 0]
-            if len(rect_rois) == 1:
-                rect = rect_rois[0]
+            if len(excluder_.rois) == 1 \
+                    and isinstance(excluder_.rois[0], RectangularROI) \
+                    and excluder_.rois[0].angle == 0:
+                rect = excluder_.rois[0]
                 axis_1, axis_2 = excluder_.axes[0], excluder_.axes[1]
                 gen_1 = [g for g in generators if axis_1 in g.axes][0]
                 gen_2 = [g for g in generators if axis_2 in g.axes][0]
@@ -113,11 +113,8 @@ class CompoundGenerator(object):
                         len(points_2), gen_2.alternate)
                     generators[generators.index(gen_1)] = new_gen1
                     generators[generators.index(gen_2)] = new_gen2
-                    # Remove ROI from Excluder
-                    excluder_.rois.remove(rect)
-                    if not excluder_.rois:
-                        # Remove Excluder if it is now empty
-                        excluders.remove(excluder_)
+                    # Remove Excluder as it is now empty
+                    excluders.remove(excluder_)
 
         for generator in generators:
             generator.prepare_positions()
