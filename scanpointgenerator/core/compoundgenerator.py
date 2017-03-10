@@ -22,7 +22,7 @@ class CompoundGenerator(object):
             generators(list(Generator)): List of Generators to nest
             excluders(list(Excluder)): List of Excluders to filter points by
             mutators(list(Mutator)): List of Mutators to apply to each point
-            duration(int): Point durations in seconds (-1 for variable)
+            duration(double): Point durations in seconds (-1 for variable)
         """
 
         self.size = 0
@@ -263,7 +263,7 @@ class CompoundGenerator(object):
         d['generators'] = [g.to_dict() for g in self.generators]
         d['excluders'] = [e.to_dict() for e in self.excluders]
         d['mutators'] = [m.to_dict() for m in self.mutators]
-        d['duration'] = self.duration
+        d['duration'] = float(self.duration)
         return d
 
     @classmethod
