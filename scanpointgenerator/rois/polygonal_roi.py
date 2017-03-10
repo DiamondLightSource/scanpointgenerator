@@ -42,7 +42,7 @@ class PolygonalROI(ROI):
         x = points[0]
         y = points[1]
         v1x, v1y = self.points_x[-1], self.points_y[-1]
-        mask = np.full(len(x), False, dtype=bool)
+        mask = np.full(len(x), False, dtype=np.int8)
         for v2x, v2y in zip(self.points_x, self.points_y):
             # skip horizontal edges
             if (v2y != v1y):
