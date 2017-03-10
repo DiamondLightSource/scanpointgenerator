@@ -28,13 +28,13 @@ class ROIExcluder(Excluder):
             y_points(numpy.array(float)): Array of points for y-axis
 
         Returns:
-            np.array: Boolean array of points to exclude
+            np.array(int8): Array of points to exclude
 
         """
         if len(x_points) != len(y_points):
             raise ValueError("Points lengths must be equal")
 
-        mask = np.zeros_like(x_points, dtype=bool)
+        mask = np.zeros_like(x_points, dtype=np.int8)
         for roi in self.rois:
             # Accumulate all True entries
             # Points outside of all ROIs will be excluded
