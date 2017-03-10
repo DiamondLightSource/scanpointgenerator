@@ -46,6 +46,7 @@ for the CompoundGenerator is as follows::
                         y: 0.2
                 }
             }
+        duration: -1.0
         ]
     }
 
