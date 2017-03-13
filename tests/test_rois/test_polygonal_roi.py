@@ -11,29 +11,34 @@ from scanpointgenerator.compat import np
 class PolygonalROITests(unittest.TestCase):
 
     def test_init(self):
-        roi = PolygonalROI([[0, 0], [0, 1], [1, 0]])
-        self.assertEquals([[0, 0], [0, 1], [1, 0]], roi.points)
+        roi = PolygonalROI([0, 0, 1], [0, 1, 0])
+        self.assertEquals([0, 0, 1], roi.points_x)
+        self.assertEquals([0, 1, 0], roi.points_y)
 
     def test_init_raises_on_few_points(self):
         with self.assertRaises(ValueError):
-            roi = PolygonalROI([[0, 0], [1, 1]])
+            roi = PolygonalROI([0, 0], [1, 1])
 
     def test_to_dict(self):
-        roi = PolygonalROI([[0, 0], [1, 1], [1, 0]])
+        roi = PolygonalROI([0, 1, 1], [0, 1, 0])
         expected = {
             "typeid":"scanpointgenerator:roi/PolygonalROI:1.0",
-            "points":[[0, 0], [1, 1], [1, 0]]}
+            "points_x":[0, 1, 1],
+            "points_y":[0, 1, 0]}
         self.assertEquals(expected, roi.to_dict())
 
     def test_from_dict(self):
         d = {
             "typeid":"scanpointgenerator:roi/PolygonalROI:1.0",
-            "points":[[1, 1], [1, 2], [3, 1]]}
+            "points_x":[1, 1, 0],
+            "points_y":[2, 3, 5]}
         roi = PolygonalROI.from_dict(d)
-        self.assertEquals([[1, 1], [1, 2], [3, 1]], roi.points)
+        self.assertEquals([1, 1, 0], roi.points_x)
+        self.assertEquals([2, 3, 5], roi.points_y)
 
     def test_simple_point_contains(self):
-        vertices = [[0, 0], [1, 0], [2, -1], [2, 1], [-1, 1], [-1, -1]]
+        vertices_x = [0, 1, 2, 2, -1, -1]
+        vertices_y = [0, 0, -1, 1, 1, -1]
         """
         Shape described looks like this:
         _____
@@ -41,7 +46,7 @@ class PolygonalROITests(unittest.TestCase):
         |/ \|
 
         """
-        roi = PolygonalROI(vertices)
+        roi = PolygonalROI(vertices_x, vertices_y)
         p = [-0.9, -0.85]
         self.assertTrue(roi.contains_point(p))
         p = [1.9, 0.85]
@@ -52,9 +57,9 @@ class PolygonalROITests(unittest.TestCase):
         self.assertTrue(roi.contains_point(p))
 
     def test_complex_point_contains(self):
-        vertices = [[0, 0], [0, 2], [2, 2], [2, 1],
-                    [1, 1], [1, 3], [3, 3], [3, 0]]
-        roi = PolygonalROI(vertices)
+        vertices_x = [0, 0, 2, 2, 1, 1, 3, 3]
+        vertices_y = [0, 2, 2, 1, 1, 3, 3, 0]
+        roi = PolygonalROI(vertices_x, vertices_y)
         p = [0.5, 0.5]
         self.assertTrue(roi.contains_point(p))
         p = [0.5, 2.5]
@@ -66,9 +71,9 @@ class PolygonalROITests(unittest.TestCase):
         self.assertFalse(roi.contains_point(p))
 
     def test_mask_points(self):
-        vertices = [[0, 0], [0, 2], [2, 2], [2, 1],
-                    [1, 1], [1, 3], [3, 3], [3, 0]]
-        roi = PolygonalROI(vertices)
+        vertices_x = [0, 0, 2, 2, 1, 1, 3, 3]
+        vertices_y = [0, 2, 2, 1, 1, 3, 3, 0]
+        roi = PolygonalROI(vertices_x, vertices_y)
         px = [0.5, 0.5, 1.5, 1.5, 2.5,  2.5, 3.5, -0.5, 3.5, 2, 3, 0]
         py = [0.5, 2.5, 1.5, 2.5, 2.5, -0.5, 1.5,  0.5, 0.5, 0, 2, 1.5]
         p = [np.array(px), np.array(py)]
