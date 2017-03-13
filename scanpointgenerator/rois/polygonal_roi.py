@@ -59,7 +59,9 @@ class PolygonalROI(ROI):
         for v2x, v2y in zip(self.points_x, self.points_y):
             # skip horizontal edges
             if (v2y != v1y):
-                vmask = ((y < v2y) & (y >= v1y)) | ((y < v1y) & (y >= v2y))
+                vmask = np.full(len(x), False, dtype=np.int8)
+                vmask |= ((y < v2y) & (y >= v1y))
+                vmask |= ((y < v1y) & (y >= v2y))
                 t = (y - v2y) / (v2y - v1y)
                 vmask &= x < v1x + t * (v2x - v1x)
                 mask ^= vmask
