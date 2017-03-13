@@ -95,9 +95,11 @@ class ContainsPointTest(unittest.TestCase):
         roi = RectangularROI([1, 2], 1, 1, pi/4)
         points = [np.array([2, 2, 1, 1, 1.7, 0.3, 1.01, 0.99]),
                   np.array([3, 2, 2, 3.4, 2.7, 2.705, 1.99, 1.99])]
+        points_cp = [axis.copy().tolist() for axis in points]
         expected = [False, False, True, True, True, True, False, False]
         mask = roi.mask_points(points)
         self.assertEqual(expected, mask.tolist())
+        self.assertEqual(points_cp, [axis.tolist() for axis in points])
 
 class DictTest(unittest.TestCase):
 

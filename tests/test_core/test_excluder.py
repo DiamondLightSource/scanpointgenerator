@@ -13,55 +13,41 @@ from mock import MagicMock
 
 class ExcluderTest(unittest.TestCase):
 
-    def setUp(self):
-        self.roi = MagicMock()
-        self.scannables = ['x', 'y']
-        self.e = Excluder(self.roi, self.scannables)
-
     def test_init(self):
-        self.assertEqual(self.e.roi, self.roi)
-        self.assertEqual(self.e.scannables, self.scannables)
-
-    def test_contains_point(self):
-        d = dict()
-        d['x'] = 1.0
-        d['y'] = 2.0
-
-        self.e.contains_point(d)
-
-        self.roi.contains_point.assert_called_once_with((1.0, 2.0))
+        Excluder(["x", "y"])
 
 
-class TestSerialisation(unittest.TestCase):
+class SimpleFunctionsTest(unittest.TestCase):
 
     def setUp(self):
-        self.r1 = MagicMock()
-        self.r1_dict = MagicMock()
+        self.e = Excluder(["x", "y"])
 
-        self.e = Excluder(self.r1, ['x', 'y'])
+    def test_create_mask(self):
+        with self.assertRaises(NotImplementedError):
+            self.e.create_mask(MagicMock(), MagicMock())
+
+
+class SerialisationTest(unittest.TestCase):
+
+    def setUp(self):
+        self.e = Excluder(["x", "y"])
 
     def test_to_dict(self):
-        self.r1.to_dict.return_value = self.r1_dict
-
         expected_dict = dict()
-        expected_dict['roi'] = self.r1_dict
-        expected_dict['scannables'] = ['x', 'y']
+        expected_dict['axes'] = ["x", "y"]
 
         d = self.e.to_dict()
 
         self.assertEqual(expected_dict, d)
 
     def test_from_dict(self):
-        self.r1_dict.from_dict.return_value = self.r1
+        m = MagicMock()
+        self.e._excluder_lookup['TestMutator'] = m
 
-        _dict = dict()
-        _dict['roi'] = self.r1_dict
-        _dict['scannables'] = ['x', 'y']
+        gen_dict = dict(typeid="TestMutator")
+        self.e.from_dict(gen_dict)
 
-        e = Excluder.from_dict(_dict)
-
-        self.assertEqual(e.roi, self.r1)
-        self.assertEqual(e.scannables, ['x', 'y'])
+        m.from_dict.assert_called_once_with(gen_dict)
 
 if __name__ == "__main__":
     unittest.main()

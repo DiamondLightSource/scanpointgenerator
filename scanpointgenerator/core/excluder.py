@@ -1,64 +1,62 @@
 
 
 class Excluder(object):
-    """
-    A class to remove points that lie outside of a given 2D region of interest
-    """
 
-    def __init__(self, roi, scannables):
+    """Base class for objects that filter points based on their attributes."""
+
+    # Lookup table for excluder subclasses
+    _excluder_lookup = {}
+
+    def __init__(self, axes):
         """
         Args:
-            roi(ROI): Region of interest to filter points by
-            scannables(list): List of two scannables to filter points by
+            axes(list(str)): Names of axes to exclude points from
+
         """
-
-        self.roi = roi
-        self.scannables = scannables
-
-    def contains_point(self, d):
-        """
-        Create a 2D sub-point from the ND point d and pass the sub_point to
-        the roi to check if it contains it.
-
-        Args:
-            d(dict): Dictionary representation of point
-
-        Returns:
-            bool: Whether roi contains the given point
-        """
-
-        scannable_1 = d[self.scannables[0]]
-        scannable_2 = d[self.scannables[1]]
-
-        sub_point = (scannable_1, scannable_2)
-
-        return self.roi.contains_point(sub_point)
+        self.axes = axes
 
     def create_mask(self, x_points, y_points):
-        return self.roi.mask_points([x_points, y_points])
+        raise NotImplementedError("Method must be implemented in child class.")
 
     def to_dict(self):
-        """Convert object attributes into a dictionary"""
-
+        """Construct dictionary from attributes."""
         d = dict()
-        d['roi'] = self.roi.to_dict()
-        d['scannables'] = self.scannables
+        d['axes'] = self.axes
 
         return d
 
     @classmethod
     def from_dict(cls, d):
-        """
-        Create a Excluder instance from a serialised dictionary
+        """Create an Excluder instance from a serialised dictionary.
 
         Args:
             d(dict): Dictionary of attributes
 
         Returns:
             Excluder: New Excluder instance
+
         """
+        excluder_type = d["typeid"]
+        excluder = cls._excluder_lookup[excluder_type]
+        assert excluder is not cls, \
+            "Subclass %s did not redefine from_dict" % excluder_type
+        excluder = excluder.from_dict(d)
 
-        roi = d['roi'].from_dict()
-        scannables = d['scannables']
+        return excluder
 
-        return cls(roi, scannables)
+    @classmethod
+    def register_subclass(cls, excluder_type):
+        """
+        Register a subclass so from_dict() works
+
+        Args:
+            excluder_type(Excluder): Subclass to register
+
+        """
+        def decorator(excluder):
+            cls._excluder_lookup[excluder_type] = excluder
+            excluder.typeid = excluder_type
+
+            return excluder
+
+        return decorator

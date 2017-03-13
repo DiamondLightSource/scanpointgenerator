@@ -59,10 +59,10 @@ generator as it is not repeated.
 The following is `not` legal::
 
     from scanpointgenerator import LineGenerator, CompoundGenerator, \
-    Excluder, CircularROI
+    ROIExcluder, CircularROI
 
     xs = LineGenerator("x", "mm", 0, 1, 2)
     ys = LineGenerator("y", "mm", 0, 1, 2)
     zs = LineGenerator("z", "mm", 0, 1, 2)
-    exc = Excluder(CircularROI([0, 0], 1), ["x", "z"])
+    exc = ROIExcluder([CircularROI([0, 0], 1)], ["x", "z"])
     gen = CompoundGenerator([zs, ys, xs], [exc], []) # xs and zs are not consecutive

@@ -43,9 +43,11 @@ class ContainsPointTest(unittest.TestCase):
 
     def test_mask_points(self):
         points = [np.array([7., 9.]), np.array([11., 11.])]
+        points_cp = [axis.copy().tolist() for axis in points]
         expected = [True, False]
         mask = self.roi.mask_points(points)
         self.assertEqual(expected, mask.tolist())
+        self.assertEqual(points_cp, [axis.tolist() for axis in points])
 
 
 class DictTest(unittest.TestCase):

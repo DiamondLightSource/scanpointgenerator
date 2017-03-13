@@ -5,6 +5,7 @@ from scanpointgenerator.core.dimension import Dimension
 from scanpointgenerator.core.generator import Generator
 from scanpointgenerator.core.point import Point
 from scanpointgenerator.core.excluder import Excluder
+from scanpointgenerator.excluders.roiexcluder import ROIExcluder
 from scanpointgenerator.core.mutator import Mutator
 from scanpointgenerator.rois import RectangularROI
 from scanpointgenerator.generators import LineGenerator
@@ -76,36 +77,44 @@ class CompoundGenerator(object):
         # we should restrict the resulting grid rather than merge dimensions
         # this changes the alternating case a little (without doing this, we
         # may have started in reverse direction)
-        for rect in [r for r in excluders \
-                if isinstance(r.roi, RectangularROI) and r.roi.angle == 0]:
-            axis_1, axis_2 = rect.scannables[0], rect.scannables[1]
-            gen_1 = [g for g in generators if axis_1 in g.axes][0]
-            gen_2 = [g for g in generators if axis_2 in g.axes][0]
-            if gen_1 is gen_2:
-                continue
-            if isinstance(gen_1, LineGenerator) \
-                    and isinstance(gen_2, LineGenerator):
-                gen_1.prepare_positions()
-                gen_2.prepare_positions()
-                valid = np.full(gen_1.size, True, dtype=np.int8)
-                valid &= gen_1.positions[axis_1] \
-                        <= rect.roi.width + rect.roi.start[0]
-                valid &= gen_1.positions[axis_1] >= rect.roi.start[0]
-                points_1 = gen_1.positions[axis_1][valid.astype(np.bool)]
-                valid = np.full(gen_2.size, True, dtype=np.int8)
-                valid &= gen_2.positions[axis_2] \
-                        <= rect.roi.height + rect.roi.start[1]
-                valid &= gen_2.positions[axis_2] >= rect.roi.start[1]
-                points_2 = gen_2.positions[axis_2][valid.astype(np.bool)]
-                new_gen1 = LineGenerator(
-                    gen_1.axes, gen_1.units, points_1[0], points_1[-1],
-                    len(points_1), gen_1.alternate)
-                new_gen2 = LineGenerator(
-                    gen_2.axes, gen_2.units, points_2[0], points_2[-1],
-                    len(points_2), gen_2.alternate)
-                generators[generators.index(gen_1)] = new_gen1
-                generators[generators.index(gen_2)] = new_gen2
-                excluders.remove(rect)
+        for excluder_ in [e for e in excluders if isinstance(e, ROIExcluder)]:
+            if len(excluder_.rois) == 1 \
+                    and isinstance(excluder_.rois[0], RectangularROI) \
+                    and excluder_.rois[0].angle == 0:
+                rect = excluder_.rois[0]
+                axis_1, axis_2 = excluder_.axes[0], excluder_.axes[1]
+                gen_1 = [g for g in generators if axis_1 in g.axes][0]
+                gen_2 = [g for g in generators if axis_2 in g.axes][0]
+                if gen_1 is gen_2:
+                    continue
+                if isinstance(gen_1, LineGenerator) \
+                        and isinstance(gen_2, LineGenerator):
+                    gen_1.prepare_positions()
+                    gen_2.prepare_positions()
+                    # Filter by axis 1
+                    valid = np.full(gen_1.size, True, dtype=np.int8)
+                    valid &= \
+                        gen_1.positions[axis_1] <= rect.width + rect.start[0]
+                    valid &= \
+                        gen_1.positions[axis_1] >= rect.start[0]
+                    points_1 = gen_1.positions[axis_1][valid.astype(np.bool)]
+                    # Filter by axis 2
+                    valid = np.full(gen_2.size, True, dtype=np.int8)
+                    valid &= \
+                        gen_2.positions[axis_2] <= rect.height + rect.start[1]
+                    valid &= gen_2.positions[axis_2] >= rect.start[1]
+                    points_2 = gen_2.positions[axis_2][valid.astype(np.bool)]
+                    # Recreate generators to replace larger generators + ROI
+                    new_gen1 = LineGenerator(
+                        gen_1.axes, gen_1.units, points_1[0], points_1[-1],
+                        len(points_1), gen_1.alternate)
+                    new_gen2 = LineGenerator(
+                        gen_2.axes, gen_2.units, points_2[0], points_2[-1],
+                        len(points_2), gen_2.alternate)
+                    generators[generators.index(gen_1)] = new_gen1
+                    generators[generators.index(gen_2)] = new_gen2
+                    # Remove Excluder as it is now empty
+                    excluders.remove(excluder_)
 
         for generator in generators:
             generator.prepare_positions()
@@ -114,7 +123,7 @@ class CompoundGenerator(object):
         generators[-1].prepare_bounds()
 
         for excluder in excluders:
-            axis_1, axis_2 = excluder.scannables
+            axis_1, axis_2 = excluder.axes
             gen_1 = [g for g in generators if axis_1 in g.axes][0]
             gen_2 = [g for g in generators if axis_2 in g.axes][0]
             gen_diff = generators.index(gen_1) \

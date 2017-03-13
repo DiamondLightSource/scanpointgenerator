@@ -89,9 +89,11 @@ class LinearROIContainsTest(unittest.TestCase):
         px = [1, 2,  3, 1+1e-10, 3-1e-10, 2+1e-10, 2-1e-14,  3+1e-14, 1]
         py = [1, 0, -1, 1      , -1     , 0+1e-10, 0+1e-14, -1-1e-14, 1+1e-14]
         p = [np.array(px), np.array(py)]
+        points_cp = [axis.copy().tolist() for axis in p]
         expected = [True, True, True, False, False, False, True, True, True]
         mask = l.mask_points(p, 1e-12)
         self.assertEquals(expected, mask.tolist())
+        self.assertEqual(points_cp, [axis.tolist() for axis in p])
 
 class LinearROIDictTest(unittest.TestCase):
 

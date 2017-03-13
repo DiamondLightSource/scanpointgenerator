@@ -16,9 +16,9 @@ class PointROI(ROI):
         return x * x + y * y <= epsilon * epsilon
 
     def mask_points(self, points, epsilon=0):
-        x = points[0]
+        x = points[0].copy()
         x -= self.point[0]
-        y = points[1]
+        y = points[1].copy()
         y -= self.point[1]
         x *= x
         y *= y
