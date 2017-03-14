@@ -1,4 +1,5 @@
 sudo: false
+dist: trusty
 language: python
 python:
   - "2.7"
@@ -16,21 +17,61 @@ cache:
     - $HOME/.cache/pip
     - $HOME/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages
     - $HOME/virtualenv/python$TRAVIS_PYTHON_VERSION/bin
+    - $HOME/jython_deps
 
 before_install:
   - export JYTHON_URL='http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1b3/jython-installer-2.7.1b3.jar'
+  - export REQUIRED_JARS="org.eclipse.january_1.0.0.v201610161242.jar"
+  - export REQUIRED_JARS="ch.qos.logback.core_1.1.7.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="org.apache.commons.math3_3.6.1.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="slf4j.api_1.7.21.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="uk.ac.diamond.jama_1.0.3.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="org.eclipse.dawnsci.analysis.api_1.1.0.v20161111-1001.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="org.eclipse.dawnsci.nexus_1.0.0.v20161115-1503.jar:$REQUIRED_JARS"
   - if [ "$JYTHON" == "true" ]; then
+      jdk_switcher use oraclejdk8;
       wget $JYTHON_URL -O jython_installer.jar;
       java -jar jython_installer.jar -s -d $HOME/jython;
       export PATH=$HOME/jython/bin:$PATH;
       $HOME/jython/bin/easy_install nose;
+      if [ ! -f "$HOME/jython_deps/.cache" ]; then
+        export DAWN_URL='http://opengda.org/DawnDiamond/2.3/downloads/builds-release/DawnDiamond-2.3.1.v20161216-0929-linux64.zip';
+        wget $DAWN_URL -O $HOME/dawn.zip;
+        unzip -q $HOME/dawn.zip -d $HOME/dawn;
+        export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.3.1.v20161216-0929-linux64);
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.3.0/scisoftpy $HOME/jython_deps/numjy;
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.3.0/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.analysis_1.3.0.v20161209-0938/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.eclipse.dawnsci.analysis.dataset_1.0.0.v20161202-1040/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.dawnsci.boofcv_1.0.0.v20161123-1542/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/hdf.hdf5lib_1.10.0.v20160527-1525/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.eclipse.dawnsci.hdf5_1.3.0.v20161102-0954/* $HOME/jython_deps;
+        IFS=":";
+        for j in $REQUIRED_JARS; do
+          cp $DAWN/plugins/$j $HOME/jython_deps/;
+        done;
+        touch $HOME/jython_deps/.cache;
+      fi
     fi
 
 install:
   - env
   - pip install -r requirements/test.txt
   - pip install coveralls
+  - pip install mock
   - python setup.py bdist_egg
+  - if [ "$JYTHON" == "true" ]; then
+      pip install decorator;
+      export JYTHONPATH=$HOME/jython_deps;
+      export CLASSPATH="$HOME/jython_deps:$HOME/jython_deps/jars/*";
+      IFS=":";
+      for j in $REQUIRED_JARS; do
+        export CLASSPATH="$CLASSPATH:$HOME/jython_deps/$j";
+      done;
+      unset IFS;
+      echo "CLASSPATH:";
+      echo "$CLASSPATH";
+    fi
 
 before_script:
   - if [ "$JYTHON" == "true" ]; then
