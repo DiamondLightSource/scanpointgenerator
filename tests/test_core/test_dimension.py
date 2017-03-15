@@ -99,7 +99,7 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual([0, 10, -16, 1, 1, 0], combined.lower)
 
     def test_prepare(self):
-        d = Dimension(Mock(axes=["x", "y"], positions={"x":np.array(0), "y":np.array(0)}, size=30))
+        d = Dimension(Mock(axes=["x", "y"], positions={"x":np.array([0]), "y":np.array([0])}, size=30))
         m1 = np.array([0, 1, 0, 1, 1, 0], dtype=np.int8)
         m2 = np.array([1, 1, 0, 0, 1], dtype=np.int8)
         d._masks = [
