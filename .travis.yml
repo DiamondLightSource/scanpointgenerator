@@ -37,6 +37,7 @@ before_install:
         $HOME/jython/bin/easy_install nose;
         touch $HOME/jython/.cache;
       fi;
+      export OLD_PATH=$PATH;
       export PATH=$HOME/jython/bin:$PATH;
       if [ ! -f "$HOME/jython_deps/.cache" ]; then
         export DAWN_URL='http://opengda.org/DawnDiamond/2.3/downloads/builds-release/DawnDiamond-2.3.1.v20161216-0929-linux64.zip';
@@ -66,6 +67,7 @@ install:
   - python setup.py bdist_egg
   - if [ "$JYTHON" == "true" ]; then
       pip install decorator;
+      python -m pip install coveralls;
       export JYTHONPATH=$HOME/jython_deps;
       export CLASSPATH="$HOME/jython_deps:$HOME/jython_deps/jars/*";
       IFS=":";
@@ -85,9 +87,33 @@ before_script:
       export NOSETESTS=nosetests;
     fi
 
-script: $NOSETESTS
+# For Jython, we have to handle the fact that nosetest's coverage module will
+# always fail generating its report - it will still produce the "lines covered"
+# data, but fail afterwards. We need to capture return code (255) and generate
+# our own - we look at the XUnit XML file for non-zero Errors or Failures
+script:
+  - if [ "$JYTHON" == "true" ]; then
+      $NOSETESTS --with-xunit;
+      RC=$?;
+      if [ $RC -ne 255 ] && [ $RC -ne 0 ]; then
+        (exit $RC);
+      else
+        ERRORS=$(grep -c -e errors=\"[1-9] -e failures=\"[1-9] nosetests.xml);
+        echo "grep nosetests output:";
+        echo $(grep -e errors=\"[1-9] -e failures=\"[1-9] nosetests.xml);
+        if [ $ERRORS -ne 0 ]; then
+          (exit 1);
+        fi
+      fi
+    else
+      $NOSETESTS;
+    fi;
 
+# Restore original $PATH so we run the python version of coveralls
 after_success:
-    - coveralls
+  - if [ "$JYTHON" == "true" ]; then
+      export PATH=$OLD_PATH;
+    fi
+  - coveralls;
 
 
