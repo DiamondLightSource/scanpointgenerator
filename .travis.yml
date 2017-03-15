@@ -75,6 +75,7 @@ install:
 
 before_script:
   - if [ "$JYTHON" == "true" ]; then
+      export JAVA_MEM=-Xmx1g
       export NOSETESTS=$HOME/jython/bin/nosetests;
     else
       export NOSETESTS=nosetests;
