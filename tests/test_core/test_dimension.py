@@ -142,8 +142,8 @@ class DimensionTests(ScanPointGeneratorTest):
         d.apply_excluder(e)
         d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
         self.assertEqual([{"repeat":1, "tile":1, "mask":mask.tolist()}], d._masks)
-        self.assertTrue((np.repeat([1, 2, 3, 4, 5], 3) == e.create_mask.call_args[0][0]).all())
-        self.assertTrue((np.tile([-1, -2, -3], 5) == e.create_mask.call_args[0][1]).all())
+        self.assertTrue((np.repeat(np.array([1, 2, 3, 4, 5]), 3) == e.create_mask.call_args[0][0]).all())
+        self.assertTrue((np.tile(np.array([-1, -2, -3]), 5) == e.create_mask.call_args[0][1]).all())
 
     def test_apply_excluders_over_single_alternating(self):
         x_pos = np.array([1, 2, 3, 4, 5])
