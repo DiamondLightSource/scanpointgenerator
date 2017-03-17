@@ -34,6 +34,7 @@ class Dimension(object):
         self._masks = []
         self._max_length = generator.size
         self._prepared = False
+        self.indices = []
 
     def get_positions(self, axis):
         """
@@ -64,7 +65,7 @@ class Dimension(object):
             points = np.append(p, points[:int(len(points)//2)])
         else:
             points = np.tile(points, int(tile))
-        return points[self.mask.nonzero()[0]]
+        return points[self.indices]
 
 
     def apply_excluder(self, excluder):
@@ -143,7 +144,8 @@ class Dimension(object):
         # we have to assume the "returned" mask may be edited in place
         # so we have to store a copy
         self.mask = mask
-        self.size = len(self.mask.nonzero()[0])
+        self.indices = self.mask.nonzero()[0]
+        self.size = len(self.indices)
         self._prepared = True
 
     @staticmethod

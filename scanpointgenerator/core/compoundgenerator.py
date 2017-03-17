@@ -177,11 +177,9 @@ class CompoundGenerator(object):
         for dim in self.dimensions:
             self._dim_meta[dim] = {}
             dim.prepare()
-            indices = np.nonzero(dim.mask)[0]
-            if len(indices) == 0:
+            if dim.size == 0:
                 raise ValueError("Regions would exclude entire scan")
-            self.size *= len(indices)
-            self._dim_meta[dim]["indices"] = indices
+            self.size *= dim.size
 
         self.shape = tuple(dim.size for dim in self.dimensions)
         repeat = self.size
@@ -237,17 +235,16 @@ class CompoundGenerator(object):
         # many times we've run through them
         kc = 0 # the "cumulative" k for each dimension
         for dim in self.dimensions:
-            indices = self._dim_meta[dim]["indices"]
             i = int(n // self._dim_meta[dim]["repeat"])
-            i %= len(indices)
-            k = indices[i]
+            i %= dim.size
+            k = dim.indices[i]
             dim_reverse = False
             if dim.alternate and kc % 2 == 1:
-                i = len(indices) - i - 1
+                i = dim.size - i - 1
                 dim_reverse = True
-            kc *= len(indices)
+            kc *= dim.size
             kc += k
-            k = indices[i]
+            k = dim.indices[i]
             # need point k along each generator in dimension
             # in alternating case, need to sometimes go backward
             point.indexes.append(i)
