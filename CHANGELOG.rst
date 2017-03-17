@@ -10,6 +10,33 @@ Added:
 
 - Nothing yet
 
+`2-0-0`_ - 2017-03-17
+---------------------
+
+Added:
+
+- Adds dependency on numpy
+- Added Dimension class, providing points along a dataset dimension
+- Add dimensions attribute to CompoundGenerator
+- Add shape attribute to CompoundGenerator
+- Jython builds using a numpy emulator are tested
+- Add ROIExcluder, replacing previous use of Excluder (now a generic base class)
+
+Changed:
+
+- Rewrite Generator mechanisms to use vectorised operations for point calculation
+- Generators now only usable through CompoundGenerator
+- CompoundGenerator requires call to prepare before use
+- CompoundGenerator now takes a duration argument, replacing FixedDurationMutator (removed)
+- Rename name/names to axes in Generators
+- Rename scannables to axes in Excluders
+- Generators take an array for units with the same size as axes
+- Rename num_points to size and num_lobes to lobes in LissajousGenerator
+- PolygonalROI takes separate x,y arrays for its vertices
+- Bounds are only applied to the innermost axis/axes
+- Remove index_names and index_dims from Generators
+- License changed to Eclipse Public License v1.0
+
 `1-6-1`_ - 2016-10-27
 ---------------------
 
@@ -115,6 +142,7 @@ Added:
 
 - Initial structure with Line and Nested generators
 
+.. _2-0-0: https://github.com/dls-controls/scanpointgenerator/compare/1-6-1...2-0-0
 .. _1-6-1: https://github.com/dls-controls/scanpointgenerator/compare/1-6...1-6-1
 .. _1-6: https://github.com/dls-controls/scanpointgenerator/compare/1-5...1-6
 .. _1-5: https://github.com/dls-controls/scanpointgenerator/compare/1-4...1-5
