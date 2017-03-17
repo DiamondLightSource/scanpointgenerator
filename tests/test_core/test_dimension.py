@@ -99,7 +99,7 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual([0, 10, -16, 1, 1, 0], combined.lower)
 
     def test_prepare(self):
-        d = Dimension(Mock(axes=["x", "y"], positions={"x":np.array(0), "y":np.array(0)}, size=30))
+        d = Dimension(Mock(axes=["x", "y"], positions={"x":np.array([0]), "y":np.array([0])}, size=30))
         m1 = np.array([0, 1, 0, 1, 1, 0], dtype=np.int8)
         m2 = np.array([1, 1, 0, 0, 1], dtype=np.int8)
         d._masks = [
@@ -142,8 +142,8 @@ class DimensionTests(ScanPointGeneratorTest):
         d.apply_excluder(e)
         d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
         self.assertEqual([{"repeat":1, "tile":1, "mask":mask.tolist()}], d._masks)
-        self.assertTrue((np.repeat([1, 2, 3, 4, 5], 3) == e.create_mask.call_args[0][0]).all())
-        self.assertTrue((np.tile([-1, -2, -3], 5) == e.create_mask.call_args[0][1]).all())
+        self.assertTrue((np.repeat(np.array([1, 2, 3, 4, 5]), 3) == e.create_mask.call_args[0][0]).all())
+        self.assertTrue((np.tile(np.array([-1, -2, -3]), 5) == e.create_mask.call_args[0][1]).all())
 
     def test_apply_excluders_over_single_alternating(self):
         x_pos = np.array([1, 2, 3, 4, 5])

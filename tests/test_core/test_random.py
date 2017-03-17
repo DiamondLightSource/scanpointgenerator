@@ -13,7 +13,7 @@ from scanpointgenerator import Random
 
 class RandomTest(unittest.TestCase):
 
-    @patch('scanpointgenerator.random.Random.twist')
+    @patch('scanpointgenerator.core.Random.twist')
     def test_init(self, twist_mock):
         self.RNG = Random(1)
         self.assertEqual(0, self.RNG.index)
@@ -23,7 +23,7 @@ class RandomTest(unittest.TestCase):
     def setUp(self):
         self.RNG = Random(1)
 
-    @patch('scanpointgenerator.random.Random.twist')
+    @patch('scanpointgenerator.core.Random.twist')
     def test_generate_number(self, twist_mock):
         self.RNG.seeds[0] = 1234567890
         response = self.RNG.generate_number()
