@@ -62,7 +62,7 @@ class PolygonalROI(ROI):
                 vmask = np.full(len(x), False, dtype=np.int8)
                 vmask |= ((y < v2y) & (y >= v1y))
                 vmask |= ((y < v1y) & (y >= v2y))
-                t = (y - v2y) / (v2y - v1y)
+                t = (y - v1y) / (v2y - v1y)
                 vmask &= x < v1x + t * (v2x - v1x)
                 mask ^= vmask
             v1x, v1y = v2x, v2y

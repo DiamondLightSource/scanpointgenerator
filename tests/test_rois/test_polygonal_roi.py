@@ -70,7 +70,18 @@ class PolygonalROITests(unittest.TestCase):
         p = [1.5, 1.5] # has winding number -2
         self.assertFalse(roi.contains_point(p))
 
-    def test_mask_points(self):
+    def test_simple_point_contains(self):
+        vertices_x = [0, 1, 2, 2, -1, -1]
+        vertices_y = [0, 0, -1, 1, 1, -1]
+        roi = PolygonalROI(vertices_x, vertices_y)
+        px = [-0.9, 1.9, 0.5, 0.5, 2.2, -1.1]
+        py = [-0.85, 0.85, -0.5, 0.5, 0.5, 0.5]
+        p = [np.array(px), np.array(py)]
+        expected = [True, True, False, True, False, False]
+        mask = roi.mask_points(p)
+        self.assertEquals(expected, mask.tolist())
+
+    def test_complex_mask_points(self):
         vertices_x = [0, 0, 2, 2, 1, 1, 3, 3]
         vertices_y = [0, 2, 2, 1, 1, 3, 3, 0]
         roi = PolygonalROI(vertices_x, vertices_y)
