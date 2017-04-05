@@ -44,7 +44,7 @@ before_install:
         wget $DAWN_URL -O $HOME/dawn.zip;
         unzip -q $HOME/dawn.zip -d $HOME/dawn;
         export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.3.1.v20161216-0929-linux64);
-        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.3.0/scisoftpy $HOME/jython_deps/numjy;
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.3.0/scisoftpy $HOME/jython_deps/numpy;
         cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.3.0/* $HOME/jython_deps;
         cp -r $DAWN/plugins/uk.ac.diamond.scisoft.analysis_1.3.0.v20161209-0938/* $HOME/jython_deps;
         cp -r $DAWN/plugins/org.eclipse.dawnsci.analysis.dataset_1.0.0.v20161202-1040/* $HOME/jython_deps;
