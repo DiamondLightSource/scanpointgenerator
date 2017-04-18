@@ -10,6 +10,18 @@ Added:
 
 - Nothing yet
 
+`2-1-0`_ - 2017-04-18
+---------------------
+
+Fixed:
+
+- Fixed incorrect comparison PolygonalROI mask_points that resulted in an incorrect mask
+- Point bounds are now giben for a grid scan in a rectangular region
+
+Changed:
+
+- Use numpy import when running in Jython instead of "numjy"
+
 `2-0-0`_ - 2017-03-17
 ---------------------
 
@@ -142,6 +154,7 @@ Added:
 
 - Initial structure with Line and Nested generators
 
+.. _2-1-0: https://github.com/dls-controls/scanpointgenerator/compare/2-0-0...2-1-0
 .. _2-0-0: https://github.com/dls-controls/scanpointgenerator/compare/1-6-1...2-0-0
 .. _1-6-1: https://github.com/dls-controls/scanpointgenerator/compare/1-6...1-6-1
 .. _1-6: https://github.com/dls-controls/scanpointgenerator/compare/1-5...1-6
