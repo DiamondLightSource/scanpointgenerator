@@ -17,7 +17,7 @@ ZSIZE = 10 if os.name == "java" else 100
 # Normally this should take CPython ~5 seconds on a reasonable machine for
 # for 200 million points, but Travis VMs are sometimes quite weak.
 # Jython gets less time because it's doing fewer points (but around 3 times slower)
-TIMELIMIT = 5 if os.name == "java" else 12
+TIMELIMIT = 8 if os.name == "java" else 16
 
 class CompoundGeneratorPerformanceTest(ScanPointGeneratorTest):
     def test_200_million_time_constraint(self):
