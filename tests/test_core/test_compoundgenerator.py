@@ -609,6 +609,22 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
         self.assertEqual(positions, expected_positions)
 
+    def test_bounds_applied_in_rectangle_roi_secial_case(self):
+        x = LineGenerator("x", "mm", 0, 1, 2, True)
+        y = LineGenerator("y", "mm", 0, 1, 2, True)
+        r = RectangularROI([0, 0], 1, 1)
+        e = ROIExcluder([r], ["x", "y"])
+        g = CompoundGenerator([y, x], [e], [])
+        g.prepare()
+        p = g.get_point(0)
+        self.assertEqual({"x":-0.5, "y":0.}, p.lower)
+        self.assertEqual({"x":0., "y":0.}, p.positions)
+        self.assertEqual({"x":0.5, "y":0.}, p.upper)
+        p = g.get_point(2)
+        self.assertEqual({"x":1.5, "y":1}, p.lower)
+        self.assertEqual({"x":1, "y":1}, p.positions)
+        self.assertEqual({"x":0.5, "y":1}, p.upper)
+
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""
 

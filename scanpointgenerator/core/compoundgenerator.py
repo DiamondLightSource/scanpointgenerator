@@ -266,7 +266,8 @@ class CompoundGenerator(object):
                     j_lower, j_upper = j_upper, j_lower
                 for axis in g.axes:
                     point.positions[axis] = g.positions[axis][j]
-                    if g is self.generators[-1]:
+                    # apply "real" bounds to the "innermost" generator only
+                    if dim is self.dimensions[-1] and g is dim.generators[-1]:
                         point.lower[axis] = g.bounds[axis][j_lower]
                         point.upper[axis] = g.bounds[axis][j_upper]
                     else:
