@@ -8,6 +8,7 @@ from scanpointgenerator import CompoundGenerator
 from scanpointgenerator import LineGenerator
 from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import LissajousGenerator
+from scanpointgenerator import StaticPointGenerator
 from scanpointgenerator import ROIExcluder
 from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI
 from scanpointgenerator.mutators import RandomOffsetMutator
@@ -674,6 +675,116 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_positions, positions)
         self.assertEqual(expected_positions, lower)
         self.assertEqual(expected_positions, upper)
+
+    def test_staticpointgen(self):
+        m = StaticPointGenerator(3)
+        g = CompoundGenerator([m], [], [])
+        g.prepare()
+
+        expected_positions = [{}] * 3
+        positions = [point.positions for point in g.iterator()]
+        self.assertEqual(expected_positions, positions)
+
+        self.assertEqual([], g.axes)
+        self.assertEqual({}, g.units)
+        self.assertEqual(3, g.size)
+        self.assertEqual((3,), g.shape)
+
+        self.assertEqual(1, len(g.dimensions))
+        self.assertEqual([], g.dimensions[0].upper)
+        self.assertEqual([], g.dimensions[0].lower)
+        self.assertEqual([], g.dimensions[0].axes)
+        self.assertEqual(3, g.dimensions[0].size)
+
+    def test_inner_staticpointgen(self):
+        x = LineGenerator("x", "mm", 0, 1, 3, False)
+        m = StaticPointGenerator(5)
+        g = CompoundGenerator([x, m], [], [])
+        g.prepare()
+
+        expected_positions = [{'x':0.0}] * 5 + [{'x':0.5}] * 5 + [{'x':1.0}] * 5
+        positions = [point.positions for point in g.iterator()]
+        self.assertEqual(expected_positions, positions)
+
+        self.assertEqual(15, g.size)
+        self.assertEqual((3, 5), g.shape)
+        self.assertEqual(["x"], g.axes)
+        self.assertEqual({"x":"mm"}, g.units)
+
+        expected_dimensions = [{"axes":["x"], "size":3, "alternate":False, "upper":[1.0], "lower":[0.0]},
+                {"axes":[], "size":5, "alternate":False, "upper":[], "lower":[]}]
+        dimensions = [{"axes":d.axes, "size":d.size, "alternate":d.alternate, "upper":d.upper, "lower":d.lower}
+                for d in g.dimensions]
+        self.assertEqual(expected_dimensions, dimensions)
+
+    def test_line_with_staticpointgen(self):
+        x = LineGenerator("x", "mm", 0, 1, 3, False)
+        m = StaticPointGenerator(5)
+        g = CompoundGenerator([m, x], [], [])
+        g.prepare()
+
+        expected_positions = [{'x':0.0}, {'x':0.5}, {'x':1.0}] * 5
+        positions = [point.positions for point in g.iterator()]
+        self.assertEqual(expected_positions, positions)
+
+        self.assertEqual(15, g.size)
+        self.assertEqual((5, 3), g.shape)
+        self.assertEqual(["x"], g.axes)
+        self.assertEqual({"x":"mm"}, g.units)
+
+        expected_dimensions = [{"axes":[], "size":5, "alternate":False, "upper":[], "lower":[]},
+                {"axes":["x"], "size":3, "alternate":False, "upper":[1.0], "lower":[0.0]}]
+        dimensions = [{"axes":d.axes, "size":d.size, "alternate":d.alternate, "upper":d.upper, "lower":d.lower}
+                for d in g.dimensions]
+        self.assertEqual(expected_dimensions, dimensions)
+
+    def test_alternating_line_with_staticpointgen(self):
+        x = LineGenerator("x", "mm", 0, 1, 3, True)
+        m = StaticPointGenerator(5)
+        g = CompoundGenerator([m, x], [], [])
+        g.prepare()
+        expected_positions = [
+                {'x':0.0}, {'x':0.5}, {'x':1.0},
+                {'x':1.0}, {'x':0.5}, {'x':0.0},
+                {'x':0.0}, {'x':0.5}, {'x':1.0},
+                {'x':1.0}, {'x':0.5}, {'x':0.0},
+                {'x':0.0}, {'x':0.5}, {'x':1.0}]
+
+        positions = [point.positions for point in g.iterator()]
+        self.assertEqual(expected_positions, positions)
+
+        self.assertEqual(15, g.size)
+        self.assertEqual((5, 3), g.shape)
+        self.assertEqual(["x"], g.axes)
+        self.assertEqual({"x":"mm"}, g.units)
+
+        expected_dimensions = [{"axes":[], "size":5, "alternate":False, "upper":[], "lower":[]},
+                {"axes":["x"], "size":3, "alternate":True, "upper":[1.0], "lower":[0.0]}]
+        dimensions = [{"axes":d.axes, "size":d.size, "alternate":d.alternate, "upper":d.upper, "lower":d.lower}
+                for d in g.dimensions]
+        self.assertEqual(expected_dimensions, dimensions)
+
+    def test_intermediate_staticpointgen(self):
+        x = LineGenerator("x", "mm", 0, 1, 3, False)
+        y = LineGenerator("y", "cm", 2, 3, 4, False)
+        m = StaticPointGenerator(5)
+        g = CompoundGenerator([y, m, x], [], [])
+        g.prepare()
+
+        expected_positions = []
+        for yp in [2.0, 2 + 1./3, 2 + 2./3, 3.0]:
+            for mp in range_(5):
+                for xp in [0.0, 0.5, 1.0]:
+                    expected_positions.append({"y":yp, "x":xp})
+
+        positions = [point.positions for point in g.iterator()]
+        self.assertEqual(expected_positions, positions)
+
+        self.assertEqual(60, g.size)
+        self.assertEqual((4, 5, 3), g.shape)
+        self.assertEqual(["y", "x"], g.axes)
+        self.assertEqual({"y":"cm", "x":"mm"}, g.units)
+        self.assertEqual(3, len(g.dimensions))
 
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""
