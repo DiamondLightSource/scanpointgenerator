@@ -62,7 +62,6 @@ before_install:
 install:
   - env
   - pip install -r requirements/test.txt
-  - pip install coveralls
   - pip install mock
   - python setup.py bdist_egg
   - if [ "$JYTHON" == "true" ]; then
@@ -77,6 +76,8 @@ install:
       unset IFS;
       echo "CLASSPATH:";
       echo "$CLASSPATH";
+    else
+      pip install coveralls;
     fi
 
 before_script:
