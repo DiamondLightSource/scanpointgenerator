@@ -21,7 +21,7 @@ cache:
     - $HOME/jython
 
 before_install:
-  - export JYTHON_URL='http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1b3/jython-installer-2.7.1b3.jar'
+  - export JYTHON_URL='http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar'
   - export REQUIRED_JARS="org.eclipse.january_1.0.0.v201610161242.jar"
   - export REQUIRED_JARS="ch.qos.logback.core_1.1.7.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="org.apache.commons.math3_3.6.1.jar:$REQUIRED_JARS"
