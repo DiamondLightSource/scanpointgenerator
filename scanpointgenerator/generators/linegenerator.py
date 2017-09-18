@@ -85,7 +85,7 @@ class LineGenerator(Generator):
         d = dict()
         d['typeid'] = self.typeid
         d['axes'] = self.axes
-        d['units'] = [self.units[a] for a in self.axes]
+        d['units'] = [self.units[a] if (len(self.axes)==len(self.units)) else self.units.values()[0] for a in self.axes ] #just take the first one unless two are specified
         d['start'] = self.start
         d['stop'] = self.stop
         d['size'] = self.size

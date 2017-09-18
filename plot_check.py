@@ -1,10 +1,10 @@
 from scanpointgenerator import LineGenerator, CompoundGenerator
-from scanpointgenerator.rectangular_roi import RectangularROI
-from scanpointgenerator.circular_roi import CircularROI
-from scanpointgenerator.spiralgenerator import SpiralGenerator
-from scanpointgenerator.lissajousgenerator import LissajousGenerator
-from scanpointgenerator.randomoffsetmutator import RandomOffsetMutator
-from scanpointgenerator.excluder import Excluder
+from scanpointgenerator import RectangularROI
+from scanpointgenerator import CircularROI
+from scanpointgenerator import SpiralGenerator
+from scanpointgenerator import LissajousGenerator
+from scanpointgenerator import RandomOffsetMutator
+from scanpointgenerator import ROIExcluder
 from scanpointgenerator.plotgenerator import plot_generator
 
 from pkg_resources import require
@@ -15,7 +15,7 @@ require('scipy')
 
 def grid_check():
 
-    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
+    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
     gen = CompoundGenerator([y, x], [], [])
 
@@ -24,9 +24,9 @@ def grid_check():
 
 def grid_circle_check():
 
-    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
+    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
-    circle = Excluder(CircularROI([2.0, 1.0], 2.0), ['x', 'y'])
+    circle = ROIExcluder([CircularROI([2.0, 1.0], 2.0)], ['x', 'y'])
     gen = CompoundGenerator([y, x], [circle], [])
 
     plot_generator(gen, circle)
@@ -43,7 +43,7 @@ def spiral_check():
 def spiral_rectangle_check():
 
     spiral = SpiralGenerator(['x', 'y'], "mm", [0.0, 0.0], 10.0)
-    rectangle = Excluder(RectangularROI([0.0, 0.0], 10.0, 10.0), ['x', 'y'])
+    rectangle = ROIExcluder([RectangularROI([0.0, 0.0], 10.0, 10.0)], ['x', 'y'])
     gen = CompoundGenerator([spiral], [rectangle], [])
 
     plot_generator(gen, rectangle)
@@ -51,8 +51,8 @@ def spiral_rectangle_check():
 
 def lissajous_check():
 
-    bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-    lissajous = LissajousGenerator(['x', 'y'], "mm", bounding_box, 2)
+    bounding_box = dict(centre=[0.0, 0.0],span=[1.0,1.0], lobes=2)
+    lissajous = LissajousGenerator(['x', 'y'], "mm",**bounding_box)
     gen = CompoundGenerator([lissajous], [], [])
 
     plot_generator(gen)
@@ -60,27 +60,27 @@ def lissajous_check():
 
 def lissajous_rectangle_check():
 
-    bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
-    lissajous = LissajousGenerator(['x', 'y'], "mm", bounding_box, 2)
-    rectangle = Excluder(RectangularROI([0.0, 0.0], 0.8, 0.8), ['x', 'y'])
+    bounding_box = dict(centre=[0.0, 0.0],span=[1.0,1.0], lobes=2)
+    lissajous = LissajousGenerator(['x', 'y'], "mm", **bounding_box)
+    rectangle = ROIExcluder([RectangularROI([0.0, 0.0], 0.8, 0.8)], ['x', 'y'])
     gen = CompoundGenerator([lissajous], [rectangle], [])
 
     plot_generator(gen, rectangle)
 
 
 def line_2d_check():
-
+ 
     line = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
     gen = CompoundGenerator([line], [], [])
-
+ 
     plot_generator(gen)
 
 
 def random_offset_check():
 
-    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
+    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
-    mutator = RandomOffsetMutator(2, dict(x=0.25, y=0.25))
+    mutator = RandomOffsetMutator(2,['x','y'], dict(x=0.25, y=0.25))
 
     gen = CompoundGenerator([y, x], [], [mutator])
 
@@ -101,7 +101,7 @@ def random_offset_check():
 
 def serialise_grid_check():
 
-    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate_direction=True)
+    x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
     y = LineGenerator("y", "mm", 0.0, 3.0, 4)
 
     gen = CompoundGenerator([y, x], [], [])
