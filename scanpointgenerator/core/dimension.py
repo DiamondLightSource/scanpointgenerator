@@ -74,48 +74,47 @@ class Dimension(object):
         if self._prepared:
             raise ValueError("Can not apply excluders after"
                              "prepare has been called")
-        axis_inner = excluder.axes[0]
-        axis_outer = excluder.axes[1]
-        gen_inner = [g for g in self.generators if axis_inner in g.axes][0]
-        gen_outer = [g for g in self.generators if axis_outer in g.axes][0]
-        gen_inner_idx = self.generators.index(gen_inner)
-        gen_outer_idx = self.generators.index(gen_outer)
-        gen_distance = gen_outer_idx - gen_inner_idx
-        if gen_distance < 0:
-            gen_inner, gen_outer = gen_outer, gen_inner
-            gen_inner_idx, gen_outer_idx = gen_outer_idx, gen_inner_idx
-            gen_distance = -gen_distance
-            axis_inner, axis_outer = axis_outer, axis_inner
+        # find generators referenced by excluder
+        matched_gens = [g for g in self.generators if len(set(g.axes) & set(excluder.axes)) != 0]
+        if len(matched_gens) == 0:
+            raise ValueError("Excluder references axes not present in dimension : %s" % str(excluder.axes))
+        g_start = self.generators.index(matched_gens[0])
+        g_end = self.generators.index(matched_gens[-1])
+        point_arrays = {axis:[g for g in matched_gens if axis in g.axes][0].positions[axis] for axis in excluder.axes}
 
-        points_x = gen_inner.positions[axis_inner]
-        points_y = gen_outer.positions[axis_outer]
+        if self.alternate:
+            for axis in point_arrays.keys():
+                arr = point_arrays[axis]
+                point_arrays[axis] = np.append(arr, arr[::-1])
 
-        if gen_distance == 0 and self.alternate:
-            points_x = np.append(points_x, points_x[::-1])
-            points_y = np.append(points_y, points_y[::-1])
-        if gen_distance != 0:
-            if self.alternate:
-                points_x = np.append(points_x, points_x[::-1])
-                points_y = np.append(points_y, points_y[::-1])
-            x_repeats = 1
-            y_tiles = 1
-            for g in self.generators[gen_inner_idx+1:gen_outer_idx+1]:
-                x_repeats *= g.size
-            for g in self.generators[gen_inner_idx:gen_outer_idx]:
-                y_tiles *= g.size
-            points_x = np.repeat(points_x, x_repeats)
-            points_y = np.tile(points_y, y_tiles)
+        # scale up all point arrays using generators within the range
+        # inner generators are tiled by the size of outer generators
+        # outer generators have points repeated by the size of inner ones
+        axes_tiling = {axis:1 for axis in excluder.axes}
+        axes_repeats = {axis:1 for axis in excluder.axes}
+        axes_seen = []
+        axes_to_see = [axis for axis in excluder.axes]
+        for g in self.generators[g_start:g_end+1]:
+            found_axes = [axis for axis in g.axes if axis in excluder.axes]
+            axes_to_see = [axis for axis in axes_to_see if axis not in found_axes]
+            for axis in axes_to_see:
+                axes_tiling[axis] *= g.size
+            for axis in axes_seen:
+                axes_repeats[axis] *= g.size
+            axes_seen.extend(found_axes)
+        for axis in point_arrays.keys():
+            arr = point_arrays[axis]
+            point_arrays[axis] = np.tile(np.repeat(arr, axes_repeats[axis]), axes_tiling[axis])
 
-        if axis_inner == excluder.axes[0]:
-            excluder_mask = excluder.create_mask(points_x, points_y)
-        else:
-            excluder_mask = excluder.create_mask(points_y, points_x)
+        arrays = [point_arrays[axis] for axis in excluder.axes]
+        excluder_mask = excluder.create_mask(*arrays)
 
+        # record the tiling/repeat information for generators outside the axis range
         tile = 0.5 if self.alternate else 1
         repeat = 1
-        for g in self.generators[0:gen_inner_idx]:
+        for g in self.generators[0:g_start]:
             tile *= g.size
-        for g in self.generators[gen_outer_idx+1:]:
+        for g in self.generators[g_end+1:]:
             repeat *= g.size
 
         m = {"repeat":repeat, "tile":tile, "mask":excluder_mask}

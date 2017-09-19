@@ -27,7 +27,7 @@ class Excluder(object):
         """
         self.axes = axes
 
-    def create_mask(self, x_points, y_points):
+    def create_mask(self, *point_arrays):
         raise NotImplementedError("Method must be implemented in child class.")
 
     def to_dict(self):
