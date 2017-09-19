@@ -138,39 +138,24 @@ class CompoundGenerator(object):
         generators[-1].prepare_bounds()
 
         for excluder in excluders:
-            axis_1, axis_2 = excluder.axes
-            gen_1 = [g for g in generators if axis_1 in g.axes][0]
-            gen_2 = [g for g in generators if axis_2 in g.axes][0]
-            gen_diff = generators.index(gen_1) \
-                - generators.index(gen_2)
-            if gen_diff < -1 or gen_diff > 1:
+            matched_dims = [d for d in self.dimensions if len(set(d.axes) & set(excluder.axes)) != 0]
+            if len(matched_dims) == 0:
                 raise ValueError(
-                    "Excluders must be defined on axes that are adjacent in " \
-                        "generator order")
-
-            # merge dimensions if region spans two
-            dim_1 = [i for i in self.dimensions if axis_1 in i.axes][0]
-            dim_2 = [i for i in self.dimensions if axis_2 in i.axes][0]
-            dim_diff = self.dimensions.index(dim_1) \
-                - self.dimensions.index(dim_2)
-            if dim_diff == 1:
-                dim_1, dim_2 = dim_2, dim_1
-                dim_diff = -1
-            if dim_1.alternate != dim_2.alternate \
-                    and dim_1 is not self.dimensions[0]:
-                raise ValueError(
-                    "Generators tied by regions must have the same " \
-                            "alternate setting")
-            # merge "inner" into "outer"
-            if dim_diff == -1:
-                # dim_1 is "outer" - preserves axis ordering
-                new_dim = Dimension.merge_dimensions([dim_1, dim_2])
-                self.dimensions[self.dimensions.index(dim_1)] = new_dim
-                self.dimensions.remove(dim_2)
-                dim = new_dim
+                        "Excluder references axes that have not been provided by generators: %s" % str(excluder.axes))
+            d_start = self.dimensions.index(matched_dims[0])
+            d_end = self.dimensions.index(matched_dims[-1])
+            if d_start != d_end:
+                # merge all excluders between d_start and d_end (inclusive)
+                alternate = self.dimensions[d_end].alternate
+                # verify consistent alternate settings (ignoring outermost dimesion where it doesn't matter)
+                for d in self.dimensions[max(1, d_start):d_end]:
+                    if alternate != d.alternate:
+                        raise ValueError("Nested generators connected by regions must have the same alternate setting")
+                merged_dim = Dimension.merge_dimensions(self.dimensions[d_start:d_end+1])
+                self.dimensions = self.dimensions[:d_start] + [merged_dim] + self.dimensions[d_end+1:]
+                dim = merged_dim
             else:
-                dim = dim_1
-
+                dim = self.dimensions[d_start]
             dim.apply_excluder(excluder)
 
         self.size = 1
