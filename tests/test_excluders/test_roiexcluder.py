@@ -1,16 +1,20 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 
 from pkg_resources import require
 require("mock")
 from mock import MagicMock, patch, call
 
+from test_util import ScanPointGeneratorTest
 from scanpointgenerator import ROIExcluder
 from scanpointgenerator.compat import np
 
 roi_patch_path = "scanpointgenerator.core.ROI"
 
 
-class TestCreateMask(unittest.TestCase):
+class TestCreateMask(ScanPointGeneratorTest):
 
     def setUp(self):
         self.r1 = MagicMock()
@@ -72,3 +76,6 @@ class TestSerialisation(unittest.TestCase):
                                          call(self.r2_dict)])
         self.assertEqual(e.rois, [self.r1, self.r2])
         self.assertEqual(e.axes, ["x", "y"])
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
