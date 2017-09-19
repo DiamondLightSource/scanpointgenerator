@@ -78,40 +78,45 @@ class Dimension(object):
         axis_outer = excluder.axes[1]
         gen_inner = [g for g in self.generators if axis_inner in g.axes][0]
         gen_outer = [g for g in self.generators if axis_outer in g.axes][0]
+        gen_inner_idx = self.generators.index(gen_inner)
+        gen_outer_idx = self.generators.index(gen_outer)
+        gen_distance = gen_outer_idx - gen_inner_idx
+        if gen_distance < 0:
+            gen_inner, gen_outer = gen_outer, gen_inner
+            gen_inner_idx, gen_outer_idx = gen_outer_idx, gen_inner_idx
+            gen_distance = -gen_distance
+            axis_inner, axis_outer = axis_outer, axis_inner
+
         points_x = gen_inner.positions[axis_inner]
         points_y = gen_outer.positions[axis_outer]
-        if self.generators.index(gen_inner) > self.generators.index(gen_outer):
-            gen_inner, gen_outer = gen_outer, gen_inner
-            axis_inner, axis_outer = axis_outer, axis_inner
-            points_x, points_y = points_y, points_x
 
-        if gen_inner is gen_outer and self.alternate:
+        if gen_distance == 0 and self.alternate:
             points_x = np.append(points_x, points_x[::-1])
             points_y = np.append(points_y, points_y[::-1])
-        elif self.alternate:
-            points_x = np.append(points_x, points_x[::-1])
-            points_x = np.repeat(points_x, gen_outer.size)
-            points_y = np.append(points_y, points_y[::-1])
-            points_y = np.tile(points_y, gen_inner.size)
-        elif gen_inner is not gen_outer:
-            points_x = np.repeat(points_x, gen_outer.size)
-            points_y = np.tile(points_y, gen_inner.size)
+        if gen_distance != 0:
+            if self.alternate:
+                points_x = np.append(points_x, points_x[::-1])
+                points_y = np.append(points_y, points_y[::-1])
+            x_repeats = 1
+            y_tiles = 1
+            for g in self.generators[gen_inner_idx+1:gen_outer_idx+1]:
+                x_repeats *= g.size
+            for g in self.generators[gen_inner_idx:gen_outer_idx]:
+                y_tiles *= g.size
+            points_x = np.repeat(points_x, x_repeats)
+            points_y = np.tile(points_y, y_tiles)
 
         if axis_inner == excluder.axes[0]:
             excluder_mask = excluder.create_mask(points_x, points_y)
         else:
             excluder_mask = excluder.create_mask(points_y, points_x)
+
         tile = 0.5 if self.alternate else 1
         repeat = 1
-        found_axis = False
-        for g in self.generators:
-            if axis_inner in g.axes or axis_outer in g.axes:
-                found_axis = True
-            else:
-                if found_axis:
-                    repeat *= g.size
-                else:
-                    tile *= g.size
+        for g in self.generators[0:gen_inner_idx]:
+            tile *= g.size
+        for g in self.generators[gen_outer_idx+1:]:
+            repeat *= g.size
 
         m = {"repeat":repeat, "tile":tile, "mask":excluder_mask}
         self._masks.append(m)

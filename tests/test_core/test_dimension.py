@@ -260,6 +260,75 @@ class DimensionTests(ScanPointGeneratorTest):
             [0, 1, 2, 0, 1, 2, 2, 1, 0, 0, 1, 2, 0, 1, 2],
             d.get_positions("gx").tolist())
 
+    def test_excluder_over_spread_axes(self):
+        gw_pos = np.array([0.1, 0.2])
+        gx_pos = np.array([0, 1, 2, 3])
+        gy_pos = np.array([10, 11, 12, 13])
+        gz_pos = np.array([100, 101, 102, 103])
+        go_pos = np.array([1000, 1001, 1002])
+        mask_xz_func = lambda px, pz: (px-1)**2 + (pz-102)**2 <= 1
+        exz = Mock(axes=["gx", "gz"], create_mask=Mock(side_effect=mask_xz_func))
+        gw = Mock(axes=["gw"], positions={"gw":gw_pos}, size=2, alternate=False)
+        gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=False)
+        gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=False)
+        gz = Mock(axes=["gz"], positions={"gz":gz_pos}, size=4, alternate=False)
+        go = Mock(axes=["go"], positions={"go":go_pos}, size=3, alternate=False)
+        dw = Dimension(gw)
+        dx = Dimension(gx)
+        dy = Dimension(gy)
+        dz = Dimension(gz)
+        do = Dimension(go)
+        d = Dimension.merge_dimensions([do, dz, dy, dx, dw])
+
+        d.apply_excluder(exz)
+        d.prepare()
+
+        x_positions = np.tile(np.array([0, 1, 2, 3]), 16)
+        y_positions = np.repeat(np.tile(np.array([10, 11, 12, 13]), 4), 4)
+        z_positions = np.repeat(np.array([100, 101, 102, 103]), 16)
+        x_positions = np.tile(np.repeat(x_positions, gw.size), go.size)
+        y_positions = np.tile(np.repeat(y_positions, gw.size), go.size)
+        z_positions = np.tile(np.repeat(z_positions, gw.size), go.size)
+
+        mask = mask_xz_func(x_positions, z_positions)
+        expected_x = x_positions[mask].tolist()
+        expected_y = y_positions[mask].tolist()
+        expected_z = z_positions[mask].tolist()
+
+        self.assertEqual(expected_x, d.get_positions("gx").tolist())
+        self.assertEqual(expected_y, d.get_positions("gy").tolist())
+        self.assertEqual(expected_z, d.get_positions("gz").tolist())
+
+    def test_spread_excluder_multi_axes_per_gen(self):
+        gx1_pos = np.array([1, 2, 3, 4, 5])
+        gx2_pos = np.array([11, 10, 9, 8, 7])
+        gy_pos = np.array([-1, 0, 1])
+        gz_pos = np.array([1, 0, -1, -2, -3])
+        mask_x1z_func = lambda px, pz: (px-4)**2 + (pz+1)**2 <= 1
+        exz = Mock(axes=["gx1", "gz"], create_mask=Mock(side_effect=mask_x1z_func))
+        gx = Mock(axes=["gx1", "gx2"], positions={"gx1":gx1_pos, "gx2":gx2_pos}, size=5, alternate=False)
+        gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=3, alternate=False)
+        gz = Mock(axes=["gz"], positions={"gz":gz_pos}, size=5, alternate=False)
+        d = Dimension.merge_dimensions([Dimension(gz), Dimension(gy), Dimension(gx)])
+
+        d.apply_excluder(exz)
+        d.prepare()
+
+        x1_positions = np.tile(gx1_pos, 15)
+        x2_positions = np.tile(gx2_pos, 15)
+        y_positions = np.repeat(np.tile(gy_pos, 5), 5)
+        z_positions = np.repeat(gz_pos, 15)
+
+        mask = mask_x1z_func(x1_positions, z_positions)
+        expected_x1 = x1_positions[mask].tolist()
+        expected_x2 = x2_positions[mask].tolist()
+        expected_y = y_positions[mask].tolist()
+        expected_z = z_positions[mask].tolist()
+
+        self.assertEqual(expected_x1, d.get_positions("gx1").tolist())
+        self.assertEqual(expected_x2, d.get_positions("gx2").tolist())
+        self.assertEqual(expected_y, d.get_positions("gy").tolist())
+        self.assertEqual(expected_z, d.get_positions("gz").tolist())
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
