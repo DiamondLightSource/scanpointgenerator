@@ -164,7 +164,7 @@ class CompoundGenerator(object):
             # merge "inner" into "outer"
             if dim_diff == -1:
                 # dim_1 is "outer" - preserves axis ordering
-                new_dim = Dimension.merge_dimensions(dim_1, dim_2)
+                new_dim = Dimension.merge_dimensions([dim_1, dim_2])
                 self.dimensions[self.dimensions.index(dim_1)] = new_dim
                 self.dimensions.remove(dim_2)
                 dim = new_dim

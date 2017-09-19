@@ -149,25 +149,34 @@ class Dimension(object):
         self._prepared = True
 
     @staticmethod
-    def merge_dimensions(outer, inner):
-        """Collapse two dimensions into one, appropriate scaling structures"""
-        dim = Dimension(outer.generators[0])
+    def merge_dimensions(dimensions):
+        """Merge multiple dimensions into one, scaling structures as required
+
+        Args:
+            dimensions (list): dimensions to merge (outermost first)
+        Returns:
+            Dimension: squashed dimension
+        """
+        final_dim = Dimension(dimensions[0].generators[0])
+        final_dim.generators = []
+        final_dim.lower = []
+        final_dim.upper = []
+        final_dim.axes = []
+        final_dim._max_length = 1
         # masks in the inner generator are tiled by the size of
         # outer generators and outer generators have their elements
         # repeated by the size of inner generators
-        inner_masks = [m.copy() for m in inner._masks]
-        outer_masks = [m.copy() for m in outer._masks]
-        scale = inner._max_length
-        for m in outer_masks:
-            m["repeat"] *= scale
-        scale = outer._max_length
-        for m in inner_masks:
-            m["tile"] *= scale
-        dim._masks = outer_masks + inner_masks
-        dim.axes = outer.axes + inner.axes
-        dim.generators = outer.generators + inner.generators
-        dim.alternate = outer.alternate or inner.alternate
-        dim._max_length = outer._max_length * inner._max_length
-        dim.upper = outer.upper + inner.upper
-        dim.lower = outer.lower + inner.lower
-        return dim
+        for dim in dimensions:
+            inner_masks = [m.copy() for m in dim._masks] # copy masks to preserve input strucutres
+            for m in final_dim._masks:
+                m["repeat"] *= dim._max_length
+            for m in inner_masks:
+                m["tile"] *= final_dim._max_length
+            final_dim._masks += inner_masks
+            final_dim.axes += dim.axes
+            final_dim.generators += dim.generators
+            final_dim.upper += dim.upper
+            final_dim.lower += dim.lower
+            final_dim._max_length *= dim._max_length
+            final_dim.alternate = final_dim.alternate or dim.alternate
+        return final_dim

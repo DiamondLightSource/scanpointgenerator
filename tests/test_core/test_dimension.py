@@ -42,7 +42,7 @@ class DimensionTests(ScanPointGeneratorTest):
             {"repeat":5, "tile":7, "mask":om2}]
         inner._masks = [{"repeat":11, "tile":13, "mask":im1},
             {"repeat":17, "tile":19, "mask":im2}]
-        combined = Dimension.merge_dimensions(outer, inner)
+        combined = Dimension.merge_dimensions([outer, inner])
 
         self.assertEqual(g.size * h.size, combined._max_length)
         self.assertEqual(outer.alternate or inner.alternate, combined.alternate)
@@ -54,6 +54,33 @@ class DimensionTests(ScanPointGeneratorTest):
             {"repeat":320, "tile":7, "mask":om2},
             {"repeat":11, "tile":13*16, "mask":im1},
             {"repeat":17, "tile":19*16, "mask":im2}]
+        self.assertEqual(expected_masks, combined._masks)
+
+    def test_merge_three(self):
+        g1, g2, g3 = Mock(), Mock(), Mock()
+        g1.axes, g2.axes, g3.axes = ["g1"], ["g2"], ["g3"]
+        g1.size, g2.size, g3.size = 3, 4, 5
+        g1.positions = {"g1":np.array([0, 1, 2])}
+        g2.positions = {"g2":np.array([-1, 0, 1, 2])}
+        g3.positions = {"g3":np.array([-2, 0, 2, 4, 6])}
+        d1, d2, d3 = Dimension(g1), Dimension(g2), Dimension(g3)
+        d1_m, d2_m, d3_m = Mock(), Mock(), Mock()
+        d1._masks = [{"repeat":1, "tile":1, "mask":d1_m}]
+        d2._masks = [{"repeat":2, "tile":3, "mask":d2_m}]
+        d3._masks = [{"repeat":5, "tile":7, "mask":d3_m}]
+
+        combined = Dimension.merge_dimensions([d1, d2, d3])
+
+        self.assertEqual(60, combined._max_length)
+        self.assertEqual(g1.alternate or g2.alternate or g3.alternate, combined.alternate)
+        self.assertEqual(["g1", "g2", "g3"], combined.axes)
+        self.assertEqual([0, -1, -2], combined.lower)
+        self.assertEqual([2, 2, 6], combined.upper)
+
+        expected_masks = [
+                {"repeat":20, "tile":1, "mask":d1_m},
+                {"repeat":10, "tile":9, "mask":d2_m},
+                {"repeat":5, "tile":84, "mask":d3_m}]
         self.assertEqual(expected_masks, combined._masks)
 
     def test_successive_merges(self):
@@ -77,8 +104,8 @@ class DimensionTests(ScanPointGeneratorTest):
         dg2._masks = [{"repeat":1, "tile":1, "mask":g2mask}]
         dh1._masks = [{"repeat":1, "tile":1, "mask":h1mask}]
 
-        outer = Dimension.merge_dimensions(dg1, dg2)
-        inner = Dimension.merge_dimensions(dh1, dh2)
+        outer = Dimension.merge_dimensions([dg1, dg2])
+        inner = Dimension.merge_dimensions([dh1, dh2])
         self.assertEqual(5 * 7, outer._max_length)
         self.assertEqual(11 * 13, inner._max_length)
         self.assertEqual([{"repeat":1, "tile":5, "mask":g2mask}], outer._masks)
@@ -87,7 +114,7 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual([0, 10, -16], outer.lower)
         self.assertEqual([11, 21, 9], inner.upper)
         self.assertEqual([1, 1, 0], inner.lower)
-        combined = Dimension.merge_dimensions(outer, inner)
+        combined = Dimension.merge_dimensions([outer, inner])
 
         expected_masks = [
             {"repeat":11*13, "tile":5, "mask":g2mask},
@@ -198,7 +225,7 @@ class DimensionTests(ScanPointGeneratorTest):
         e = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
         dx = Dimension(gx)
         dy = Dimension(gy)
-        d = Dimension.merge_dimensions(dy, dx)
+        d = Dimension.merge_dimensions([dy, dx])
         d.apply_excluder(e)
         d.prepare()
         self.assertEqual([1, 0, 1, 2, 1], d.get_positions("gx").tolist())
@@ -218,14 +245,8 @@ class DimensionTests(ScanPointGeneratorTest):
         dx = Dimension(gx)
         dy = Dimension(gy)
         dz = Dimension(gz)
-        dz.prepare()
-        self.assertEqual([0, 1, 2, 3], dz.get_positions("gz").tolist())
-        dyx = Dimension.merge_dimensions(dy, dx)
-        dyx.apply_excluder(exy)
-        dyx.prepare()
-        self.assertEqual([2, 1, 0, 0, 1, 2, 2, 1, 0], dyx.get_positions("gx").tolist())
-        self.assertEqual([1, 1, 1, 2, 2, 2, 3, 3, 3], dyx.get_positions("gy").tolist())
-        d = Dimension.merge_dimensions(dz, dyx)
+        d = Dimension.merge_dimensions([dz, dy, dx])
+        d.apply_excluder(exy)
         d.apply_excluder(eyz)
         d.prepare()
         self.assertEqual(15, d.size)
