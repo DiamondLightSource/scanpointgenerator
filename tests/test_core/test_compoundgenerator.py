@@ -786,6 +786,34 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual({"y":"cm", "x":"mm"}, g.units)
         self.assertEqual(3, len(g.dimensions))
 
+    def test_staticpointgen_in_alternating(self):
+        x = LineGenerator("x", "mm", 0, 1, 3, True)
+        y = LineGenerator("y", "cm", 2, 3, 4, False)
+        m = StaticPointGenerator(5)
+        r = CircularROI((0.5, 2.5), 0.4)
+        e = ROIExcluder([r], ["x", "y"])
+        g = CompoundGenerator([y, m, x], [e], [])
+        g.prepare()
+
+        expected_positions = []
+        x_positions = [0.0, 0.5, 1.0]
+        direction = 1
+        for yp in [2.0, 2 + 1./3, 2 + 2./3, 3.0]:
+            for mp in range_(5):
+                for xp in x_positions[::direction]:
+                    if (xp-0.5)**2 + (yp-2.5)**2 <= 0.4**2:
+                        expected_positions.append({"y":yp, "x":xp})
+                direction *= -1
+
+        positions = [point.positions for point in g.iterator()]
+
+        self.assertEqual(expected_positions, positions)
+        self.assertEqual(len(expected_positions), g.size)
+        self.assertEqual((len(expected_positions),), g.shape)
+        self.assertEqual(["y", "x"], g.axes)
+        self.assertEqual({"y":"cm", "x":"mm"}, g.units)
+        self.assertEqual(1, len(g.dimensions))
+
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""
 

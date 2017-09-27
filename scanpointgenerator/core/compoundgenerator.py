@@ -23,7 +23,7 @@ from scanpointgenerator.core.excluder import Excluder
 from scanpointgenerator.excluders.roiexcluder import ROIExcluder
 from scanpointgenerator.core.mutator import Mutator
 from scanpointgenerator.rois import RectangularROI
-from scanpointgenerator.generators import LineGenerator
+from scanpointgenerator.generators import LineGenerator, StaticPointGenerator
 
 
 class CompoundGenerator(object):
@@ -152,6 +152,9 @@ class CompoundGenerator(object):
                 alternate = self.dimensions[d_end].alternate
                 # verify consistent alternate settings (ignoring outermost dimesion where it doesn't matter)
                 for d in self.dimensions[max(1, d_start):d_end]:
+                    # filter out dimensions consisting of a single StaticPointGenerator, since alternation means nothing
+                    if len(d.generators) == 1 and isinstance(d.generators[0], StaticPointGenerator):
+                        continue
                     if alternate != d.alternate:
                         raise ValueError("Nested generators connected by regions must have the same alternate setting")
                 merged_dim = Dimension.merge_dimensions(self.dimensions[d_start:d_end+1])
