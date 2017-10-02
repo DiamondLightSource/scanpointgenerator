@@ -47,30 +47,26 @@ def plot_generator(gen, excluder=None, show_indexes=True):
         # If lower is different from last then include it
         xlower = point.lower["x"]
         ylower = point.lower.get("y", 0)
+        xpos = point.positions["x"]
+        ypos = point.positions.get("y", 0)
         if len(x) == 0 or x[-1] != xlower or y[-1] != ylower:
             if len(x) != 0:
-                # add in a tiny fractional distance
-                xneg = x[-1] - xlower > 0
-                yneg = y[-1] - ylower > 0
+                # add in a tiny fractional distance to extend last point
                 xdiff = (x[-1] - x[-2]) * 0.01
                 ydiff = (y[-1] - y[-2]) * 0.01
                 for i in range(3):
                     x.append(x[-1] + xdiff)
                     y.append(y[-1] + ydiff)
-                # add the padding on the input
-                if xneg:
-                    xdiff *= -1
-                if yneg:
-                    ydiff *= -1
+                # add in padding for the next point
+                xdiff = (xpos - xlower) * 0.01
+                ydiff = (ypos - ylower) * 0.01
                 for i in reversed(range(3)):
-                    x.append(xlower + xdiff * (i + 1))
-                    y.append(ylower + ydiff * (i + 1))
+                    x.append(xlower - xdiff * (i + 1))
+                    y.append(ylower - ydiff * (i + 1))
             starts.append(len(x))
             x.append(xlower)
             y.append(ylower)
         # Add in capture points
-        xpos = point.positions["x"]
-        ypos = point.positions.get("y", 0)
         x.append(xpos)
         y.append(ypos)
         capx.append(xpos)
