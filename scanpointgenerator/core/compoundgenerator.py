@@ -32,13 +32,14 @@ class CompoundGenerator(object):
 
     typeid = "scanpointgenerator:generator/CompoundGenerator:1.0"
 
-    def __init__(self, generators, excluders, mutators, duration=-1):
+    def __init__(self, generators, excluders, mutators, duration=-1, continuous=True):
         """
         Args:
             generators(list(Generator)): List of Generators to nest
             excluders(list(Excluder)): List of Excluders to filter points by
             mutators(list(Mutator)): List of Mutators to apply to each point
             duration(double): Point durations in seconds (-1 for variable)
+            continuous(boolean): Make points continuous (set upper/lower bounds)
         """
 
         self.size = 0
@@ -58,6 +59,7 @@ class CompoundGenerator(object):
         self.duration = duration
         self._dim_meta = {}
         self._prepared = False
+        self.continuous = continuous
         for generator in generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
@@ -135,7 +137,8 @@ class CompoundGenerator(object):
             generator.prepare_positions()
             self.dimensions.append(Dimension(generator))
         # only the inner-most generator needs to have bounds calculated
-        generators[-1].prepare_bounds()
+        if self.continuous:
+            generators[-1].prepare_bounds()
 
         for excluder in excluders:
             axis_1, axis_2 = excluder.axes
@@ -267,7 +270,7 @@ class CompoundGenerator(object):
                 for axis in g.axes:
                     point.positions[axis] = g.positions[axis][j]
                     # apply "real" bounds to the "innermost" generator only
-                    if dim is self.dimensions[-1] and g is dim.generators[-1]:
+                    if self.continuous and dim is self.dimensions[-1] and g is dim.generators[-1]:
                         point.lower[axis] = g.bounds[axis][j_lower]
                         point.upper[axis] = g.bounds[axis][j_upper]
                     else:
@@ -286,6 +289,7 @@ class CompoundGenerator(object):
         d['excluders'] = [e.to_dict() for e in self.excluders]
         d['mutators'] = [m.to_dict() for m in self.mutators]
         d['duration'] = float(self.duration)
+        d['continuous'] = self.continuous
         return d
 
     @classmethod
@@ -302,4 +306,5 @@ class CompoundGenerator(object):
         excluders = [Excluder.from_dict(e) for e in d['excluders']]
         mutators = [Mutator.from_dict(m) for m in d['mutators']]
         duration = d['duration']
-        return cls(generators, excluders, mutators, duration)
+        continuous = d['continuous']
+        return cls(generators, excluders, mutators, duration, continuous)

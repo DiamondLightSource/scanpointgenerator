@@ -11,7 +11,7 @@ from scanpointgenerator import LissajousGenerator
 from scanpointgenerator import ROIExcluder
 from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI
 from scanpointgenerator.mutators import RandomOffsetMutator
-from scanpointgenerator.compat import range_
+from scanpointgenerator.compat import range_, np
 
 from pkg_resources import require
 require("mock")
@@ -22,16 +22,17 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
     def test_init(self):
         x = LineGenerator("x", "mm", 1.0, 1.2, 3, True)
         y = LineGenerator("y", "mm", 2.0, 2.1, 2, False)
-        g = CompoundGenerator([y, x], [], [], 0.2)
+        g = CompoundGenerator([y, x], [], [], 0.2, False)
         self.assertEqual(g.generators[0], y)
         self.assertEqual(g.generators[1], x)
         self.assertEqual(g.units, dict(y="mm", x="mm"))
         self.assertEqual(g.axes, ["y", "x"])
         self.assertEqual(g.duration, 0.2)
 
-    def test_default_duration(self):
+    def test_default_init_values(self):
         g = CompoundGenerator([MagicMock()], [], [])
         self.assertEqual(-1, g.duration)
+        self.assertEqual(True, g.continuous)
 
     def test_given_compound_raise_error(self):
         g = CompoundGenerator([], [], [])
@@ -625,6 +626,27 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual({"x":1, "y":1}, p.positions)
         self.assertEqual({"x":0.5, "y":1}, p.upper)
 
+    def test_no_bounds_for_non_continuous(self):
+        x_points = np.array([1, 2])
+        y_points = np.array([11, 12])
+        x = MagicMock(axes=["x"], positions={"x":x_points}, size=len(x_points), alternate=False)
+        y = MagicMock(axes=["y"], positions={"y":y_points}, size=len(y_points), alternate=False)
+
+        g = CompoundGenerator([y, x], [], [], continuous=False)
+        g.prepare()
+        positions = [p.positions for p in g.iterator()]
+        lower = [p.lower for p in g.iterator()]
+        upper = [p.upper for p in g.iterator()]
+
+        x.prepare_bounds.assert_not_called()
+        y.prepare_bounds.assert_not_called()
+
+        expected_positions = [{"x":1, "y":11}, {"x":2, "y":11},
+                {"x":1, "y":12}, {"x":2, "y":12}]
+        self.assertEqual(expected_positions, positions)
+        self.assertEqual(expected_positions, lower)
+        self.assertEqual(expected_positions, upper)
+
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""
 
@@ -830,7 +852,7 @@ class TestSerialisation(unittest.TestCase):
         self.e1_dict = MagicMock()
 
     def test_to_dict(self):
-        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1], -1)
+        self.g = CompoundGenerator([self.l2, self.l1], [self.e1], [self.m1], -1, True)
 
         self.l1.to_dict.return_value = self.l1_dict
         self.l2.to_dict.return_value = self.l2_dict
@@ -847,6 +869,7 @@ class TestSerialisation(unittest.TestCase):
         expected_dict['excluders'] = excluders_list
         expected_dict['mutators'] = mutators_list
         expected_dict['duration'] = -1
+        expected_dict['continuous'] = True
 
         d = self.g.to_dict()
 
@@ -867,6 +890,7 @@ class TestSerialisation(unittest.TestCase):
         _dict['excluders'] = [self.e1_dict]
         _dict['mutators'] = [self.m1_dict]
         _dict['duration'] = 12
+        _dict['continuous'] = False
 
         units_dict = dict()
         units_dict['x'] = 'mm'
@@ -879,6 +903,7 @@ class TestSerialisation(unittest.TestCase):
         self.assertEqual(gen.mutators[0], self.m1)
         self.assertEqual(gen.excluders[0], self.e1)
         self.assertEqual(gen.duration, 12)
+        self.assertEqual(gen.continuous, False)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
