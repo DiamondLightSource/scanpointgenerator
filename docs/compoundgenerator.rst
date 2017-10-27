@@ -51,18 +51,6 @@ be run in reverse to give a snake scan.
 Restrictions
 ------------
 
-:ref:`excluders` must be defined on axes that are given by consecutive
-generators. Generators with axes filtered by an excluder must also have a
-common ``alternate`` setting. An exception is made for the outermost
-generator as it is not repeated.
-
-The following is `not` legal::
-
-    from scanpointgenerator import LineGenerator, CompoundGenerator, \
-    ROIExcluder, CircularROI
-
-    xs = LineGenerator("x", "mm", 0, 1, 2)
-    ys = LineGenerator("y", "mm", 0, 1, 2)
-    zs = LineGenerator("z", "mm", 0, 1, 2)
-    exc = ROIExcluder([CircularROI([0, 0], 1)], ["x", "z"])
-    gen = CompoundGenerator([zs, ys, xs], [exc], []) # xs and zs are not consecutive
+Generators with axes filtered by an excluder or between any such generators
+must have a common ``alternate`` setting. An exception is made for the
+outermost generator as it is not repeated.

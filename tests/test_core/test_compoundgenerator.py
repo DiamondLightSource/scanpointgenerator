@@ -610,6 +610,34 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
         self.assertEqual(positions, expected_positions)
 
+    def test_excluder_spread_axes(self):
+        sp = SpiralGenerator(["s1", "s2"], ["mm", "mm"], centre=[0, 0], radius=1, scale=0.5, alternate=True)
+        y = LineGenerator("y", "mm", 0, 1, 3, True)
+        z = LineGenerator("z", "mm", -2, 3, 6, True)
+        e = ROIExcluder([CircularROI([0., 0.], 1.0)], ["s1", "z"])
+        g = CompoundGenerator([z, y, sp], [e], [])
+
+        g.prepare()
+
+        s1_pos, s2_pos = sp.positions["s1"], sp.positions["s2"]
+        s1_pos = np.tile(np.append(s1_pos, s1_pos[::-1]), 9)
+        s2_pos = np.tile(np.append(s2_pos, s2_pos[::-1]), 9)
+        y_pos = np.tile(np.repeat(np.array([0, 0.5, 1.0, 1.0, 0.5, 0]), sp.size), 3)
+        z_pos = np.repeat(np.array([-2, -1, 0, 1, 2, 3]), sp.size * 3)
+
+        mask_func = lambda ps1, pz: ps1**2 + pz**2 <= 1
+        mask = mask_func(s1_pos, z_pos)
+
+        expected_s1 = s1_pos[mask]
+        expected_s2 = s2_pos[mask]
+        expected_y = y_pos[mask]
+        expected_z = z_pos[mask]
+        expected_positions = [{'s1':ps1, 's2':ps2, 'y':py, 'z':pz}
+                for (ps1, ps2, py, pz) in zip(expected_s1, expected_s2, expected_y, expected_z)]
+        positions = [point.positions for point in list(g.iterator())]
+
+        self.assertEqual(positions, expected_positions)
+
     def test_bounds_applied_in_rectangle_roi_secial_case(self):
         x = LineGenerator("x", "mm", 0, 1, 2, True)
         y = LineGenerator("y", "mm", 0, 1, 2, True)

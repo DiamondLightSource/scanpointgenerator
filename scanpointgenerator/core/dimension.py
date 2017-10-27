@@ -74,44 +74,48 @@ class Dimension(object):
         if self._prepared:
             raise ValueError("Can not apply excluders after"
                              "prepare has been called")
-        axis_inner = excluder.axes[0]
-        axis_outer = excluder.axes[1]
-        gen_inner = [g for g in self.generators if axis_inner in g.axes][0]
-        gen_outer = [g for g in self.generators if axis_outer in g.axes][0]
-        points_x = gen_inner.positions[axis_inner]
-        points_y = gen_outer.positions[axis_outer]
-        if self.generators.index(gen_inner) > self.generators.index(gen_outer):
-            gen_inner, gen_outer = gen_outer, gen_inner
-            axis_inner, axis_outer = axis_outer, axis_inner
-            points_x, points_y = points_y, points_x
+        # find generators referenced by excluder
+        matched_gens = [g for g in self.generators if len(set(g.axes) & set(excluder.axes)) != 0]
+        if len(matched_gens) == 0:
+            raise ValueError("Excluder references axes not present in dimension : %s" % str(excluder.axes))
+        g_start = self.generators.index(matched_gens[0])
+        g_end = self.generators.index(matched_gens[-1])
+        point_arrays = {axis:[g for g in matched_gens if axis in g.axes][0].positions[axis] for axis in excluder.axes}
 
-        if gen_inner is gen_outer and self.alternate:
-            points_x = np.append(points_x, points_x[::-1])
-            points_y = np.append(points_y, points_y[::-1])
-        elif self.alternate:
-            points_x = np.append(points_x, points_x[::-1])
-            points_x = np.repeat(points_x, gen_outer.size)
-            points_y = np.append(points_y, points_y[::-1])
-            points_y = np.tile(points_y, gen_inner.size)
-        elif gen_inner is not gen_outer:
-            points_x = np.repeat(points_x, gen_outer.size)
-            points_y = np.tile(points_y, gen_inner.size)
+        if self.alternate:
+            for axis in point_arrays.keys():
+                arr = point_arrays[axis]
+                point_arrays[axis] = np.append(arr, arr[::-1])
 
-        if axis_inner == excluder.axes[0]:
-            excluder_mask = excluder.create_mask(points_x, points_y)
-        else:
-            excluder_mask = excluder.create_mask(points_y, points_x)
+        # scale up all point arrays using generators within the range
+        # inner generators are tiled by the size of outer generators
+        # outer generators have points repeated by the size of inner ones
+        axes_tiling = {axis:1 for axis in excluder.axes}
+        axes_repeats = {axis:1 for axis in excluder.axes}
+        axes_seen = []
+        axes_to_see = [axis for axis in excluder.axes]
+        for g in self.generators[g_start:g_end+1]:
+            found_axes = [axis for axis in g.axes if axis in excluder.axes]
+            axes_to_see = [axis for axis in axes_to_see if axis not in found_axes]
+            for axis in axes_to_see:
+                axes_tiling[axis] *= g.size
+            for axis in axes_seen:
+                axes_repeats[axis] *= g.size
+            axes_seen.extend(found_axes)
+        for axis in point_arrays.keys():
+            arr = point_arrays[axis]
+            point_arrays[axis] = np.tile(np.repeat(arr, axes_repeats[axis]), axes_tiling[axis])
+
+        arrays = [point_arrays[axis] for axis in excluder.axes]
+        excluder_mask = excluder.create_mask(*arrays)
+
+        # record the tiling/repeat information for generators outside the axis range
         tile = 0.5 if self.alternate else 1
         repeat = 1
-        found_axis = False
-        for g in self.generators:
-            if axis_inner in g.axes or axis_outer in g.axes:
-                found_axis = True
-            else:
-                if found_axis:
-                    repeat *= g.size
-                else:
-                    tile *= g.size
+        for g in self.generators[0:g_start]:
+            tile *= g.size
+        for g in self.generators[g_end+1:]:
+            repeat *= g.size
 
         m = {"repeat":repeat, "tile":tile, "mask":excluder_mask}
         self._masks.append(m)
@@ -149,25 +153,34 @@ class Dimension(object):
         self._prepared = True
 
     @staticmethod
-    def merge_dimensions(outer, inner):
-        """Collapse two dimensions into one, appropriate scaling structures"""
-        dim = Dimension(outer.generators[0])
+    def merge_dimensions(dimensions):
+        """Merge multiple dimensions into one, scaling structures as required
+
+        Args:
+            dimensions (list): dimensions to merge (outermost first)
+        Returns:
+            Dimension: squashed dimension
+        """
+        final_dim = Dimension(dimensions[0].generators[0])
+        final_dim.generators = []
+        final_dim.lower = []
+        final_dim.upper = []
+        final_dim.axes = []
+        final_dim._max_length = 1
         # masks in the inner generator are tiled by the size of
         # outer generators and outer generators have their elements
         # repeated by the size of inner generators
-        inner_masks = [m.copy() for m in inner._masks]
-        outer_masks = [m.copy() for m in outer._masks]
-        scale = inner._max_length
-        for m in outer_masks:
-            m["repeat"] *= scale
-        scale = outer._max_length
-        for m in inner_masks:
-            m["tile"] *= scale
-        dim._masks = outer_masks + inner_masks
-        dim.axes = outer.axes + inner.axes
-        dim.generators = outer.generators + inner.generators
-        dim.alternate = outer.alternate or inner.alternate
-        dim._max_length = outer._max_length * inner._max_length
-        dim.upper = outer.upper + inner.upper
-        dim.lower = outer.lower + inner.lower
-        return dim
+        for dim in dimensions:
+            inner_masks = [m.copy() for m in dim._masks] # copy masks to preserve input strucutres
+            for m in final_dim._masks:
+                m["repeat"] *= dim._max_length
+            for m in inner_masks:
+                m["tile"] *= final_dim._max_length
+            final_dim._masks += inner_masks
+            final_dim.axes += dim.axes
+            final_dim.generators += dim.generators
+            final_dim.upper += dim.upper
+            final_dim.lower += dim.lower
+            final_dim._max_length *= dim._max_length
+            final_dim.alternate = final_dim.alternate or dim.alternate
+        return final_dim

@@ -31,27 +31,28 @@ class ROIExcluder(Excluder):
 
         self.rois = rois
 
-    def create_mask(self, x_points, y_points):
+    def create_mask(self, *point_arrays):
         """Create a boolean array specifying the points to exclude.
 
         The resulting mask is created from the union of all ROIs.
 
         Args:
-            x_points(numpy.array(float)): Array of points for x-axis
-            y_points(numpy.array(float)): Array of points for y-axis
+            *point_arrays (numpy.array(float)): Array of points for each axis
 
         Returns:
             np.array(int8): Array of points to exclude
 
         """
-        if len(x_points) != len(y_points):
-            raise ValueError("Points lengths must be equal")
+        l = len(point_arrays[0])
+        for arr in point_arrays:
+            if len(arr) != l:
+                raise ValueError("Points lengths must be equal")
 
-        mask = np.zeros_like(x_points, dtype=np.int8)
+        mask = np.zeros_like(point_arrays[0], dtype=np.int8)
         for roi in self.rois:
             # Accumulate all True entries
             # Points outside of all ROIs will be excluded
-            mask |= roi.mask_points([x_points, y_points])
+            mask |= roi.mask_points(point_arrays)
 
         return mask
 
