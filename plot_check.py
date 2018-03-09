@@ -3,6 +3,7 @@ from scanpointgenerator import RectangularROI
 from scanpointgenerator import CircularROI
 from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import LissajousGenerator
+from scanpointgenerator import PowerTermGenerator
 from scanpointgenerator import RandomOffsetMutator
 from scanpointgenerator import ROIExcluder
 from scanpointgenerator.plotgenerator import plot_generator
@@ -47,6 +48,12 @@ def spiral_rectangle_check():
     gen = CompoundGenerator([spiral], [rectangle], [])
 
     plot_generator(gen, rectangle)
+
+
+def power_gen_check():
+
+    gen = PowerTermGenerator("x", "eV", 250, 360, 280, 3, 5)
+    plot_generator(gen)
 
 
 def lissajous_check():
@@ -123,3 +130,4 @@ lissajous_rectangle_check()
 line_2d_check()
 random_offset_check()
 serialise_grid_check()
+power_gen_check()

@@ -4,16 +4,10 @@ from scanpointgenerator.compat import np
 
 @Generator.register_subclass("scanpointgenerator:generator/PowerTermGenerator:1.0")
 class PowerTermGenerator(Generator):
-    """
-    Generate a line of points according to the function
-        y = sign * ((x-xf)/a)**n + yf
-
-        sign is determined by start, stop, focus and exponent parameters
-    """
+    """Generate a line of points according to the function y = ((x-x_focus)/divisor)**exponent + focus"""
 
     def __init__(self, axis, units, start, stop, focus, exponent, divisor):
         """
-        y = ((x-x_focus)/divisor)**exponent + focus
         Args:
             axis (str): The scannable axis e.g. "dcm_energy"
             units (str): The scannable units e.g. "keV"
