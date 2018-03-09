@@ -124,6 +124,7 @@ class PowerGeneratorTest(ScanPointGeneratorTest):
         expected['focus'] = 280.
         expected['exponent'] = 3
         expected['divisor'] = 5.
+        expected['alternate'] = False
 
         self.assertEquals(g.to_dict(), expected)
 
@@ -136,6 +137,7 @@ class PowerGeneratorTest(ScanPointGeneratorTest):
         _dict['focus'] = 280.
         _dict['exponent'] = 3
         _dict['divisor'] = 20.5
+        _dict['alternate'] = False
 
         units_dict = dict()
         units_dict['x'] = "cm"

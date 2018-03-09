@@ -6,7 +6,7 @@ from scanpointgenerator.compat import np
 class PowerTermGenerator(Generator):
     """Generate a line of points according to the function y = ((x-x_focus)/divisor)**exponent + focus"""
 
-    def __init__(self, axis, units, start, stop, focus, exponent, divisor):
+    def __init__(self, axis, units, start, stop, focus, exponent, divisor, alternate=False):
         """
         Args:
             axis (str): The scannable axis e.g. "dcm_energy"
@@ -36,6 +36,8 @@ class PowerTermGenerator(Generator):
 
         self.xf = self.find_xf()
         self.size = int(self._inv_fn(stop))+1
+
+        self.alternate = alternate
 
     def prepare_arrays(self, index_array):
         arrays = dict()
@@ -75,6 +77,7 @@ class PowerTermGenerator(Generator):
         d['focus'] = self.focus
         d['exponent'] = self.exponent
         d['divisor'] = self.divisor
+        d['alternate'] = self.alternate
 
         return d
 
@@ -87,8 +90,9 @@ class PowerTermGenerator(Generator):
         exponent = d['exponent']
         divisor = d['divisor']
         focus = d['focus']
+        alternate = d['alternate']
 
-        return cls(axes, units, start, stop, focus, exponent, divisor)
+        return cls(axes, units, start, stop, focus, exponent, divisor, alternate)
 
 
 def get_suitable_sign(start, stop, focus, exponent):
