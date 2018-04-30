@@ -117,4 +117,14 @@ after_success:
     fi
   - coveralls;
 
+deploy:
+  provider: pypi
+  user: dls_controls
+  password:
+    secure: VFGRvZC15WvLiNqHGJMArbk4bZSjd7mBIC9u81JpHkRmWqGh2Hj8MIsftPMXUtAApmLMaD8m6GXmEoHvWjg87scG/U9E+gLAJmr9yyK/hdPUGSyjJwvCNAs3v+y5NQ9RYXJxIcsMWIDUJ5/JChQjwMyCk0gsilMORTWRY1q5HXiZliCutWmDc8Ym2W8e3Kn/xKbyZMPAnkAR7UnGDeTjVf24FRCRsukZn90o1Heb3LfUNfiKV4hfAzX+bXsl883FZ/179benh9In4UhN2yzCZu+XUi9PL9osXR3B807ZYfMOLnQaKqfsbCdD/i/fYPr3kOgbvGxNqvXXk8VLffmk0KOBAXWbveTIFsPZD7nHe27tfC7r6Binp8vNnmCHxI6/TuyNxBlNWNgKmJpbU8+7K0B1OTVGs/VQcaUcVp6mh5tGKfPjbii96PN6BvETNIMALRC9fYOsm0sXhBo85gIL46IqtcVbnj3uLlkScEElqe8PrFmW3cUKN7i/A8jrUpx/4TvtxeTUGHVhv5lBleHCvxhpH0E4a5w0HEEHvL0iQ93PgdHyGn3hmTfyO6/a4IymLY2s87n11275FbyPz1BZo9P3xDDFUuaxKxvoQMKs/xWhELS8lLruIMgfG4Xu8NZR2hs7pbobzEzfNZ74OepkuOkS8Ca3fq5Qm6jwv4fsGHI=
+  on:
+    tags: true
+    # As we are doing a source dist, only deploy for one python
+    python: "3.5"
+
 
