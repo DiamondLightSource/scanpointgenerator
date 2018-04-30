@@ -10,6 +10,13 @@ Added:
 
 - Nothing yet
 
+`2-1-1`_ - 2017-04-30
+---------------------
+
+Changed:
+
+- Changed to use Travis deploy to upload to PyPi
+
 `2-1-0`_ - 2017-04-18
 ---------------------
 

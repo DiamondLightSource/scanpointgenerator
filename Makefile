@@ -23,10 +23,7 @@ install: dist docs
 		--record=installed.files \
 		--prefix=$(PREFIX) dist/*.egg
 
-# Upload to pypi
-publish:
-	$(PYTHON) setup.py register -r https://pypi.python.org/pypi sdist upload -r https://pypi.python.org/pypi
-
+# Upload to pypi test. To upload a new release to pypi, push to Travis with a tag.
 testpublish:
 	$(PYTHON) setup.py register -r https://testpypi.python.org/pypi sdist upload -r https://testpypi.python.org/pypi
 
