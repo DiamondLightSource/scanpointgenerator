@@ -13,9 +13,16 @@ Added:
 `2-1-1`_ - 2017-04-30
 ---------------------
 
-Changed:
+Added:
 
-- Changed to use Travis deploy to upload to PyPi
+- Tags now cause Travis to deploy to PyPi
+- Added StaticPointGenerator
+- Allow ROI to span multiple Dimensions
+- Add continuous property to CompoundGenerator
+
+Fixed:
+
+- Fixed plotgenerator to interpolate turnarounds properly 
 
 `2-1-0`_ - 2017-04-18
 ---------------------
@@ -161,6 +168,7 @@ Added:
 
 - Initial structure with Line and Nested generators
 
+.. _2-1-1: https://github.com/dls-controls/scanpointgenerator/compare/2-1-0...2-1-1
 .. _2-1-0: https://github.com/dls-controls/scanpointgenerator/compare/2-0-0...2-1-0
 .. _2-0-0: https://github.com/dls-controls/scanpointgenerator/compare/1-6-1...2-0-0
 .. _1-6-1: https://github.com/dls-controls/scanpointgenerator/compare/1-6...1-6-1
