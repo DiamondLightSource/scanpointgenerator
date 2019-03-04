@@ -10,14 +10,14 @@ class StaticPointGeneratorTest(ScanPointGeneratorTest):
 
     def test_init(self):
         g = StaticPointGenerator(7)
-        self.assertEqual({}, g.units)
+        self.assertEqual([], g.units)
         self.assertEqual([], g.axes)
         self.assertEqual(7, g.size)
 
     def test_to_dict(self):
         g = StaticPointGenerator(7)
         expected_dict = {
-                "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.0",
+                "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.1",
                 "size": 7,
                 }
 
@@ -28,7 +28,7 @@ class StaticPointGeneratorTest(ScanPointGeneratorTest):
         g = StaticPointGenerator.from_dict(d)
         self.assertEqual(6, g.size)
         self.assertEqual([], g.axes)
-        self.assertEqual({}, g.units)
+        self.assertEqual([], g.units)
 
 
 if __name__ == "__main__":

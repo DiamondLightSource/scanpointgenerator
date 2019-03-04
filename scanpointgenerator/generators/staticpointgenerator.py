@@ -11,28 +11,16 @@
 #
 ###
 
-from scanpointgenerator.core import Generator
+from scanpointgenerator.core import Generator, ASize
 
-@Generator.register_subclass("scanpointgenerator:generator/StaticPointGenerator:1.0")
+
+@Generator.register_subclass(
+    "scanpointgenerator:generator/StaticPointGenerator:1.1")
 class StaticPointGenerator(Generator):
     """Generate 'empty' points with no axis information"""
-
     def __init__(self, size):
-        self.size = size
-        self.units = {}
-        self.axes = []
-
-    def to_dict(self):
-        d = {
-                "typeid" : self.typeid,
-                "size" : self.size,
-            }
-        return d
+        # type: (ASize) -> None
+        super(StaticPointGenerator, self).__init__(axes=[], units=[], size=size)
 
     def prepare_arrays(self, index_array):
         return {}
-
-    @classmethod
-    def from_dict(cls, d):
-        size = d["size"]
-        return cls(size)

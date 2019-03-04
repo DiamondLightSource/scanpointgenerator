@@ -13,28 +13,47 @@
 #
 ###
 
+from annotypes import Serializable, Anno, Array, Sequence, Union, TYPE_CHECKING
+
 from scanpointgenerator.compat import np
 
+if TYPE_CHECKING:
+    from typing import Dict
 
-class Generator(object):
-    """Base class for all malcolm scan point generators
 
-    Attributes:
-        units (dict): Dict of str position_name -> str position_unit
-            for each scannable dimension. E.g. {"x": "mm", "y": "mm"}
-        axes (list): List of scannable names, used in GDA to reconstruct Point
-            in CompoundGenerators
-    """
-    alternate = False
-    units = None
-    positions = None
-    bounds = None
-    size = 0
-    # Lookup table for generator subclasses
-    _generator_lookup = {}
-    axes = []
+with Anno("List of scannable names contributed to each Point"):
+    AAxes = Array[str]
+UAxes = Union[AAxes, Sequence[str], str]
+with Anno("The units that the scannables are demanded in"):
+    AUnits = Array[str]
+UUnits = Union[AUnits, Sequence[str], str]
+with Anno("The number of Points that this generator will produce"):
+    ASize = int
+with Anno("Whether to reverse on each alternate run of the generator"):
+    AAlternate = bool
+
+
+class Generator(Serializable):
+    """Base class for all malcolm scan point generators"""
+
+    def __init__(self, axes, units, size, alternate=False):
+        # type: (UAxes, UUnits, ASize, AAlternate) -> None
+        self.axes = AAxes(axes)
+        self.units = AUnits(units)
+        self.size = ASize(size)
+        assert self.size > 0, "Expected size > 0, got size = %d" % self.size
+        self.alternate = AAlternate(alternate)
+        # These will be filled in by prepare_*
+        self.positions = None
+        self.bounds = None
+
+    def axis_units(self):
+        # type: () -> Dict[str, float]
+        """Return the units for each axis in a dict"""
+        return dict(zip(self.axes, self.units))
 
     def prepare_arrays(self, index_array):
+        # type: (np.array) -> Dict[str, np.array]
         """
         Abstract method to create position or bounds array from provided index
         array. index_array will be np.arange(self.size) for positions and
@@ -53,44 +72,3 @@ class Generator(object):
 
     def prepare_bounds(self):
         self.bounds = self.prepare_arrays(np.arange(self.size + 1) - 0.5)
-
-    def to_dict(self):
-        """Abstract method to convert object attributes into a dictionary"""
-        raise NotImplementedError
-
-    @classmethod
-    def from_dict(cls, d):
-        """
-        Abstract method to create a ScanPointGenerator instance from a
-        serialised dictionary
-
-        Args:
-            d(dict): Dictionary of attributes
-
-        Returns:
-            Generator: New ScanPointGenerator instance
-        """
-
-        generator_type = d["typeid"]
-        generator = cls._generator_lookup[generator_type]
-        assert generator is not cls, \
-            "Subclass %s did not redefine from_dict" % generator_type
-        gen = generator.from_dict(d)
-        return gen
-
-    @classmethod
-    def register_subclass(cls, generator_type):
-        """
-        Register a subclass so from_dict() works
-
-        Args:
-            generator_type (Generator): Subclass to register
-        """
-
-        def decorator(generator):
-
-            cls._generator_lookup[generator_type] = generator
-            generator.typeid = generator_type
-
-            return generator
-        return decorator

@@ -11,14 +11,14 @@ class LineGeneratorTest(ScanPointGeneratorTest):
 
     def test_init(self):
         g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
-        self.assertEqual(dict(x="mm"), g.units)
+        self.assertEqual(dict(x="mm"), g.axis_units())
         self.assertEqual(["x"], g.axes)
         self.assertEqual(True, g.alternate)
 
     def test_init_multi_dim(self):
         g = LineGenerator(["x", "y"], ["mm", "cm"], [2., -2.], [4., -4.], 3)
         self.assertEqual(["x", "y"], g.axes)
-        self.assertEqual({"x":"mm", "y":"cm"}, g.units)
+        self.assertEqual({"x":"mm", "y":"cm"}, g.axis_units())
         self.assertEqual(False, g.alternate)
 
     def test_array_positions(self):
@@ -54,7 +54,7 @@ class LineGeneratorTest(ScanPointGeneratorTest):
     def test_to_dict(self):
         g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
         expected_dict = dict()
-        expected_dict['typeid'] = "scanpointgenerator:generator/LineGenerator:1.0"
+        expected_dict['typeid'] = "scanpointgenerator:generator/LineGenerator:1.1"
         expected_dict['axes'] = ["x"]
         expected_dict['units'] = ["mm"]
         expected_dict['start'] = [1.0]
@@ -80,17 +80,18 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         gen = LineGenerator.from_dict(_dict)
 
         self.assertEqual(["x"], gen.axes)
-        self.assertEqual(units_dict, gen.units)
+        self.assertEqual(units_dict, gen.axis_units())
         self.assertEqual([1.0], gen.start)
         self.assertEqual([9.0], gen.stop)
         self.assertEqual(5, gen.size)
         self.assertTrue(gen.alternate)
 
+
 class LineGenerator2DTest(ScanPointGeneratorTest):
 
     def test_init(self):
         g = LineGenerator(["x", "y"], ["mm", "mm"], [1.0, 2.0], [5.0, 10.0], 5)
-        self.assertEqual(dict(x="mm", y="mm"), g.units)
+        self.assertEqual(dict(x="mm", y="mm"), g.axis_units())
         self.assertEqual(["x", "y"], g.axes)
 
     def test_given_inconsistent_dims_then_raise_error(self):
@@ -99,7 +100,9 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
 
     def test_give_one_point_then_step_zero(self):
         l = LineGenerator(["1", "2", "3", "4", "5"], "mm", [0.0]*5, [10.0]*5, 1)
-        self.assertEqual([0]*5, l.step)
+        l.prepare_positions()
+        for v in l.positions.values():
+            assert v == [0.0]
 
     def test_array_positions(self):
         g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
