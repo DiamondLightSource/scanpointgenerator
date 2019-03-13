@@ -17,7 +17,7 @@ class StaticPointGeneratorTest(ScanPointGeneratorTest):
     def test_to_dict(self):
         g = StaticPointGenerator(7)
         expected_dict = {
-                "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.1",
+                "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.0",
                 "size": 7,
                 }
 

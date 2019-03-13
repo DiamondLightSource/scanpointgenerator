@@ -11,22 +11,35 @@
 #
 ###
 
+from annotypes import Anno, Union, Array, Sequence
+
 from math import hypot, atan2, pi
 
 from scanpointgenerator.core import ROI
 from scanpointgenerator.compat import np
+
+with Anno("The centre of sector"):
+    ACentre = Array[float]
+UCentre = Union[ACentre, Sequence[float]]
+with Anno("The radii of sector"):
+    ARadii = Array[float]
+URadii = Union[ARadii, Sequence[float]]
+with Anno("The angles of sector"):
+    AAngles = Array[float]
+UAngles = Union[AAngles, Sequence[float]]
 
 
 @ROI.register_subclass("scanpointgenerator:roi/SectorROI:1.0")
 class SectorROI(ROI):
 
     def __init__(self, centre, radii, angles):
+        # type: (UCentre, URadii, UAngles) -> None
         super(SectorROI, self).__init__()
         if radii[0] < 0 or radii[1] < radii[0] or radii[1] <= 0.0:
             raise ValueError("Sector size is invalid")
-        self.centre = centre
-        self.radii = radii
-        self.angles = self.constrain_angles(angles)
+        self.centre = ACentre(centre)
+        self.radii = ARadii(radii)
+        self.angles = AAngles(self.constrain_angles(angles))
 
     def constrain_angles(self, angles):
         # constrain angles such that angles[0] < angles[1],
@@ -81,17 +94,3 @@ class SectorROI(ROI):
         mask &= r2 >= self.radii[0]
         mask &= (phi_x <= phi_s)
         return mask
-
-    def to_dict(self):
-        d = super(SectorROI, self).to_dict()
-        d["centre"] = self.centre
-        d["radii"] = self.radii
-        d["angles"] = self.angles
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        centre = d['centre']
-        radii = d['radii']
-        angles = d['angles']
-        return cls(centre, radii, angles)

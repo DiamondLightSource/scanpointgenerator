@@ -11,25 +11,38 @@
 #
 ###
 
+from annotypes import Anno, Union, Array, Sequence
+
 from math import cos, sin
 
 from scanpointgenerator.core import ROI
 from scanpointgenerator.compat import np
+
+with Anno("The start point of the rectangle"):
+    AStart = Array[float]
+UStart = Union[AStart, Sequence[float]]
+with Anno("The width of the rectangle"):
+    AWidth = float
+with Anno("The height of the rectangle"):
+    AHeight = float
+with Anno("The angle of the rectangle"):
+    AAngle = float
 
 
 @ROI.register_subclass("scanpointgenerator:roi/RectangularROI:1.0")
 class RectangularROI(ROI):
 
     def __init__(self, start, width, height, angle=0):
+        # type: (UStart, AWidth, AHeight, AAngle) -> None
         super(RectangularROI, self).__init__()
 
         if 0.0 in [height, width]:
             raise ValueError("Rectangle must have some size")
 
-        self.start = start
-        self.width = width
-        self.height = height
-        self.angle = angle
+        self.start = AStart(start)
+        self.width = AWidth(width)
+        self.height = AHeight(height)
+        self.angle = AAngle(angle)
 
     def contains_point(self, point):
         # transform point to the rotated rectangle frame
@@ -58,15 +71,3 @@ class RectangularROI(ROI):
         mask_x = np.logical_and(x >= 0, x <= self.width)
         mask_y = np.logical_and(y >= 0, y <= self.height)
         return np.logical_and(mask_x, mask_y)
-
-    def to_dict(self):
-        d = super(RectangularROI, self).to_dict()
-        d['start'] = self.start
-        d['width'] = self.width
-        d['height'] = self.height
-        d['angle'] = self.angle
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d['start'], d['width'], d['height'], d['angle'])

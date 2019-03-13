@@ -1,2 +1,3 @@
 matplotlib
 scipy
+annotypes>=0.12

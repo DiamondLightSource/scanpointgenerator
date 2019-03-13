@@ -11,15 +11,21 @@
 #
 ###
 
+from annotypes import Anno, Union, Array, Sequence
+
 from scanpointgenerator.core import ROI
 
+with Anno("The point"):
+    APoint = Array[float]
+UPoint = Union[APoint, Sequence[float]]
 
 @ROI.register_subclass("scanpointgenerator:roi/PointROI:1.0")
 class PointROI(ROI):
 
     def __init__(self, point):
+        # type: (UPoint) -> None
         super(PointROI, self).__init__()
-        self.point = point
+        self.point = APoint(point)
 
     def contains_point(self, point, epsilon=0):
         if epsilon == 0:
@@ -37,12 +43,3 @@ class PointROI(ROI):
         y *= y
         x += y
         return x <= epsilon * epsilon
-
-    def to_dict(self):
-        d = super(PointROI, self).to_dict()
-        d["point"] = self.point
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["point"])

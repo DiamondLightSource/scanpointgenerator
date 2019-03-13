@@ -48,13 +48,13 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([-0.5, 2.5], g.bounds["x"].tolist())
 
     def test_duplicate_name_raises(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             LineGenerator(["x", "x"], "mm", 0.0, 1.0, 5)
 
     def test_to_dict(self):
         g = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
         expected_dict = dict()
-        expected_dict['typeid'] = "scanpointgenerator:generator/LineGenerator:1.1"
+        expected_dict['typeid'] = "scanpointgenerator:generator/LineGenerator:1.0"
         expected_dict['axes'] = ["x"]
         expected_dict['units'] = ["mm"]
         expected_dict['start'] = [1.0]
@@ -101,8 +101,7 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
     def test_give_one_point_then_step_zero(self):
         l = LineGenerator(["1", "2", "3", "4", "5"], "mm", [0.0]*5, [10.0]*5, 1)
         l.prepare_positions()
-        for v in l.positions.values():
-            assert v == [0.0]
+        assert list(l.positions.values()) == 5*[0.0]
 
     def test_array_positions(self):
         g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)

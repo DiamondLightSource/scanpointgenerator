@@ -39,7 +39,15 @@ class Generator(Serializable):
     def __init__(self, axes, units, size, alternate=False):
         # type: (UAxes, UUnits, ASize, AAlternate) -> None
         self.axes = AAxes(axes)
+        assert len(self.axes) == len(set(self.axes)), \
+            "Axis names cannot be duplicated; given %s" % list(self.axes)
         self.units = AUnits(units)
+        # If only one set of units given, use those for all axes
+        if len(self.units) == 1:
+            self.units = AUnits(self.units.seq * len(self.axes))
+        assert len(self.axes) == len(self.units), \
+            "Units array %s length != axes array %s length" % (
+                list(self.units), list(self.axes))
         self.size = ASize(size)
         assert self.size > 0, "Expected size > 0, got size = %d" % self.size
         self.alternate = AAlternate(alternate)

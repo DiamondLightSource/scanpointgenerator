@@ -13,11 +13,11 @@ class SpiralGeneratorTest(ScanPointGeneratorTest):
         self.g = SpiralGenerator(['x', 'y'], ["cm", "mm"], [0.0, 0.0], 1.4, alternate=True)
 
     def test_init(self):
-        self.assertEqual(self.g.units, dict(x="cm", y="mm"))
+        self.assertEqual(self.g.axis_units(), dict(x="cm", y="mm"))
         self.assertEqual(self.g.axes, ["x", "y"])
 
     def test_duplicate_name_raises(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             SpiralGenerator(["x", "x"], ["mm", "mm"], [0.0, 0.0], 1.0)
 
     def test_array_positions(self):
@@ -56,7 +56,6 @@ class SpiralGeneratorTest(ScanPointGeneratorTest):
 
     def test_from_dict(self):
         _dict = dict()
-        _dict['type'] = "SpiralGenerator"
         _dict['axes'] = ["x", "y"]
         _dict['units'] = ["mm", "cm"]
         _dict['centre'] = [0.0, 0.0]
@@ -71,10 +70,11 @@ class SpiralGeneratorTest(ScanPointGeneratorTest):
         gen = SpiralGenerator.from_dict(_dict)
 
         self.assertEqual(["x", "y"], gen.axes)
-        self.assertEqual(units_dict, gen.units)
+        self.assertEqual(units_dict, gen.axis_units())
         self.assertEqual([0.0, 0.0], gen.centre)
         self.assertEqual(1.4, gen.radius)
         self.assertEqual(1, gen.scale)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

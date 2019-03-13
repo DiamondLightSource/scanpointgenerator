@@ -14,94 +14,66 @@
 
 import math as m
 
-from scanpointgenerator.compat import range_, np
-from scanpointgenerator.core import Generator
-from scanpointgenerator.core import Point
+from annotypes import Anno, Union, Array, Sequence
+
+from scanpointgenerator.compat import np
+from scanpointgenerator.core import Generator, UAxes, UUnits, ASize, AAlternate
+
+with Anno("The centre of the lissajous curve"):
+    ACentre = Array[float]
+UCentre = Union[ACentre, Sequence[float]]
+with Anno("The [height, width] of the curve"):
+    ASpan = Array[float]
+USpan = Union[ASpan, Sequence[float]]
+with Anno("Number of x-direction lobes for curve; "
+          "will have lobes+1 y-direction lobes"):
+    ALobes = int
 
 
-@Generator.register_subclass("scanpointgenerator:generator/LissajousGenerator:1.0")
+@Generator.register_subclass(
+    "scanpointgenerator:generator/LissajousGenerator:1.1")
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 
     def __init__(self, axes, units, centre, span, lobes, size=None, alternate=False):
-        """
-        Args:
-            axes (list(str)): The scannable axes e.g. ["x", "y"]
-            units (list(str)): The scannable units e.g. ["mm", "mm"]
-            centre (list(float)): The centre of the lissajous curve
-            span (list(float)): The [height, width] of the curve
-            num(int): Number of x-direction lobes for curve; will
-                have lobes+1 y-direction lobes
-            size(int): The number of points to fill the Lissajous
-                curve. Default is 250 * lobes
-        """
+        # type: (UAxes, UUnits, UCentre, USpan, ALobes, ASize, AAlternate) -> None
+        # Default for size is 250 * lobes if not specified
+        self.centre = ACentre(centre)
+        self.span = ASpan(span)
+        self.lobes = ALobes(lobes)
+        if size is None:
+            size = self.lobes * 250
 
-        self.axes = axes
-        self.units = {d:u for d,u in zip(axes, units)}
-        self.alternate = alternate
-
-        if len(self.axes) != len(set(self.axes)):
-            raise ValueError("Axis names cannot be duplicated; given %s" %
-                             axes)
-
-        lobes = int(lobes)
-
-        self.x_freq = lobes
-        self.y_freq = lobes + 1
-        self.x_max, self.y_max = span[0]/2, span[1]/2
-        self.centre = centre
-        self.size = size
+        # Validate
+        assert len(self.centre) == len(self.span) == len(axes) == 2, \
+            "Expected centre %s, span %s and axes %s to be 2 dimensional" % (
+                list(self.centre), list(self.span), list(axes))
 
         # Phase needs to be 0 for even lobes and pi/2 for odd lobes to start
         # at centre for odd and at right edge for even
-        self.phase_diff = m.pi/2 * (lobes % 2)
-        if size is None:
-            self.size = lobes * 250
-        self.increment = 2*m.pi/self.size
+        self.x_freq = self.lobes
+        self.y_freq = self.lobes + 1
+        self.x_max, self.y_max = self.span[0]/2, self.span[1]/2
+        self.phase_diff = m.pi/2 * (self.lobes % 2)
+        self.increment = 2*m.pi/size
+        super(LissajousGenerator, self).__init__(axes, units, size, alternate)
 
     def prepare_arrays(self, index_array):
-        arrays = {}
-        x0, y0 = self.centre[0], self.centre[1]
-        A, B = self.x_max, self.y_max
-        a, b = self.x_freq, self.y_freq
-        d = self.phase_diff
-        fx = lambda t: x0 + A * np.sin(a * 2*m.pi * t/self.size + d)
-        fy = lambda t: y0 + B * np.sin(b * 2*m.pi * t/self.size)
-        arrays[self.axes[0]] = fx(index_array)
-        arrays[self.axes[1]] = fy(index_array)
+        arrays = {
+          self.axes[0]: self.centre[0] +
+                        self.x_max *
+                        np.sin(
+                            self.x_freq *
+                            self.increment *
+                            index_array +
+                            self.phase_diff
+                        ),
+          self.axes[1]: self.centre[1] +
+                        self.y_max *
+                        np.sin(
+                            self.y_freq *
+                            self.increment *
+                            index_array
+                        )
+        }
         return arrays
-
-    def to_dict(self):
-        """Convert object attributes into a dictionary"""
-
-        d = dict()
-        d['typeid'] = self.typeid
-        d['axes'] = self.axes
-        d['units'] = [self.units[a] for a in self.axes]
-        d['centre'] = self.centre
-        d['span'] = [self.x_max * 2, self.y_max * 2]
-        d['lobes'] = self.x_freq
-        d['size'] = self.size
-
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        """
-        Create a LissajousGenerator instance from a serialised dictionary
-
-        Args:
-            d(dict): Dictionary of attributes
-
-        Returns:
-            LissajousGenerator: New LissajousGenerator instance
-        """
-
-        axes = d['axes']
-        units = d['units']
-        centre = d['centre']
-        span = d['span']
-        lobes = d['lobes']
-        size = d['size']
-
-        return cls(axes, units, centre, span, lobes, size)

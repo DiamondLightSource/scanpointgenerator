@@ -5,10 +5,10 @@ import unittest
 
 from pkg_resources import require
 require("mock")
-from mock import MagicMock, patch, call
+from mock import patch, MagicMock
 
 from test_util import ScanPointGeneratorTest
-from scanpointgenerator import ROIExcluder
+from scanpointgenerator import ROIExcluder, CircularROI
 from scanpointgenerator.compat import np
 
 roi_patch_path = "scanpointgenerator.core.ROI"
@@ -17,8 +17,8 @@ roi_patch_path = "scanpointgenerator.core.ROI"
 class TestCreateMask(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.r1 = MagicMock()
-        self.r2 = MagicMock()
+        self.r1 = MagicMock(spec=CircularROI)
+        self.r2 = MagicMock(spec=CircularROI)
         self.e = ROIExcluder([self.r1, self.r2], ["x", "y"])
 
     def test_create_mask_returns_union_of_rois(self):
@@ -44,12 +44,11 @@ class TestCreateMask(ScanPointGeneratorTest):
 class TestSerialisation(unittest.TestCase):
 
     def setUp(self):
-        self.r1 = MagicMock()
-        self.r1_dict = MagicMock()
-        self.r2 = MagicMock()
-        self.r2_dict = MagicMock()
-        self.r1.to_dict.return_value = self.r1_dict
-        self.r2.to_dict.return_value = self.r2_dict
+        self.r1 = CircularROI([1, 2], 3)
+        self.r2 = CircularROI([4, 5], 6)
+
+        self.r1_dict = self.r1.to_dict()
+        self.r2_dict = self.r2.to_dict()
 
         self.e = ROIExcluder([self.r1, self.r2], ["x", "y"])
 
@@ -63,19 +62,22 @@ class TestSerialisation(unittest.TestCase):
 
         self.assertEqual(expected_dict, d)
 
-    @patch(roi_patch_path + '.from_dict')
-    def test_from_dict(self, from_dict_mock):
-        from_dict_mock.side_effect = [self.r1, self.r2]
+    def test_from_dict(self):
         _dict = dict()
+
         _dict['rois'] = [self.r1_dict, self.r2_dict]
         _dict['axes'] = ["x", "y"]
 
         e = ROIExcluder.from_dict(_dict)
 
-        from_dict_mock.assert_has_calls([call(self.r1_dict),
-                                         call(self.r2_dict)])
-        self.assertEqual(e.rois, [self.r1, self.r2])
-        self.assertEqual(e.axes, ["x", "y"])
+        self.assertEqual(["x", "y"], e.axes)
+        self.assertEqual(2, len(e.rois))
+        self.assertEqual("scanpointgenerator:roi/CircularROI:1.0", e.rois[0].typeid)
+        self.assertEqual([1, 2], e.rois[0].centre)
+        self.assertEqual(3, e.rois[0].radius)
+        self.assertEqual("scanpointgenerator:roi/CircularROI:1.0", e.rois[1].typeid)
+        self.assertEqual([4, 5], e.rois[1].centre)
+        self.assertEqual(6, e.rois[1].radius)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

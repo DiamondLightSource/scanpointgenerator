@@ -27,7 +27,7 @@ UStop = Union[AStop, Sequence[float], float]
 
 
 @Generator.register_subclass(
-    "scanpointgenerator:generator/LineGenerator:1.1")
+    "scanpointgenerator:generator/LineGenerator:1.0")
 class LineGenerator(Generator):
     """Generate a line of equally spaced N-dimensional points"""
 
@@ -38,9 +38,6 @@ class LineGenerator(Generator):
         self.stop = AStop(stop)
 
         # Validate
-        if len(self.axes) != len(set(self.axes)):
-            raise ValueError(
-                "Axis names cannot be duplicated; given %s" % (axes,))
         if len(self.axes) != len(self.start) or \
            len(self.axes) != len(self.stop):
             raise ValueError(

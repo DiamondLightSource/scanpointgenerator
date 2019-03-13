@@ -15,7 +15,7 @@ from scanpointgenerator.core import Generator, ASize
 
 
 @Generator.register_subclass(
-    "scanpointgenerator:generator/StaticPointGenerator:1.1")
+    "scanpointgenerator:generator/StaticPointGenerator:1.0")
 class StaticPointGenerator(Generator):
     """Generate 'empty' points with no axis information"""
     def __init__(self, size):

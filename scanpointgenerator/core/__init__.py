@@ -17,7 +17,7 @@ from .random import Random
 from .point import Point
 from .roi import ROI
 from .mutator import Mutator
-from .excluder import Excluder
+from .excluder import Excluder, AExcluderAxes, UExcluderAxes
 from .generator import Generator, AAxes, AUnits, AAlternate, ASize, UAxes, \
     UUnits
 from .compoundgenerator import CompoundGenerator

@@ -11,7 +11,7 @@ class ArrayGeneratorTest(ScanPointGeneratorTest):
 
     def test_1d_init(self):
         g = ArrayGenerator("x", "mm", [0, 1, 2, 3])
-        self.assertEqual({"x":"mm"}, g.units)
+        self.assertEqual({"x":"mm"}, g.axis_units())
         self.assertEqual(["x"], g.axes)
 
     def test_array_positions(self):
@@ -27,30 +27,31 @@ class ArrayGeneratorTest(ScanPointGeneratorTest):
     def test_to_dict(self):
         points = [0., 0., 1., 2., 0.5, 2.7, 1.3, 4.0]
         expected = {}
-        expected["typeid"] = "scanpointgenerator:generator/ArrayGenerator:1.0"
-        expected["axis"] = "x"
-        expected["units"] = "cm"
+        expected["typeid"] = "scanpointgenerator:generator/ArrayGenerator:1.1"
+        expected['axes'] = ["x"]
+        expected["units"] = ["cm"]
         expected["points"] = points
         expected["alternate"] = True
 
         g = ArrayGenerator("x", "cm", points, True)
+
         self.assertEqual(expected, g.to_dict())
 
     def test_from_dict(self):
         points = [0., 0., 1., 2., 0.5, 2.7, 1.3, 4.0]
 
         d = {}
-        d["type"] = "ArrayGenerator"
-        d["axis"] = "x"
+        d["axes"] = ["x"]
         d["units"] = "cm"
         d["points"] = points
         d["alternate"] = True
 
         g = ArrayGenerator.from_dict(d)
         self.assertEqual(["x"], g.axes)
-        self.assertEqual({"x":"cm"}, g.units)
-        self.assertEqual(points, g.points.tolist())
+        self.assertEqual({"x":"cm"}, g.axis_units())
+        self.assertEqual(points, g.points)
         self.assertEqual(True, g.alternate)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
