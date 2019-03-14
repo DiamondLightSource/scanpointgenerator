@@ -24,7 +24,7 @@ UPoints = Union[APoints, Sequence[np.float64], Sequence[float]]
 
 
 @Generator.register_subclass(
-    "scanpointgenerator:generator/ArrayGenerator:1.1")
+    "scanpointgenerator:generator/ArrayGenerator:1.0")
 class ArrayGenerator(Generator):
     """Generate points from a given list of positions"""
 

@@ -31,7 +31,7 @@ with Anno("Number of x-direction lobes for curve; "
 
 
 @Generator.register_subclass(
-    "scanpointgenerator:generator/LissajousGenerator:1.1")
+    "scanpointgenerator:generator/LissajousGenerator:1.0")
 class LissajousGenerator(Generator):
     """Generate the points of a Lissajous curve"""
 

@@ -27,7 +27,7 @@ class ArrayGeneratorTest(ScanPointGeneratorTest):
     def test_to_dict(self):
         points = [0., 0., 1., 2., 0.5, 2.7, 1.3, 4.0]
         expected = {}
-        expected["typeid"] = "scanpointgenerator:generator/ArrayGenerator:1.1"
+        expected["typeid"] = "scanpointgenerator:generator/ArrayGenerator:1.0"
         expected['axes'] = ["x"]
         expected["units"] = ["cm"]
         expected["points"] = points

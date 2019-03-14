@@ -38,7 +38,7 @@ with Anno("List of Mutators to apply to each point"):
     AMutators = Array[Generator]
 UMutators = Union[AMutators, Sequence[Mutator], Mutator]
 with Anno("Point durations in seconds (-1 for variable)"):
-    ADuration = np.float64
+    ADuration = float
 with Anno("Make points continuous (set upper/lower bounds)"):
     AContinuous = bool
 

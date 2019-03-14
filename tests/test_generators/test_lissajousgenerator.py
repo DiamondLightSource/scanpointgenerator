@@ -68,7 +68,7 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         g = LissajousGenerator(["x", "y"], ["mm", "cm"], [0., 0.], [1., 1.], 1)
 
         expected_dict = dict()
-        expected_dict['typeid'] = "scanpointgenerator:generator/LissajousGenerator:1.1"
+        expected_dict['typeid'] = "scanpointgenerator:generator/LissajousGenerator:1.0"
         expected_dict['axes'] = ["x", "y"]
         expected_dict['units'] = ["mm", "cm"]
         expected_dict['centre'] = [0., 0.]
