@@ -31,7 +31,7 @@ class CircularROI(ROI):
         # type: (UCentre, ARadius) -> None
         super(CircularROI, self).__init__()
 
-        if radius == 0.0:
+        if radius <= 0.0:
             raise ValueError("Circle must have some size")
 
         self.radius = ARadius(radius)

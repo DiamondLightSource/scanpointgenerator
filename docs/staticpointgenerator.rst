@@ -1,5 +1,5 @@
 Static Point Generator
-====================
+======================
 
 .. module:: scanpointgenerator
 
