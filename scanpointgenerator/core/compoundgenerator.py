@@ -15,6 +15,9 @@
 
 import logging
 
+from annotypes import Serializable, Anno, Union, Array, Sequence, \
+    deserialize_object
+
 from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core.dimension import Dimension
 from scanpointgenerator.core.generator import Generator
@@ -25,22 +28,29 @@ from scanpointgenerator.core.mutator import Mutator
 from scanpointgenerator.rois import RectangularROI
 from scanpointgenerator.generators import LineGenerator, StaticPointGenerator
 
+with Anno("List of Generators to nest"):
+    AGenerators = Array[Generator]
+UGenerators = Union[AGenerators, Sequence[Generator], Generator]
+with Anno("List of Excluders to filter points by"):
+    AExcluders = Array[Generator]
+UExcluders = Union[AExcluders, Sequence[Excluder], Excluder]
+with Anno("List of Mutators to apply to each point"):
+    AMutators = Array[Generator]
+UMutators = Union[AMutators, Sequence[Mutator], Mutator]
+with Anno("Point durations in seconds (-1 for variable)"):
+    ADuration = float
+with Anno("Make points continuous (set upper/lower bounds)"):
+    AContinuous = bool
 
-class CompoundGenerator(object):
+
+@Generator.register_subclass(
+    "scanpointgenerator:generator/CompoundGenerator:1.0")
+class CompoundGenerator(Serializable):
     """Nest N generators, apply exclusion regions to relevant generator pairs
     and apply any mutators before yielding points"""
 
-    typeid = "scanpointgenerator:generator/CompoundGenerator:1.0"
-
     def __init__(self, generators, excluders, mutators, duration=-1, continuous=True):
-        """
-        Args:
-            generators(list(Generator)): List of Generators to nest
-            excluders(list(Excluder)): List of Excluders to filter points by
-            mutators(list(Mutator)): List of Mutators to apply to each point
-            duration(double): Point durations in seconds (-1 for variable)
-            continuous(boolean): Make points continuous (set upper/lower bounds)
-        """
+        # type: (UGenerators, UExcluders, UMutators, ADuration, AContinuous) -> None
 
         self.size = 0
         """int: Final number of points to be generated -
@@ -52,26 +62,28 @@ class CompoundGenerator(object):
         """list(Dimension): Dimension instances -
         valid only after calling prepare"""
 
-        self.excluders = excluders
-        self.mutators = mutators
+        self.excluders = AExcluders(
+            [deserialize_object(e, Excluder) for e in excluders])
+        self.mutators = AMutators(
+            [deserialize_object(m, Mutator) for m in mutators])
         self.axes = []
         self.units = {}
-        self.duration = duration
+        self.duration = ADuration(duration)
         self._dim_meta = {}
         self._prepared = False
-        self.continuous = continuous
-        for generator in generators:
+        self.continuous = AContinuous(continuous)
+
+        self.generators = AGenerators(
+            [deserialize_object(g, Generator) for g in generators])
+
+        for generator in self.generators:
             logging.debug("Generator passed to Compound init")
             logging.debug(generator.to_dict())
-            if isinstance(generator, self.__class__):
-                raise TypeError("CompoundGenerators cannot be nested, nest"
-                                "its constituent parts instead")
             self.axes += generator.axes
-            self.units.update(generator.units)
+            self.units.update(generator.axis_units())
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated")
 
-        self.generators = generators
         self._generator_dim_scaling = {}
 
     def prepare(self):
@@ -123,10 +135,10 @@ class CompoundGenerator(object):
                     points_2 = gen_2.positions[axis_2][valid.astype(np.bool)]
                     # Recreate generators to replace larger generators + ROI
                     new_gen1 = LineGenerator(
-                        gen_1.axes, gen_1.units, points_1[0], points_1[-1],
+                        gen_1.axes, gen_1.units, [points_1[0]], [points_1[-1]],
                         len(points_1), gen_1.alternate)
                     new_gen2 = LineGenerator(
-                        gen_2.axes, gen_2.units, points_2[0], points_2[-1],
+                        gen_2.axes, gen_2.units, [points_2[0]], [points_2[-1]],
                         len(points_2), gen_2.alternate)
                     generators[generators.index(gen_1)] = new_gen1
                     generators[generators.index(gen_2)] = new_gen2
@@ -268,31 +280,3 @@ class CompoundGenerator(object):
         for m in self.mutators:
             point = m.mutate(point, n)
         return point
-
-    def to_dict(self):
-        """Convert object attributes into a dictionary"""
-        d = {}
-        d['typeid'] = self.typeid
-        d['generators'] = [g.to_dict() for g in self.generators]
-        d['excluders'] = [e.to_dict() for e in self.excluders]
-        d['mutators'] = [m.to_dict() for m in self.mutators]
-        d['duration'] = float(self.duration)
-        d['continuous'] = self.continuous
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        """
-        Create a CompoundGenerator instance from a serialised dictionary
-
-        Args:
-            d(dict): Dictionary of attributes
-        Returns:
-            CompoundGenerator: New CompoundGenerator instance
-        """
-        generators = [Generator.from_dict(g) for g in d['generators']]
-        excluders = [Excluder.from_dict(e) for e in d['excluders']]
-        mutators = [Mutator.from_dict(m) for m in d['mutators']]
-        duration = d['duration']
-        continuous = d['continuous']
-        return cls(generators, excluders, mutators, duration, continuous)

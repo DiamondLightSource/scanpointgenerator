@@ -13,11 +13,12 @@
 #
 ###
 
-from scanpointgenerator.core.random import Random
-from scanpointgenerator.core.point import Point
-from scanpointgenerator.core.roi import ROI
-from scanpointgenerator.core.mutator import Mutator
-from scanpointgenerator.core.excluder import Excluder
-from scanpointgenerator.core.generator import Generator
-from scanpointgenerator.core.compoundgenerator import CompoundGenerator
-from scanpointgenerator.core.dimension import Dimension
+from .random import Random
+from .point import Point
+from .roi import ROI
+from .mutator import Mutator
+from .excluder import Excluder, AExcluderAxes, UExcluderAxes
+from .generator import Generator, AAxes, AUnits, AAlternate, ASize, UAxes, \
+    UUnits
+from .compoundgenerator import CompoundGenerator
+from .dimension import Dimension

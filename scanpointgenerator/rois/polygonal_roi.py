@@ -11,20 +11,23 @@
 #
 ###
 
+from annotypes import Anno, Union, Array, Sequence
+
 from scanpointgenerator.core import ROI
 from scanpointgenerator.compat import range_, np
 
+with Anno("x positions for polygon vertices"):
+    APointsX = Array[np.float64]
+UPointsX = Union[APointsX, Sequence[np.float64], Sequence[float]]
+with Anno("y positions for polygon vertices"):
+    APointsY = Array[np.float64]
+UPointsY = Union[APointsY, Sequence[np.float64], Sequence[float]]
 
 @ROI.register_subclass("scanpointgenerator:roi/PolygonalROI:1.0")
 class PolygonalROI(ROI):
 
     def __init__(self, points_x, points_y):
-        """
-        Args:
-            points_x (list(double)): x positions for polygon vertices
-            points_y (list(double)): y positions for polygon vertices
-        """
-
+        # type: (UPointsX, UPointsY) -> None
         super(PolygonalROI, self).__init__()
         if len(points_x) != len(points_y):
             raise ValueError("Point arrays must be the same size")
@@ -32,8 +35,8 @@ class PolygonalROI(ROI):
             raise ValueError("Polygon requires at least 3 vertices")
         # TODO: check points are not all collinear
         #       (i.e. describe at least a triangle)
-        self.points_x = points_x
-        self.points_y = points_y
+        self.points_x = APointsX(np.array(points_x, dtype=np.float64))
+        self.points_y = APointsY(np.array(points_y, dtype=np.float64))
 
     def contains_point(self, point):
         # Uses ray-casting algorithm - "fails" for complex (self-intersecting)
@@ -67,13 +70,3 @@ class PolygonalROI(ROI):
                 mask ^= vmask
             v1x, v1y = v2x, v2y
         return mask
-
-    def to_dict(self):
-        d = super(PolygonalROI, self).to_dict()
-        d["points_x"] = self.points_x
-        d["points_y"] = self.points_y
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["points_x"], d["points_y"])

@@ -11,11 +11,11 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
 
     def test_init(self):
         g = LissajousGenerator(["x", "y"], ["mm", "cm"], [0., 0.], [1., 1.], 1)
-        self.assertEqual(g.units, dict(x="mm", y="cm"))
+        self.assertEqual(g.axis_units(), dict(x="mm", y="cm"))
         self.assertEqual(g.axes, ["x", "y"])
 
     def test_duplicate_name_raises(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             LissajousGenerator(["x", "x"], ["mm", "mm"], [0., 0,], [1., 1.], 1)
 
     def test_array_positions(self):
@@ -65,18 +65,17 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         self.assertListAlmostEqual(expected_by, g.bounds['y'].tolist())
 
     def test_to_dict(self):
-        bounding_box = dict(centre=[0.0, 0.0], width=1.0, height=1.0)
         g = LissajousGenerator(["x", "y"], ["mm", "cm"], [0., 0.], [1., 1.], 1)
-        expected_dict = dict()
-        box = dict()
-        expected_dict['typeid'] = "scanpointgenerator:generator/LissajousGenerator:1.0"
 
+        expected_dict = dict()
+        expected_dict['typeid'] = "scanpointgenerator:generator/LissajousGenerator:1.0"
         expected_dict['axes'] = ["x", "y"]
         expected_dict['units'] = ["mm", "cm"]
         expected_dict['centre'] = [0., 0.]
         expected_dict['span'] = [1., 1.]
         expected_dict['lobes'] = 1
         expected_dict['size'] = 250
+        expected_dict['alternate'] = False
 
         d = g.to_dict()
 
@@ -98,12 +97,13 @@ class LissajousGeneratorTest(ScanPointGeneratorTest):
         gen = LissajousGenerator.from_dict(_dict)
 
         self.assertEqual(["x", "y"], gen.axes)
-        self.assertEqual(units_dict, gen.units)
+        self.assertEqual(units_dict, gen.axis_units())
         self.assertEqual(5, gen.x_freq)
         self.assertEqual(0.5, gen.x_max)
         self.assertEqual(1.0, gen.y_max)
         self.assertEqual([0.0, 0.0], gen.centre)
         self.assertEqual(250, gen.size)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

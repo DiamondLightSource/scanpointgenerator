@@ -12,21 +12,30 @@
 #
 ###
 
+from annotypes import Anno, Union, Array, Sequence
+
 from scanpointgenerator.core import ROI
 import math as m
+
+with Anno("The centre of circle"):
+    ACentre = Array[float]
+UCentre = Union[ACentre, Sequence[float]]
+with Anno("The radius of the circle"):
+    ARadius = float
 
 
 @ROI.register_subclass("scanpointgenerator:roi/CircularROI:1.0")
 class CircularROI(ROI):
 
     def __init__(self, centre, radius):
+        # type: (UCentre, ARadius) -> None
         super(CircularROI, self).__init__()
 
-        if radius == 0.0:
+        if radius <= 0.0:
             raise ValueError("Circle must have some size")
 
-        self.radius = radius
-        self.centre = centre
+        self.radius = ARadius(radius)
+        self.centre = ACentre(centre)
 
     def contains_point(self, point):
         if m.sqrt((point[0] - self.centre[0]) ** 2 +
@@ -46,29 +55,3 @@ class CircularROI(ROI):
         x += y
         r2 = self.radius * self.radius
         return x <= r2
-
-    def to_dict(self):
-        """Convert object attributes into a dictionary"""
-
-        d = super(CircularROI, self).to_dict()
-        d['centre'] = self.centre
-        d['radius'] = self.radius
-
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        """
-        Create a CircularROI instance from a serialised dictionary
-
-        Args:
-            d(dict): Dictionary of attributes
-
-        Returns:
-            CircularROI: New CircularROI instance
-        """
-
-        centre = d['centre']
-        radius = d['radius']
-
-        return cls(centre, radius)

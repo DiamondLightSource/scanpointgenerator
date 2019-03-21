@@ -6,9 +6,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 Unreleased
 ----------
 
-Added:
+Changed:
 
-- Nothing yet
+- Converted Generators, Excluders, Mutators, and ROIS to use annotypes
+- Removed python 3.3 and 3.4 from travis build, and added 3.6
 
 `2-1-1`_ - 2018-04-30
 ---------------------

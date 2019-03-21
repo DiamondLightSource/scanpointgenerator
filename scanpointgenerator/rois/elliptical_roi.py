@@ -11,21 +11,33 @@
 #
 ###
 
+from annotypes import Anno, Union, Array, Sequence
+
 from math import cos, sin
 
 from scanpointgenerator.core import ROI
+
+with Anno("The centre of ellipse"):
+    ACentre = Array[float]
+UCentre = Union[ACentre, Sequence[float]]
+with Anno("The semiaxes of ellipse"):
+    ASemiaxes = Array[float]
+USemiaxes = Union[ASemiaxes, Sequence[float]]
+with Anno("The angle of the ellipse"):
+    AAngle = float
 
 
 @ROI.register_subclass("scanpointgenerator:roi/EllipticalROI:1.0")
 class EllipticalROI(ROI):
 
     def __init__(self, centre, semiaxes, angle=0):
+        # type: (UCentre, USemiaxes, AAngle) -> None
         super(EllipticalROI, self).__init__()
         if semiaxes[0] <= 0.0 or semiaxes[1] <= 0.0:
             raise ValueError("Ellipse semi-axes must be greater than zero")
-        self.centre = centre
-        self.semiaxes = semiaxes
-        self.angle = angle
+        self.centre = ACentre(centre)
+        self.semiaxes = ASemiaxes(semiaxes)
+        self.angle = AAngle(angle)
 
     def contains_point(self, point):
         # transform point to the rotated ellipse frame
@@ -61,14 +73,3 @@ class EllipticalROI(ROI):
         y /= ry2
         x += y
         return x <= 1
-
-    def to_dict(self):
-        d = super(EllipticalROI, self).to_dict()
-        d["centre"] = self.centre
-        d["semiaxes"] = self.semiaxes
-        d["angle"] = self.angle
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(d["centre"], d["semiaxes"], d["angle"])

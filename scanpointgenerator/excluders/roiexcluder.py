@@ -11,8 +11,14 @@
 #
 ###
 
-from scanpointgenerator.core import Excluder, ROI
+from annotypes import Anno, Union, Array, Sequence, deserialize_object
+
+from scanpointgenerator.core import Excluder, UExcluderAxes, ROI
 from scanpointgenerator.compat import np
+
+with Anno("List of regions of interest"):
+    ARois = Array[ROI]
+URois = Union[ARois, Sequence[ROI]]
 
 
 @Excluder.register_subclass("scanpointgenerator:excluder/ROIExcluder:1.0")
@@ -21,15 +27,9 @@ class ROIExcluder(Excluder):
     """A class to exclude points outside of regions of interest."""
 
     def __init__(self, rois, axes):
-        """
-        Args:
-            rois(list(ROI)): List of regions of interest
-            axes(list(str)): Names of axes to exclude points from
-
-        """
+        # type: (URois, UExcluderAxes) -> None
         super(ROIExcluder, self).__init__(axes)
-
-        self.rois = rois
+        self.rois = ARois([deserialize_object(r, ROI) for r in rois])
 
     def create_mask(self, *point_arrays):
         """Create a boolean array specifying the points to exclude.
@@ -55,27 +55,3 @@ class ROIExcluder(Excluder):
             mask |= roi.mask_points(point_arrays)
 
         return mask
-
-    def to_dict(self):
-        """Construct dictionary from attributes."""
-        d = super(ROIExcluder, self).to_dict()
-        d['typeid'] = self.typeid
-        d['rois'] = [roi.to_dict() for roi in self.rois]
-
-        return d
-
-    @classmethod
-    def from_dict(cls, d):
-        """Create a ROIExcluder from a serialised dictionary.
-
-        Args:
-            d(dict): Dictionary of attributes
-
-        Returns:
-            ROIExcluder: New instance of ROIExcluder
-
-        """
-        rois = [ROI.from_dict(roi_dict) for roi_dict in d['rois']]
-        axes = d['axes']
-
-        return cls(rois, axes)

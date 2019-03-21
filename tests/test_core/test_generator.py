@@ -14,10 +14,13 @@ from mock import MagicMock
 class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
 
     def setUp(self):
-        self.g = Generator()
+        self.g = Generator(["x", "y"], ["mm", "cm"], 1)
 
     def test_init(self):
-        self.assertEqual(self.g.units, None)
+        self.assertEqual(dict(x="mm", y="cm"), self.g.axis_units())
+        self.assertEqual(["x", "y"], self.g.axes)
+        self.assertEqual(1, self.g.size)
+        self.assertEqual(False, self.g.alternate)
 
     def test_prepare_positions_raises(self):
         with self.assertRaises(NotImplementedError):
@@ -27,26 +30,14 @@ class ScanPointGeneratorBaseTest(ScanPointGeneratorTest):
         with self.assertRaises(NotImplementedError):
             self.g.prepare_bounds()
 
-    def test_to_dict_raises(self):
-        with self.assertRaises(NotImplementedError):
-            self.g.to_dict()
+    def test_to_dict(self):
+        expected_dict = dict()
+        expected_dict['axes'] = ["x", "y"]
+        expected_dict['units'] = ["mm", "cm"]
+        expected_dict['size'] = 1
+        expected_dict['alternate'] = False
 
-    def test_from_dict(self):
-        m = MagicMock()
-        self.g._generator_lookup['TestGenerator'] = m
-
-        gen_dict = dict(typeid="TestGenerator")
-        self.g.from_dict(gen_dict)
-
-        m.from_dict.assert_called_once_with(gen_dict)
-
-    def test_register_subclass(self):
-
-        @Generator.register_subclass("TestGenerator")
-        class TestGenerator(object):
-            pass
-
-        self.assertEqual(TestGenerator, Generator._generator_lookup["TestGenerator"])
+        self.assertEqual(expected_dict, self.g.to_dict())
 
 
 if __name__ == "__main__":

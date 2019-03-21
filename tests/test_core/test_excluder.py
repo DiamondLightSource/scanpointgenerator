@@ -40,14 +40,6 @@ class SerialisationTest(unittest.TestCase):
 
         self.assertEqual(expected_dict, d)
 
-    def test_from_dict(self):
-        m = MagicMock()
-        self.e._excluder_lookup['TestMutator'] = m
-
-        gen_dict = dict(typeid="TestMutator")
-        self.e.from_dict(gen_dict)
-
-        m.from_dict.assert_called_once_with(gen_dict)
 
 if __name__ == "__main__":
     unittest.main()
