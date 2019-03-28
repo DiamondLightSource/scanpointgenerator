@@ -31,6 +31,7 @@ else:
     require("matplotlib")
     require("scipy")
     require("annotypes")
+    require("sphinx_rtd_theme")
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..')))
 
 # -- General configuration ------------------------------------------------
