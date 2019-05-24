@@ -13,7 +13,7 @@
 #
 ###
 
-from annotypes import Anno, Union, Array, Sequence
+from annotypes import Anno, Union, Array, Sequence, Any
 
 from scanpointgenerator.compat import np
 from scanpointgenerator.core import Generator, UAxes, UUnits, AAlternate
@@ -28,13 +28,25 @@ UPoints = Union[APoints, Sequence[np.float64], Sequence[float]]
 class ArrayGenerator(Generator):
     """Generate points from a given list of positions"""
 
-    def __init__(self, axes, units, points, alternate=False):
-        # type: (UAxes, UUnits, UPoints, AAlternate) -> None
+    def __init__(self, axes=None, units=None, points=[], alternate=False, **kwargs):
+        # type: (UAxes, UUnits, UPoints, AAlternate, **Any) -> None
+
+        # Check for 'axis' argument in kwargs for backwards compatibility
+        assert {"axis"}.issuperset(kwargs), \
+            "Unexpected argument found in kwargs %s" % list(kwargs)
+        axes = kwargs.get('axis', axes)
+
         super(ArrayGenerator, self).__init__(
             axes, units, len(points), alternate)
+
+        # Validation
+        assert len(self.axes) >= 1, \
+            "Must have at least one axis; given %s" % list(self.axes)
+
         assert len(self.axes) == len(self.units) == 1, \
             "Expected 1D, got axes %s and units %s" % (list(self.axes),
-                                                       list(self.axes))
+                                                       list(self.units))
+
         self.points = APoints(np.array(points, dtype=np.float64))
 
     def prepare_arrays(self, index_array):
