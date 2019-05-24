@@ -6,7 +6,14 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `Unreleased`_
 -------------
 
-Nothing yet
+Changed:
+
+- Made ArrayGenerator backwards compatible by handling 'axis' init argument
+- RandomOffsetMutator to take array of floats instead of dict for max offset arg
+
+Fixed:
+
+- Various annotypes fixes
 
 `2-2-1`_ - 2019-03-28
 ---------------------
@@ -22,6 +29,7 @@ Changed:
 
 - Converted Generators, Excluders, Mutators, and ROIS to use annotypes
 - Removed python 3.3 and 3.4 from travis build, and added 3.6
+- Updated to annotypes 0.13 to bring in sphinx extension for documentation
 
 `2-1-1`_ - 2018-04-30
 ---------------------

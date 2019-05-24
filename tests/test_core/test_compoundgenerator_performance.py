@@ -33,7 +33,7 @@ class CompoundGeneratorPerformanceTest(ScanPointGeneratorTest):
         e1 = ROIExcluder([r1], ["x", "y"])
         e2 = ROIExcluder([r2], ["w", "z"])
         e3 = ROIExcluder([r3], ["z", "y"])
-        om = RandomOffsetMutator(0, ["x", "y"], {"x":0.2, "y":0.2})
+        om = RandomOffsetMutator(0, ["x", "y"], [0.2, 0.2])
         g = CompoundGenerator([w, z, s], [e1, e3, e2], [om])
         g.prepare() # g.size ~3e5
 
