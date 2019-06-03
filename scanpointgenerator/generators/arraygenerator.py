@@ -28,7 +28,8 @@ UPoints = Union[APoints, Sequence[np.float64], Sequence[float]]
 class ArrayGenerator(Generator):
     """Generate points from a given list of positions"""
 
-    def __init__(self, axes=None, units=None, points=[], alternate=False, **kwargs):
+    def __init__(self, axes=None, units=None, points=[], alternate=False,
+                 **kwargs):
         # type: (UAxes, UUnits, UPoints, AAlternate, **Any) -> None
 
         # Check for 'axis' argument in kwargs for backwards compatibility
@@ -40,9 +41,6 @@ class ArrayGenerator(Generator):
             axes, units, len(points), alternate)
 
         # Validation
-        assert len(self.axes) >= 1, \
-            "Must have at least one axis; given %s" % list(self.axes)
-
         assert len(self.axes) == len(self.units) == 1, \
             "Expected 1D, got axes %s and units %s" % (list(self.axes),
                                                        list(self.units))
