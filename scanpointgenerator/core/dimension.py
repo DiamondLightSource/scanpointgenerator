@@ -51,6 +51,37 @@ class Dimension(object):
         # scale up points for axis
         gen = [g for g in self.generators if axis in g.axes][0]
         points = gen.positions[axis]
+        return self.scale_and_index_points(gen, points)
+
+    def get_mesh_map(self, axis):
+        """
+        Retrieve the mesh map (indices) for a given axis within the dimension.
+
+        Args:
+            axis (str): axis to get positions for
+        Returns:
+            Positions (np.array): Array of mesh indices
+        """
+        # the points for this axis must be scaled and then indexed
+        if not self._prepared:
+            raise ValueError("Must call prepare first")
+        # scale up points for axis
+        gen = [g for g in self.generators if axis in g.axes][0]
+        points = gen.positions[axis]
+        # just get index of points instead of actual point value
+        points = np.arange(len(points))
+        return self.scale_and_index_points(gen, points)
+
+    def scale_and_index_points(self, gen, points):
+        """
+        Retrieve the index of points within the dimension.
+
+        Args:
+            gen (Generator): Generator containing the points
+            points (np.array): Array of points to index
+        Returns:
+            Positions (np.array): Array of indexed points
+        """
         if self.alternate:
             points = np.append(points, points[::-1])
         tile = 0.5 if self.alternate else 1
@@ -66,7 +97,6 @@ class Dimension(object):
         else:
             points = np.tile(points, int(tile))
         return points[self.indices]
-
 
     def apply_excluder(self, excluder):
         """Apply an excluder with axes matching some axes in the dimension to
