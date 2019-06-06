@@ -32,10 +32,10 @@ with Anno("List of Generators to nest"):
     AGenerators = Array[Generator]
 UGenerators = Union[AGenerators, Sequence[Generator], Generator]
 with Anno("List of Excluders to filter points by"):
-    AExcluders = Array[Generator]
+    AExcluders = Array[Excluder]
 UExcluders = Union[AExcluders, Sequence[Excluder], Excluder]
 with Anno("List of Mutators to apply to each point"):
-    AMutators = Array[Generator]
+    AMutators = Array[Mutator]
 UMutators = Union[AMutators, Sequence[Mutator], Mutator]
 with Anno("Point durations in seconds (-1 for variable)"):
     ADuration = float

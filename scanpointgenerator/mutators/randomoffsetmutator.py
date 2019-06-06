@@ -12,6 +12,8 @@
 #
 ###
 
+import collections
+
 from annotypes import Anno, Union, Array, Sequence
 
 from scanpointgenerator.core import Mutator
@@ -22,8 +24,9 @@ with Anno("Axes to apply random offsets to, "
           "in the order the offsets should be applied"):
     AAxes = Array[str]
 UAxes = Union[AAxes, Sequence[str], str]
-with Anno("ND dict of maximum allowed offset in generator-defined units"):
-    AMaxOffset = dict
+with Anno("Array of maximum allowed offset in generator-defined units"):
+    AMaxOffset = Array[float]
+UMaxOffset = Union[AMaxOffset, Sequence[float], float]
 
 
 @Mutator.register_subclass("scanpointgenerator:mutator/RandomOffsetMutator:1.0")
@@ -32,14 +35,27 @@ class RandomOffsetMutator(Mutator):
     ScanPointGenerator"""
 
     def __init__(self, seed, axes, max_offset):
-        # type: (ASeed, UAxes, AMaxOffset) -> None
+        # type: (ASeed, UAxes, UMaxOffset) -> None
 
         self.seed = ASeed(seed)
         self.axes = AAxes(axes)
+
+        # Check max_offset isn't a dict, and convert to list if it is
+        if isinstance(max_offset, collections.Mapping):
+            new_max_offset = []
+            for axis in axes:
+                new_max_offset.append(max_offset[axis])
+            max_offset = new_max_offset
+
         self.max_offset = AMaxOffset(max_offset)
 
+        # Validate
+        if len(self.max_offset) != len(self.axes):
+            raise ValueError("Dimensions of axes (%s) and max offset (%s) don't"
+                             " match" % (len(self.max_offset), len(self.axes)))
+
     def calc_offset(self, axis, idx):
-        m = self.max_offset[axis]
+        m = self.max_offset[self.axes.index(axis)]
         x = (idx << 4) + (0 if len(axis) == 0 else ord(axis[0]))
         x ^= (self.seed << 12)
         # Apply hash algorithm to x for pseudo-randomness

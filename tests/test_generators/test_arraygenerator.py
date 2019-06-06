@@ -52,6 +52,34 @@ class ArrayGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(points, g.points)
         self.assertEqual(True, g.alternate)
 
+    def test_from_dict_backwards_compatible(self):
+        points = [0., 0., 1., 2., 0.5, 2.7, 1.3, 4.0]
+
+        d = {}
+        d["axis"] = ["x"]
+        d["units"] = "cm"
+        d["points"] = points
+        d["alternate"] = True
+
+        g = ArrayGenerator.from_dict(d)
+        self.assertEqual(["x"], g.axes)
+        self.assertEqual({"x":"cm"}, g.axis_units())
+        self.assertEqual(points, g.points)
+        self.assertEqual(True, g.alternate)
+
+    def test_from_dict_extra_args_asserts(self):
+        points = [0., 0., 1., 2., 0.5, 2.7, 1.3, 4.0]
+
+        d = {}
+        d["axes"] = ["x"]
+        d["units"] = "cm"
+        d["points"] = points
+        d["alternate"] = True
+        d["extra"] = ["extra_argument"]
+
+        with self.assertRaises(AssertionError):
+            ArrayGenerator.from_dict(d)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

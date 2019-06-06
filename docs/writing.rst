@@ -7,13 +7,21 @@ Let's walk through the simplest generator, :class:`LineGenerator`, and see how
 it is written.
 
 .. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
-    :lines: 1-2
+    :lines: 16-18
 
-We import the baseclass :class:`Generator` and the compatibility wrappers
-around the Python :py:func:`range` function and the :py:mod:`numpy` module
+We import the baseclass :class:`Generator` and the predefined
+:py:mod:`annotypes` wrappers for the common constructor parameters. We also
+import the raw :py:mod:`annotypes` classes to create new constructor argument
+wrappers
 
 .. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
-    :lines: 12-14
+    :lines: 21-26
+
+We create new :py:mod:`annotypes` wrappers for the constructor arguments that
+are specific to this generator
+
+.. literalinclude:: ../scanpointgenerator/generators/linegenerator.py
+    :lines: 29-32
 
 Our new subclass includes a docstring giving a short explanation of what it does
 and registers itself as a subclass of Generator for deserialization purposes.

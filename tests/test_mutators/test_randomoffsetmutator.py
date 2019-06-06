@@ -17,9 +17,9 @@ from mock import patch, MagicMock
 class RandomOffsetMutatorTest(ScanPointGeneratorTest):
 
     def test_init(self):
-        m = RandomOffsetMutator(1, ["x"], dict(x=0.25))
+        m = RandomOffsetMutator(1, ["x"], [0.25])
         self.assertEqual(1, m.seed)
-        self.assertEqual(dict(x=0.25), m.max_offset)
+        self.assertEqual([0.25], m.max_offset)
 
     def test_mutate_simple(self):
         def point_gen():
@@ -30,7 +30,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
                 p.lower = {"x":(n-0.5)/10.}
                 p.upper = {"x":(n+0.5)/10.}
                 yield p
-        m = RandomOffsetMutator(1, ["x"], {"x":0.01})
+        m = RandomOffsetMutator(1, ["x"], [0.01])
         original = [p for p in point_gen()]
         mutated = [m.mutate(p, i) for i, p in enumerate(point_gen())]
         for o, m in zip(original, mutated):
@@ -55,7 +55,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
                 p.lower = {"x":(n-0.5)/10.}
                 p.upper = {"x":(n+0.5)/10.}
                 yield p
-        m = RandomOffsetMutator(5025, ["x"], {"x":0.01})
+        m = RandomOffsetMutator(5025, ["x"], [0.01])
         original = [p.positions['x'] for p in point_gen()]
         mutated1 = [m.mutate(p, i).positions['x'] for i, p in enumerate(point_gen())]
         mutated2 = [m.mutate(p, i).positions['x'] for i, p in enumerate(point_gen())]
@@ -73,7 +73,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
                 p.lower = {"x":(n-0.5)/10.}
                 p.upper = {"x":(n+0.5)/10.}
                 yield p
-        m = RandomOffsetMutator(1, ["x"], {"x":0.01})
+        m = RandomOffsetMutator(1, ["x"], [0.01])
         original = [p.positions["x"] for p in point_gen()]
         mutated = [m.mutate(p, i) for i, p in enumerate(point_gen())]
         for m1, m2 in zip(mutated[:-1], mutated[1:]):
@@ -82,7 +82,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
     def test_double_line_consistency(self):
         xg = LineGenerator("x", "mm", 0, 4, 5, True)
         yg = LineGenerator("y", "mm", 0, 4, 3)
-        m = RandomOffsetMutator(1, ["x", "y"], {"x":0.1, "y":0.25})
+        m = RandomOffsetMutator(1, ["x", "y"], [0.1, 0.25])
         g = CompoundGenerator([yg, xg], [], [])
         g.prepare()
         points = list(g.iterator())
@@ -94,7 +94,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         liss = LissajousGenerator(["x", "y"], ["mm", "mm"], [0., 0.], [2., 2.],
              4, 100, True)
         line = LineGenerator("z", "mm", 0, 1, 3)
-        m = RandomOffsetMutator(1, ["x", "y"], {"x":0.1, "y":0.1})
+        m = RandomOffsetMutator(1, ["x", "y"], [0.1, 0.1])
         g = CompoundGenerator([line, liss], [], [])
         gm = CompoundGenerator([line, liss], [], [m])
         g.prepare()
@@ -112,7 +112,7 @@ class TestSerialisation(unittest.TestCase):
     def setUp(self):
         self.l = MagicMock()
         self.l_dict = MagicMock()
-        self.max_offset = dict(x=0.25)
+        self.max_offset = [0.25]
 
         self.m = RandomOffsetMutator(1, ["x"], self.max_offset)
 
@@ -143,6 +143,55 @@ class TestSerialisation(unittest.TestCase):
 
         self.assertEqual(1, m.seed)
         self.assertEqual(self.max_offset, m.max_offset)
+
+    def test_from_dict_max_offset_dict(self):
+
+        _dict = dict()
+        _dict['seed'] = 1
+        _dict['axes'] = ["x"]
+        _dict['max_offset'] = dict(x=0.25)
+
+        units_dict = dict()
+        units_dict['x'] = 'mm'
+
+        m = RandomOffsetMutator.from_dict(_dict)
+
+        self.assertEqual(1, m.seed)
+        self.assertEqual(self.max_offset, m.max_offset)
+
+    def test_from_dict_multiple_axes(self):
+
+        _dict = dict()
+        _dict['seed'] = 1
+        _dict['axes'] = ["x", "y"]
+        _dict['max_offset'] = [0.25, 0.5]
+
+        units_dict = dict()
+        units_dict['x'] = 'mm'
+        units_dict['y'] = 'cm'
+
+        m = RandomOffsetMutator.from_dict(_dict)
+
+        self.assertEqual(1, m.seed)
+        self.assertEqual(["x", "y"], m.axes)
+        self.assertEqual([0.25, 0.5], m.max_offset)
+
+    def test_from_dict_multiple_axes_dict_corrects_order(self):
+
+        _dict = dict()
+        _dict['seed'] = 1
+        _dict['axes'] = ["x", "y"]
+        _dict['max_offset'] = dict(y=0.5, x=0.25)
+
+        units_dict = dict()
+        units_dict['x'] = 'mm'
+        units_dict['y'] = 'cm'
+
+        m = RandomOffsetMutator.from_dict(_dict)
+
+        self.assertEqual(1, m.seed)
+        self.assertEqual(["x", "y"], m.axes)
+        self.assertEqual([0.25, 0.5], m.max_offset)
 
 
 if __name__ == "__main__":
