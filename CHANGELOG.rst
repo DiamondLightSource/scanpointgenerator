@@ -9,6 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 Added:
 
 - New get_mesh_map function to Dimension class to get mesh indices
+- Squashing Excluder
 
 Changed:
 
