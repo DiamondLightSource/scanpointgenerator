@@ -45,13 +45,12 @@ class Dimension(object):
         Returns:
             Positions (np.array): Array of positions
         """
-        # the points for this axis must be scaled and then indexed
+        # check that this dimension is prepared
         if not self._prepared:
             raise ValueError("Must call prepare first")
-        # scale up points for axis
+        # get the mesh map for this axis and use it to get the generator points
         gen = [g for g in self.generators if axis in g.axes][0]
-        points = gen.positions[axis]
-        return self.scale_and_index_points(gen, points)
+        return gen.positions[axis][self.get_mesh_map(axis)]
 
     def get_mesh_map(self, axis):
         """
@@ -70,18 +69,7 @@ class Dimension(object):
         points = gen.positions[axis]
         # just get index of points instead of actual point value
         points = np.arange(len(points))
-        return self.scale_and_index_points(gen, points)
 
-    def scale_and_index_points(self, gen, points):
-        """
-        Retrieve the index of points within the dimension.
-
-        Args:
-            gen (Generator): Generator containing the points
-            points (np.array): Array of points to index
-        Returns:
-            Positions (np.array): Array of indexed points
-        """
         if self.alternate:
             points = np.append(points, points[::-1])
         tile = 0.5 if self.alternate else 1
