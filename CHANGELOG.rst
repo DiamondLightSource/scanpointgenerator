@@ -6,6 +6,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `Unreleased`_
 -------------
 
+Added:
+
+- New get_mesh_map function to Dimension class to get mesh indices
+
 Changed:
 
 - Made ArrayGenerator backwards compatible by handling 'axis' init argument

@@ -374,5 +374,29 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual(y_expected, d.get_positions("y").tolist())
         self.assertEqual(z_expected, d.get_positions("z").tolist())
 
+    def test_get_mesh_map(self):
+        # Set up a generator, with 3x4 grid with alternating x and a circular
+        # excluder such that the four 'corners' of the grid are excluded
+        gx_pos = np.array([0.1, 0.2, 0.3])
+        gy_pos = np.array([1.1, 1.2, 1.3, 1.4])
+        mask_func = lambda px, py: (px - 0.2) ** 2 + (py - 1.25) ** 2 <= 0.0225
+        gx = Mock(axes=["gx"], positions={"gx": gx_pos}, size=3,
+                  alternate=True)
+        gy = Mock(axes=["gy"], positions={"gy": gy_pos}, size=4,
+                  alternate=False)
+        e = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
+
+        dx = Dimension(gx)
+        dy = Dimension(gy)
+        d = Dimension.merge_dimensions([dy, dx])
+        d.apply_excluder(e)
+        d.prepare()
+
+        self.assertEqual([1, 2, 1, 0, 0, 1, 2, 1],
+                         d.get_mesh_map("gx").tolist())
+        self.assertEqual([0, 1, 1, 1, 2, 2, 2, 3],
+                         d.get_mesh_map("gy").tolist())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
