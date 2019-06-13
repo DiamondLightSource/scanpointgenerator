@@ -1,1 +1,2 @@
 from scanpointgenerator.excluders.roiexcluder import ROIExcluder
+from scanpointgenerator.excluders.squashingexcluder import SquashingExcluder
