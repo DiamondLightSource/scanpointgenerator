@@ -36,7 +36,6 @@ class StaticPointGeneratorTest(ScanPointGeneratorTest):
 
     def test_to_dict(self):
         g = StaticPointGenerator(7)
-        print g.to_dict()
         expected_dict = {
                 "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.0",
                 "size": 7,
@@ -47,7 +46,6 @@ class StaticPointGeneratorTest(ScanPointGeneratorTest):
 
     def test_to_dict_with_axis(self):
         g = StaticPointGenerator(7, 'repeats')
-        print g.to_dict()
         expected_dict = {
                 "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.0",
                 "size": 7,
