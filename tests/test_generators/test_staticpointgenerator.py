@@ -14,11 +14,44 @@ class StaticPointGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([], g.axes)
         self.assertEqual(7, g.size)
 
+    def test_array_positions(self):
+        g = StaticPointGenerator(5)
+
+        g.prepare_positions()
+        g.prepare_bounds()
+
+        self.assertEqual({}, g.positions)
+        self.assertEqual({}, g.bounds)
+
+    def test_array_positions_with_axis(self):
+        g = StaticPointGenerator(5, 'repeats')
+        positions = [1, 2, 3, 4, 5]
+        bounds = [1, 2, 3, 4, 5, 6]
+
+        g.prepare_positions()
+        g.prepare_bounds()
+
+        self.assertEqual(positions, g.positions['repeats'].tolist())
+        self.assertEqual(bounds, g.bounds['repeats'].tolist())
+
     def test_to_dict(self):
         g = StaticPointGenerator(7)
+        print g.to_dict()
         expected_dict = {
                 "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.0",
                 "size": 7,
+                "axes": [],
+                }
+
+        self.assertEqual(expected_dict, g.to_dict())
+
+    def test_to_dict_with_axis(self):
+        g = StaticPointGenerator(7, 'repeats')
+        print g.to_dict()
+        expected_dict = {
+                "typeid":"scanpointgenerator:generator/StaticPointGenerator:1.0",
+                "size": 7,
+                "axes": ['repeats'],
                 }
 
         self.assertEqual(expected_dict, g.to_dict())

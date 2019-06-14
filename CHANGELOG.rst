@@ -15,6 +15,7 @@ Changed:
 
 - Made ArrayGenerator backwards compatible by handling 'axis' init argument
 - RandomOffsetMutator to take array of floats instead of dict for max offset arg
+- StaticPointGenerator to take an optional axes argument for a single axis
 
 Fixed:
 
