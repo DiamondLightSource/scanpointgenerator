@@ -1,5 +1,5 @@
-import numpy
 from annotypes import Anno, deserialize_object, Array
+from scanpointgenerator.compat import np
 from scanpointgenerator.core import Generator, AAlternate
 
 with Anno("The array containing points"):
@@ -33,11 +33,13 @@ class MergeGenerator(Generator):
         # The MergeGenerator gets its positions from its sub-generators
         mergearrays = {}
         for axis in self.axes:
-            mergearrays[axis] = []
+            mergearrays[axis] = np.array
         count = 1
         sizetotal = 0
+        first = True
         for generator in self.generators:
             if count >= len(self.generators):
+                # call prepare_arrays for each generator being merged
                 arrays = generator.prepare_arrays(index_array[0:len(index_array)
                                                               - sizetotal])
             else:
@@ -45,7 +47,14 @@ class MergeGenerator(Generator):
                 arrays = generator.prepare_arrays(index_array[0:generator.size])
                 count += 1
             for axis in self.axes:
-                currentarray = mergearrays[axis]
-                currentarray = numpy.append(currentarray, arrays[axis])
+                # Take the current array in mergearrays[axis] and add the array
+                # from the next generator
+                if first:
+                    currentarray = arrays[axis]
+                else:
+                    # This avoids appending an ndarray to a list
+                    currentarray = mergearrays[axis]
+                    currentarray = np.append(currentarray, arrays[axis])
                 mergearrays[axis] = currentarray
+            first = False
         return mergearrays

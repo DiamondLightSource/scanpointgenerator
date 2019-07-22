@@ -45,7 +45,7 @@ class ArrayGenerator(Generator):
             "Expected 1D, got axes %s and units %s" % (list(self.axes),
                                                        list(self.units))
 
-        self.points = APoints(np.array(points, dtype=np.float64))
+        self.points = APoints(np.array(points, dtype=float))
 
     def prepare_arrays(self, index_array):
         # Get the actual numpy array from the Array class wrapper
