@@ -17,7 +17,7 @@ from scanpointgenerator.core import ROI
 from scanpointgenerator.compat import range_, np
 
 with Anno("x positions for polygon vertices"):
-    APointsX = Array[np.float64]
+    APointsX = Array[float]
 UPointsX = Union[APointsX, Sequence[np.float64], Sequence[float]]
 with Anno("y positions for polygon vertices"):
     APointsY = Array[np.float64]
