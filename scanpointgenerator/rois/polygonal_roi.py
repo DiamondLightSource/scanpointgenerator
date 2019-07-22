@@ -18,10 +18,10 @@ from scanpointgenerator.compat import range_, np
 
 with Anno("x positions for polygon vertices"):
     APointsX = Array[float]
-UPointsX = Union[APointsX, Sequence[np.float64], Sequence[float]]
+UPointsX = Union[APointsX, Sequence[float], Sequence[float]]
 with Anno("y positions for polygon vertices"):
-    APointsY = Array[np.float64]
-UPointsY = Union[APointsY, Sequence[np.float64], Sequence[float]]
+    APointsY = Array[float]
+UPointsY = Union[APointsY, Sequence[float], Sequence[float]]
 
 @ROI.register_subclass("scanpointgenerator:roi/PolygonalROI:1.0")
 class PolygonalROI(ROI):

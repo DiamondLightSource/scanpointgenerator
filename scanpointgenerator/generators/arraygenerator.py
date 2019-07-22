@@ -19,8 +19,8 @@ from scanpointgenerator.compat import np
 from scanpointgenerator.core import Generator, UAxes, UUnits, AAlternate
 
 with Anno("The array positions"):
-    APoints = Array[np.float64]
-UPoints = Union[APoints, Sequence[np.float64], Sequence[float]]
+    APoints = Array[float]
+UPoints = Union[APoints, Sequence[float], Sequence[float]]
 
 
 @Generator.register_subclass(
