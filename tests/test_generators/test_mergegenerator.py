@@ -131,11 +131,8 @@ class MergeGeneratorTest(ScanPointGeneratorTest):
         _dict['mutators'] = []
         _dict['duration'] = 10
         _dict['continuous'] = False
-        # _dict['axes'] = ["x"]
-        # _dict['units'] = ["mm"]
         gen = CompoundGenerator.from_dict(_dict)
         self.assertEqual(gen.generators[0].to_dict(), g.to_dict())
-        # self.assertEqual(gen.generators[1].to_dict(), genTwo.to_dict())
 
     def test_compound_of_two_lines(self):
         genone = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)

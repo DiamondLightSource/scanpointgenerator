@@ -45,11 +45,11 @@ class ArrayGenerator(Generator):
             "Expected 1D, got axes %s and units %s" % (list(self.axes),
                                                        list(self.units))
 
-        self.points = APoints(np.array(points, dtype=float))
+        self.points = APoints(points)
 
     def prepare_arrays(self, index_array):
         # Get the actual numpy array from the Array class wrapper
-        points = self.points.seq
+        points = np.array(self.points.seq)
         # add linear extension to ends of points, representing t=-1 and t=N+1
         v_left = points[0] - (points[1] - points[0])
         v_right = points[-1] + (points[-1] - points[-2])

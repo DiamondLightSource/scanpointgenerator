@@ -35,8 +35,8 @@ class PolygonalROI(ROI):
             raise ValueError("Polygon requires at least 3 vertices")
         # TODO: check points are not all collinear
         #       (i.e. describe at least a triangle)
-        self.points_x = APointsX(np.array(points_x, dtype=float))
-        self.points_y = APointsY(np.array(points_y, dtype=float))
+        self.points_x = APointsX(points_x)
+        self.points_y = APointsY(points_y)
 
     def contains_point(self, point):
         # Uses ray-casting algorithm - "fails" for complex (self-intersecting)
