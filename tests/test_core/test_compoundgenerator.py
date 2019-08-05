@@ -10,6 +10,7 @@ from scanpointgenerator import SpiralGenerator
 from scanpointgenerator import LissajousGenerator
 from scanpointgenerator import StaticPointGenerator
 from scanpointgenerator import ROIExcluder
+from scanpointgenerator import SquashingExcluder
 from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI
 from scanpointgenerator.mutators import RandomOffsetMutator
 from scanpointgenerator.compat import range_, np
@@ -786,6 +787,51 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual({"y":"cm", "x":"mm"}, g.units)
         self.assertEqual(3, len(g.dimensions))
 
+    def test_staticpointgen_with_axis(self):
+        x = LineGenerator("x", "mm", 0, 1, 3, False)
+        y = LineGenerator("y", "cm", 2, 3, 4, False)
+        m = StaticPointGenerator(5, "repeats")
+        g = CompoundGenerator([y, x, m], [], [])
+        g.prepare()
+
+        expected_positions = []
+        for yp in [2.0, 2 + 1./3, 2 + 2./3, 3.0]:
+            for xp in [0.0, 0.5, 1.0]:
+                for mp in range_(5):
+                    expected_positions.append({"y": yp, "x": xp, "repeats": mp + 1})
+
+        positions = [point.positions for point in g.iterator()]
+        self.assertEqual(expected_positions, positions)
+
+        self.assertEqual(60, g.size)
+        self.assertEqual((4, 3, 5), g.shape)
+        self.assertEqual(["y", "x", "repeats"], g.axes)
+        self.assertEqual({"y": "cm", "x": "mm", "repeats": ""}, g.units)
+
+    def test_staticpointgen_with_axis_and_excluder(self):
+        x = LineGenerator("x", "mm", 0, 1, 3, False)
+        y = LineGenerator("y", "cm", 2, 3, 4, False)
+        m = StaticPointGenerator(5, "repeats")
+        e = SquashingExcluder(["x", "repeats"])
+        g = CompoundGenerator([y, x, m], [e], [])
+        g.prepare()
+
+        # Expected positions should be the same as without the excluder
+        expected_positions = []
+        for yp in [2.0, 2 + 1./3, 2 + 2./3, 3.0]:
+            for xp in [0.0, 0.5, 1.0]:
+                for mp in range_(5):
+                    expected_positions.append({"y": yp, "x": xp, "repeats": mp + 1})
+
+        positions = [point.positions for point in g.iterator()]
+        self.assertEqual(expected_positions, positions)
+
+        self.assertEqual(60, g.size)
+        self.assertEqual((4, 15), g.shape)
+        self.assertEqual(["y", "x", "repeats"], g.axes)
+        self.assertEqual({"y": "cm", "x": "mm", "repeats": ""}, g.units)
+        self.assertEqual(2, len(g.dimensions))
+
     def test_staticpointgen_in_alternating(self):
         x = LineGenerator("x", "mm", 0, 1, 3, True)
         y = LineGenerator("y", "cm", 2, 3, 4, False)
@@ -1000,6 +1046,7 @@ class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
         p = [(x/4., y/4.) for y in range_(0, 5) for x in range_(0, 5)]
         expected_mask = [x*x + y*y <= 1 for (x, y) in p]
         self.assertEqual(expected_mask, g.dimensions[0].mask.tolist())
+
 
 class TestSerialisation(unittest.TestCase):
 
