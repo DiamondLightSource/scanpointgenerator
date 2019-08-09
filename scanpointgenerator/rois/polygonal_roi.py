@@ -17,11 +17,11 @@ from scanpointgenerator.core import ROI
 from scanpointgenerator.compat import range_, np
 
 with Anno("x positions for polygon vertices"):
-    APointsX = Array[np.float64]
-UPointsX = Union[APointsX, Sequence[np.float64], Sequence[float]]
+    APointsX = Array[float]
+UPointsX = Union[APointsX, Sequence[float], Sequence[float]]
 with Anno("y positions for polygon vertices"):
-    APointsY = Array[np.float64]
-UPointsY = Union[APointsY, Sequence[np.float64], Sequence[float]]
+    APointsY = Array[float]
+UPointsY = Union[APointsY, Sequence[float], Sequence[float]]
 
 @ROI.register_subclass("scanpointgenerator:roi/PolygonalROI:1.0")
 class PolygonalROI(ROI):
@@ -35,8 +35,8 @@ class PolygonalROI(ROI):
             raise ValueError("Polygon requires at least 3 vertices")
         # TODO: check points are not all collinear
         #       (i.e. describe at least a triangle)
-        self.points_x = APointsX(np.array(points_x, dtype=np.float64))
-        self.points_y = APointsY(np.array(points_y, dtype=np.float64))
+        self.points_x = APointsX(points_x)
+        self.points_y = APointsY(points_y)
 
     def contains_point(self, point):
         # Uses ray-casting algorithm - "fails" for complex (self-intersecting)
