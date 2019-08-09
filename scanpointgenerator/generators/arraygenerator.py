@@ -19,8 +19,8 @@ from scanpointgenerator.compat import np
 from scanpointgenerator.core import Generator, UAxes, UUnits, AAlternate
 
 with Anno("The array positions"):
-    APoints = Array[np.float64]
-UPoints = Union[APoints, Sequence[np.float64], Sequence[float]]
+    APoints = Array[float]
+UPoints = Union[APoints, Sequence[float]]
 
 
 @Generator.register_subclass(
@@ -45,11 +45,11 @@ class ArrayGenerator(Generator):
             "Expected 1D, got axes %s and units %s" % (list(self.axes),
                                                        list(self.units))
 
-        self.points = APoints(np.array(points, dtype=np.float64))
+        self.points = APoints(points)
 
     def prepare_arrays(self, index_array):
         # Get the actual numpy array from the Array class wrapper
-        points = self.points.seq
+        points = np.array(self.points.seq)
         # add linear extension to ends of points, representing t=-1 and t=N+1
         v_left = points[0] - (points[1] - points[0])
         v_right = points[-1] + (points[-1] - points[-2])
