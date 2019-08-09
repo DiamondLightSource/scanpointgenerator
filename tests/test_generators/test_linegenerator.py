@@ -108,7 +108,7 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
     def test_give_one_point_then_step_zero(self):
         l = LineGenerator(["1", "2", "3", "4", "5"], "mm", [0.0]*5, [10.0]*5, 1)
         l.prepare_positions()
-        assert list(l.positions.values()) == 5*[0.0]
+        assert list(l.positions.values()) == 5*[5.0]
 
     def test_array_positions(self):
         g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
