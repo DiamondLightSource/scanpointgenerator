@@ -1,5 +1,6 @@
 matplotlib
 scipy
-annotypes>=0.15
+annotypes>=0.20
+typing
 sphinx
 sphinx_rtd_theme
