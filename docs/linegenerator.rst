@@ -33,3 +33,21 @@ LineGenerator is N dimensional; just pass in ND lists for name, start and stop.
 
     gen = LineGenerator(["x", "y"], ["mm", "mm"], [1.0, 2.0], [5.0, 10.0], 5)
     plot_generator(gen)
+
+LineGenerator can be used to represent single points. When a size of "1" is
+specified, the capture point will be the point halfway between the start and
+stop points. The bounds will be the specified start and stop points.
+
+    >>> from scanpointgenerator import LineGenerator
+    >>> gen = LineGenerator(["x", "y"], ["mm", "mm"], [1.0, 3.0], [2.0, 5.0], 1)
+    >>> gen.prepare_positions()
+    >>> gen.prepare_bounds()
+    >>> gen.positions['x'].tolist()
+    [1.5]
+    >>> gen.positions['y'].tolist()
+    [4.0]
+    >>> gen.bounds['x'].tolist()
+    [1.0, 2.0]
+    >>> gen.bounds['y'].tolist()
+    [3.0, 5.0]
+
