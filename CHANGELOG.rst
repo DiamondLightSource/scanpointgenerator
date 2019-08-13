@@ -6,6 +6,13 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `Unreleased`_
 -------------
 
+Changed:
+
+- LineGenerator single points case puts point in centre of start/stop
+
+`2-3`_ - 2019-08-09
+-------------------
+
 Added:
 
 - New get_mesh_map function to Dimension class to get mesh indices
@@ -16,7 +23,8 @@ Changed:
 - Made ArrayGenerator backwards compatible by handling 'axis' init argument
 - RandomOffsetMutator to take array of floats instead of dict for max offset arg
 - StaticPointGenerator to take an optional axes argument for a single axis
-- LineGenerator single points case puts point in centre of start/stop
+- Gave CompoundGenerator mutators and excluders defaults of ()
+- Now requires typing module
 
 Fixed:
 
@@ -196,7 +204,8 @@ Added:
 
 - Initial structure with Line and Nested generators
 
-.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/2-2-1...HEAD
+.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/2-3...HEAD
+.. _2-3: https://github.com/dls-controls/scanpointgenerator/compare/2-2-1...2-3
 .. _2-2-1: https://github.com/dls-controls/scanpointgenerator/compare/2-2...2-2-1
 .. _2-2: https://github.com/dls-controls/scanpointgenerator/compare/2-1-1...2-2
 .. _2-1-1: https://github.com/dls-controls/scanpointgenerator/compare/2-1-0...2-1-1

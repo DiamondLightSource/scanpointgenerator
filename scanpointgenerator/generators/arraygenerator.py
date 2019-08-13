@@ -20,7 +20,7 @@ from scanpointgenerator.core import Generator, UAxes, UUnits, AAlternate
 
 with Anno("The array positions"):
     APoints = Array[float]
-UPoints = Union[APoints, Sequence[float], Sequence[float]]
+UPoints = Union[APoints, Sequence[float]]
 
 
 @Generator.register_subclass(

@@ -14,14 +14,15 @@
 from annotypes import Anno, Union, Array, Sequence
 
 from scanpointgenerator.core import ROI
-from scanpointgenerator.compat import range_, np
+from scanpointgenerator.compat import np
 
 with Anno("x positions for polygon vertices"):
     APointsX = Array[float]
-UPointsX = Union[APointsX, Sequence[float], Sequence[float]]
+UPointsX = Union[APointsX, Sequence[float]]
 with Anno("y positions for polygon vertices"):
     APointsY = Array[float]
-UPointsY = Union[APointsY, Sequence[float], Sequence[float]]
+UPointsY = Union[APointsY, Sequence[float]]
+
 
 @ROI.register_subclass("scanpointgenerator:roi/PolygonalROI:1.0")
 class PolygonalROI(ROI):

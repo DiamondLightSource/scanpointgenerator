@@ -49,9 +49,14 @@ class CompoundGenerator(Serializable):
     """Nest N generators, apply exclusion regions to relevant generator pairs
     and apply any mutators before yielding points"""
 
-    def __init__(self, generators, excluders, mutators, duration=-1, continuous=True):
-        # type: (UGenerators, UExcluders, UMutators, ADuration, AContinuous) -> None
-
+    def __init__(self,
+                 generators,  # type: UGenerators
+                 excluders=(),  # type: UExcluders
+                 mutators=(),  # type: UMutators
+                 duration=-1,  # type: ADuration
+                 continuous=True  # type: AContinuous
+                 ):
+        # type: (...) -> None
         self.size = 0
         """int: Final number of points to be generated -
         valid only after calling prepare"""
