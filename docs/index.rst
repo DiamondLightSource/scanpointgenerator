@@ -17,6 +17,7 @@ Table of Contents
    lissajousgenerator
    arraygenerator
    staticpointgenerator
+   zipgenerator
 
 .. toctree::
    :maxdepth: 1
