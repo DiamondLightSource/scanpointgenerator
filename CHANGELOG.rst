@@ -6,7 +6,9 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `Unreleased`_
 -------------
 
-Nothing yet
+Changed:
+
+- LineGenerator single points case puts point in centre of start/stop
 
 `2-3`_ - 2019-08-09
 -------------------
