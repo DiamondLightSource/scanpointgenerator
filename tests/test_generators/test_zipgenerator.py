@@ -11,6 +11,7 @@ class ZipGeneratorTest(ScanPointGeneratorTest):
         gau = g.axis_units()
         self.assertEqual(dict(x="mm"), gau)
         self.assertEqual(5, g.size)
+        self.assertEqual(True, g.alternate)
 
     def test_init_diff_axis(self):
         genone = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
@@ -29,6 +30,12 @@ class ZipGeneratorTest(ScanPointGeneratorTest):
     def test_init_diff_size(self):
         genone = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
         gentwo = LineGenerator("y", "mm", 13, 20, 6, alternate=True)
+        with self.assertRaises(AssertionError):
+            ZipGenerator([genone, gentwo])
+
+    def test_init_diff_alternate(self):
+        genone = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
+        gentwo = LineGenerator("y", "mm", 13, 20, 5, alternate=False)
         with self.assertRaises(AssertionError):
             ZipGenerator([genone, gentwo])
 
@@ -92,7 +99,7 @@ class ZipGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([-1.5, -2.5, -3.5, -4.5], g.bounds['y'].tolist())
 
     def test_to_dict(self):
-        genone = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=False)
+        genone = LineGenerator("x", "mm", 1.0, 9.0, 5, alternate=True)
         gentwo = LineGenerator("y", "mm", 11, 19, 5, alternate=True)
         g = ZipGenerator([genone, gentwo])
 
@@ -101,7 +108,7 @@ class ZipGeneratorTest(ScanPointGeneratorTest):
             "scanpointgenerator:generator/ZipGenerator:1.0"
         expected_dict['generators'] = [{'typeid': 'scanpointgenerator:generator'
                                                   '/LineGenerator:1.0',
-                                        'alternate': False,
+                                        'alternate': True,
                                         'axes': ['x'],
                                         'stop': [9.0],
                                         'start': [1.0],
@@ -124,7 +131,7 @@ class ZipGeneratorTest(ScanPointGeneratorTest):
         _dict['typeid'] = "scanpointgenerator:generator/ZipGenerator:1.0"
         _dict['generators'] = [
             {'typeid': 'scanpointgenerator:generator/LineGenerator:1.0',
-             'alternate': False,
+             'alternate': True,
              'axes': ['x'],
              'stop': [9.0],
              'start': [1.0],
@@ -142,6 +149,7 @@ class ZipGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(["x", "y"], gen.axes)
         self.assertEqual(dict(x="mm", y="mm"), gen.axis_units())
         self.assertEqual(5, gen.size)
+        self.assertEqual(True, gen.alternate)
         gen.prepare_positions()
         gen.prepare_bounds()
         self.assertEqual([1, 3, 5, 7, 9], gen.positions['x'].tolist())

@@ -19,19 +19,23 @@ class ZipGenerator(Generator):
         units = []
         axes = []
         size = self.generators[0].size
+        alternate = self.generators[0].alternate
 
         for generator in self.generators:
             assert generator.axes not in axes, "You cannot zip generators " \
                                                "on the same axes"
             assert generator.size == size, "You cannot zip generators " \
                                            "of different sizes"
+            assert generator.alternate == alternate, \
+                "You cannot zip generators with different alternate values"
 
             axes += generator.axes
             units += generator.units
 
         super(ZipGenerator, self).__init__(axes=axes,
                                            size=size,
-                                           units=units)
+                                           units=units,
+                                           alternate=alternate)
 
     def prepare_arrays(self, index_array):
         # The ZipGenerator gets its positions from its sub-generators
