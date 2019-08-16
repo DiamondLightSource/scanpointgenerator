@@ -16,6 +16,8 @@ class ZipGenerator(Generator):
         self.generators = AGenerators([deserialize_object(g, Generator)
                                       for g in generators])
 
+        assert len(self.generators), "At least one generator needed"
+
         units = []
         axes = []
         size = self.generators[0].size

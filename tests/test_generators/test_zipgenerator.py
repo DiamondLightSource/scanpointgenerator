@@ -82,6 +82,10 @@ class ZipGeneratorTest(ScanPointGeneratorTest):
         with self.assertRaises(AssertionError):
             ZipGenerator([genone, gentwo])
 
+    def test_init_none(self):
+        with self.assertRaises(AssertionError):
+            ZipGenerator([])
+
     def test_array_positions_from_line(self):
         genone = LineGenerator("x", "mm", 1.0, 9.0, 5)
         gentwo = LineGenerator("y", "mm", 11, 19, 5)
