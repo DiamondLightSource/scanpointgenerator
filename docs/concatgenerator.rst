@@ -10,7 +10,7 @@ Examples
 --------
 
 This example takes two generators as inputs and merges them together, so that
-the points from gen_two and places after the points from gen_one in the final
+the points from gen_two are placed after the points from gen_one in the final
 generator output
 
 .. plot::
