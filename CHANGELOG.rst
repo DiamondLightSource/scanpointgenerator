@@ -6,6 +6,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `Unreleased`_
 -------------
 
+Added:
+
+- ZipGenerator
+
 Changed:
 
 - LineGenerator single points case puts point in centre of start/stop
