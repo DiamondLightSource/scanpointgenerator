@@ -19,3 +19,4 @@ from scanpointgenerator.generators.lissajousgenerator import LissajousGenerator
 from scanpointgenerator.generators.spiralgenerator import SpiralGenerator
 from scanpointgenerator.generators.staticpointgenerator import StaticPointGenerator
 from scanpointgenerator.generators.zipgenerator import ZipGenerator
+from scanpointgenerator.generators.concatgenerator import ConcatGenerator

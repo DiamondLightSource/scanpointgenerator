@@ -9,6 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 Added:
 
 - ZipGenerator
+- ConcatGenerator
 
 Changed:
 

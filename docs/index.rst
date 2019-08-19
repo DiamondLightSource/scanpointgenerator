@@ -18,6 +18,7 @@ Table of Contents
    arraygenerator
    staticpointgenerator
    zipgenerator
+   concatgenerator
 
 .. toctree::
    :maxdepth: 1
