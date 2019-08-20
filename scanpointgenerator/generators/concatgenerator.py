@@ -10,6 +10,7 @@ with Anno("The array containing points"):
     "scanpointgenerator:generator/ConcatGenerator:1.0")
 class ConcatGenerator(Generator):
     """ Concat generators to operate one after each other """
+    DIFF_LIMIT = 1e-05
 
     def __init__(self, generators, alternate=False):
         # type: (AGenerator, AAlternate) -> None
@@ -66,7 +67,7 @@ class ConcatGenerator(Generator):
                     cur_array = merged_arrays[axis]
 
                     if preparing_bounds:
-                        assert np.isclose(cur_array[-1], axis_array[0]), \
+                        assert (np.abs(cur_array[-1] - axis_array[0]) < self.DIFF_LIMIT).all(), \
                                           "Merged generator bounds don't meet" \
                                           " for axis %s (%f, %f)" \
                                           % (str(axis), cur_array[-1],
