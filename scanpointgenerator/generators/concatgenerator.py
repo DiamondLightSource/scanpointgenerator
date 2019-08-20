@@ -67,7 +67,7 @@ class ConcatGenerator(Generator):
                     cur_array = merged_arrays[axis]
 
                     if preparing_bounds:
-                        assert (np.abs(cur_array[-1] - axis_array[0]) < self.DIFF_LIMIT).all(), \
+                        assert np.abs(cur_array[-1] - axis_array[0]) < self.DIFF_LIMIT, \
                                           "Merged generator bounds don't meet" \
                                           " for axis %s (%f, %f)" \
                                           % (str(axis), cur_array[-1],
