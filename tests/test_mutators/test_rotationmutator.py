@@ -216,7 +216,7 @@ class TestSerialisation(unittest.TestCase):
 
         m = RotationMutator.from_dict(_dict)
 
-        self.assertEqual(1, m.seed)
+        self.assertEqual(45, m.angle)
         self.assertEqual(self.centreOfRotation, m.centreOfRotation)
 
 
