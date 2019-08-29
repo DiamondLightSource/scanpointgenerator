@@ -14,3 +14,4 @@
 ###
 
 from scanpointgenerator.mutators.randomoffsetmutator import RandomOffsetMutator
+from scanpointgenerator.mutators.rotationmutator import RotationMutator
