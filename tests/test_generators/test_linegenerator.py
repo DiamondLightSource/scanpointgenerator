@@ -44,8 +44,15 @@ class LineGeneratorTest(ScanPointGeneratorTest):
         g = LineGenerator("x", "mm", 1.0, 4.0, 1)
         g.prepare_positions()
         g.prepare_bounds()
+        self.assertEqual([2.5], g.positions["x"].tolist())
+        self.assertEqual([1.0, 4.0], g.bounds["x"].tolist())
+
+    def test_single_point_exact(self):
+        g = LineGenerator("x", "mm", 1.0, 1.0, 1)
+        g.prepare_positions()
+        g.prepare_bounds()
         self.assertEqual([1.0], g.positions["x"].tolist())
-        self.assertEqual([-0.5, 2.5], g.bounds["x"].tolist())
+        self.assertEqual([1.0, 1.0], g.bounds["x"].tolist())
 
     def test_duplicate_name_raises(self):
         with self.assertRaises(AssertionError):
@@ -101,7 +108,7 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
     def test_give_one_point_then_step_zero(self):
         l = LineGenerator(["1", "2", "3", "4", "5"], "mm", [0.0]*5, [10.0]*5, 1)
         l.prepare_positions()
-        assert list(l.positions.values()) == 5*[0.0]
+        assert list(l.positions.values()) == 5*[5.0]
 
     def test_array_positions(self):
         g = LineGenerator(["x", "y"], "mm", [1.0, 2.0], [5.0, 10.0], 5)
@@ -111,6 +118,19 @@ class LineGenerator2DTest(ScanPointGeneratorTest):
         y_positions = [2.0, 4.0, 6.0, 8.0, 10.0]
         x_bounds = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
         y_bounds = [1, 3, 5, 7, 9, 11]
+        self.assertEqual(x_positions, g.positions['x'].tolist())
+        self.assertEqual(y_positions, g.positions['y'].tolist())
+        self.assertEqual(x_bounds, g.bounds['x'].tolist())
+        self.assertEqual(y_bounds, g.bounds['y'].tolist())
+
+    def test_array_positions_single_point(self):
+        g = LineGenerator(["x", "y"], "mm", [1.0, -3.0], [5.0, -4.0], 1)
+        g.prepare_positions()
+        g.prepare_bounds()
+        x_positions = [3.0]
+        y_positions = [-3.5]
+        x_bounds = [1.0, 5.0]
+        y_bounds = [-3.0, -4.0]
         self.assertEqual(x_positions, g.positions['x'].tolist())
         self.assertEqual(y_positions, g.positions['y'].tolist())
         self.assertEqual(x_bounds, g.bounds['x'].tolist())

@@ -50,5 +50,8 @@ class LineGenerator(Generator):
             # if self.size == 1 then single point case
             if self.size > 1:
                 step /= (self.size - 1)
+            else:
+                # Single point, use midpoint as start. Bounds are start and stop
+                start = float(start + stop) / 2.0
             arrays[axis] = index_array * step + start
         return arrays
