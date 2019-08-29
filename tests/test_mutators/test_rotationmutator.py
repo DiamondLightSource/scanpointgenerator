@@ -12,6 +12,7 @@ from pkg_resources import require
 require("mock")
 from mock import MagicMock
 
+float_error_tolerance = 1e-12
 
 class RandomOffsetMutatorTest(ScanPointGeneratorTest):
 
@@ -30,6 +31,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
                     pt = Point()
                     pt.indexes = [j, k]
                     pt.positions = {"x": j/10., "y": k/10.}
+                    # TODO: generate upper & lower appropriately
                     pt.lower = {"x": (j-0.5)/10., "y": (k-0.5)/10.}
                     pt.upper = {"x": (j+0.5)/10., "y": (k+0.5)/10.}
                     yield pt
@@ -39,21 +41,29 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         for o, m in zip(original, mutated):
             op_x, mp_x = o.positions["x"], m.positions["x"]
             op_y, mp_y = o.positions["y"], m.positions["y"]
+            # TODO: test upper & lower appropriately...how should they be?
             ou_x, mu_x = o.upper["x"], m.upper["x"]
             ou_y, mu_y = o.upper["y"], m.upper["y"]
             ol_x, ml_x = o.lower["x"], m.lower["x"]
             ol_y, ml_y = o.lower["y"], m.lower["y"]
             # self.assertNotEqual(op_x, mp_x)
             # self.assertNotEqual(op_y, mp_y)
-            self.assertTrue((op_x**2 + op_y**2) - (mp_x**2 + mp_y**2) < 1e-12)
+            self.assertTrue(abs((op_x**2 + op_y**2) - (mp_x**2 + mp_y**2)) < float_error_tolerance)
 
-        # check distance between consecutive points is preserved
         for i in range(len(original) - 1):
+            # check distance between consecutive points is preserved
             o_step = (original[i + 1].positions["x"] - original[i].positions["x"]) ** 2 + \
                      (original[i + 1].positions["y"] - original[i].positions["y"]) ** 2
             m_step = (mutated[i + 1].positions["x"] - mutated[i].positions["x"]) ** 2 + \
                      (mutated[i + 1].positions["y"] - mutated[i].positions["y"]) ** 2
-            self.assertTrue(abs(o_step - m_step) < 1e-12)
+            self.assertTrue(abs(o_step - m_step) < float_error_tolerance)
+
+            # check angle between points preserved
+            o_dot = (original[i + 1].positions["x"] * original[i].positions["x"]) + \
+                    (original[i + 1].positions["y"] * original[i].positions["y"])
+            m_dot = (mutated[i + 1].positions["x"] * mutated[i].positions["x"]) + \
+                    (mutated[i + 1].positions["y"] * mutated[i].positions["y"])
+            self.assertTrue(abs(o_dot - m_dot) < float_error_tolerance)
 
     def test_mutate_cor(self):
         def point_gen():
@@ -69,6 +79,12 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         m = RotationMutator(["x", "y"], 30, CoR)
         original = [p for p in point_gen()]
         mutated = [m.mutate(p, i) for i, p in enumerate(point_gen())]
+        o_r = []
+        m_r = []
+        o_rel_x = []
+        o_rel_y = []
+        m_rel_x = []
+        m_rel_y = []
         for o, m in zip(original, mutated):
             op_x, mp_x = o.positions["x"], m.positions["x"]
             op_y, mp_y = o.positions["y"], m.positions["y"]
@@ -78,16 +94,27 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
             ol_y, ml_y = o.lower["y"], m.lower["y"]
             # self.assertNotEqual(op_x, mp_x)
             # self.assertNotEqual(op_y, mp_y)
-            self.assertTrue(
-                ((op_x - CoR[0]) ** 2 + (op_y - CoR[1]) ** 2) - ((mp_x - CoR[0]) ** 2 + (mp_y - CoR[1]) ** 2) < 1e-12)
+            o_rel_x += [op_x - CoR[0]]
+            o_rel_y += [op_y - CoR[1]]
+            m_rel_x += [mp_x - CoR[0]]
+            m_rel_y += [mp_y - CoR[1]]
+            o_r += [(op_x - CoR[0]) ** 2 + (op_y - CoR[1]) ** 2]
+            m_r += [(mp_x - CoR[0]) ** 2 + (mp_y - CoR[1]) ** 2]
 
-        # check distance between consecutive points is preserved
+            self.assertTrue(abs(m_r[-1] - o_r[-1]) < float_error_tolerance)
+
         for i in range(len(original) - 1):
+            # check distance between consecutive points is preserved
             o_step = (original[i + 1].positions["x"] - original[i].positions["x"]) ** 2 + \
                      (original[i + 1].positions["y"] - original[i].positions["y"]) ** 2
             m_step = (mutated[i + 1].positions["x"] - mutated[i].positions["x"]) ** 2 + \
                      (mutated[i + 1].positions["y"] - mutated[i].positions["y"]) ** 2
-            self.assertTrue(abs(o_step - m_step) < 1e-12)
+            self.assertTrue(abs(o_step - m_step) < float_error_tolerance)
+
+            # check angle between points preserved
+            o_dot = (o_rel_x[i + 1] * o_rel_x[i]) + (o_rel_y[i + 1] * o_rel_y[i])
+            m_dot = (m_rel_x[i + 1] * m_rel_x[i]) + (m_rel_y[i + 1] * m_rel_y[i])
+            self.assertTrue(abs(o_dot - m_dot) < float_error_tolerance)
 
     def test_mutate_90_degrees(self):
         def point_gen():
@@ -111,10 +138,10 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
             ol_y, ml_y = o.lower["y"], m.lower["y"]
             # self.assertNotEqual(op_x, mp_x)
             # self.assertNotEqual(op_y, mp_y)
-            self.assertTrue((op_x**2 + op_y**2) - (mp_x**2 + mp_y**2) < 1e-12)
+            self.assertTrue(abs((op_x**2 + op_y**2) - (mp_x**2 + mp_y**2)) < float_error_tolerance)
             # rotate 90 degrees, mp_y = op_x, mp_x = -op_y
-            self.assertTrue(abs(op_x - mp_y) < 1e-12)
-            self.assertTrue(abs(op_y + mp_x) < 1e-12)
+            self.assertTrue(abs(op_x - mp_y) < float_error_tolerance)
+            self.assertTrue(abs(op_y + mp_x) < float_error_tolerance)
 
         # check distance between consecutive points is preserved
         for i in range(len(original) - 1):
@@ -122,7 +149,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
                      (original[i + 1].positions["y"] - original[i].positions["y"]) ** 2
             m_step = (mutated[i + 1].positions["x"] - mutated[i].positions["x"]) ** 2 + \
                      (mutated[i + 1].positions["y"] - mutated[i].positions["y"]) ** 2
-            self.assertTrue(abs(o_step - m_step) < 1e-12)
+            self.assertTrue(abs(o_step - m_step) < float_error_tolerance)
 
     def test_mutate_twice_opposite(self):
         def point_gen():
@@ -147,12 +174,12 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
             ol_x, ml_x = o.lower["x"], m.lower["x"]
             ol_y, ml_y = o.lower["y"], m.lower["y"]
             # should be equal within floating point error
-            self.assertTrue(abs(mp_x - op_x) < 1e-12)
-            self.assertTrue(abs(mu_x - ou_x) < 1e-12)
-            self.assertTrue(abs(ml_x - ol_x) < 1e-12)
-            self.assertTrue(abs(mp_y - op_y) < 1e-12)
-            self.assertTrue(abs(mu_y - ou_y) < 1e-12)
-            self.assertTrue(abs(ml_y - ol_y) < 1e-12)
+            self.assertTrue(abs(mp_x - op_x) < float_error_tolerance)
+            self.assertTrue(abs(mu_x - ou_x) < float_error_tolerance)
+            self.assertTrue(abs(ml_x - ol_x) < float_error_tolerance)
+            self.assertTrue(abs(mp_y - op_y) < float_error_tolerance)
+            self.assertTrue(abs(mu_y - ou_y) < float_error_tolerance)
+            self.assertTrue(abs(ml_y - ol_y) < float_error_tolerance)
 
 
 class TestSerialisation(unittest.TestCase):
