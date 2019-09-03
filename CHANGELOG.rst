@@ -14,6 +14,7 @@ Added:
 Changed:
 
 - LineGenerator single points case puts point in centre of start/stop
+- Licence changed back to Apache License 2.0
 
 `2-3`_ - 2019-08-09
 -------------------
