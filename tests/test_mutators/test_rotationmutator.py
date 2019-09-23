@@ -14,7 +14,24 @@ from mock import MagicMock
 
 float_error_tolerance = 1e-12
 
-class RandomOffsetMutatorTest(ScanPointGeneratorTest):
+def make_point(j,k):
+    pt = Point()
+    pt.indexes = [j, k]
+    if k == 9:
+        pt.positions = {"x": j / 10., "y": k / 10.}
+        pt.lower = {"x": j / 10., "y": (k - 0.5) / 10.}
+        pt.upper = {"x": (j + 0.5) / 10., "y": 0.45}
+    elif k == 0:
+        pt.positions = {"x": j / 10., "y": k / 10.}
+        pt.lower = {"x": (j - 0.5) / 10., "y": 0.45}
+        pt.upper = {"x": j / 10., "y": (k + 0.5) / 10.}
+    else:
+        pt.positions = {"x": j / 10., "y": k / 10.}
+        pt.lower = {"x": j / 10., "y": (k - 0.5) / 10.}
+        pt.upper = {"x": j / 10., "y": (k + 0.5) / 10.}
+    return pt
+
+class RotationMutatorTest(ScanPointGeneratorTest):
 
     def test_init(self):
         m = RotationMutator(["x", "y"], 30, [0., 0.])
@@ -28,12 +45,7 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         def point_gen():
             for j in range_(10):
                 for k in range_(10):
-                    pt = Point()
-                    pt.indexes = [j, k]
-                    pt.positions = {"x": j/10., "y": k/10.}
-                    # TODO: generate upper & lower appropriately
-                    pt.lower = {"x": (j-0.5)/10., "y": (k-0.5)/10.}
-                    pt.upper = {"x": (j+0.5)/10., "y": (k+0.5)/10.}
+                    pt = make_point(j, k)
                     yield pt
         m = RotationMutator(["x", "y"], 30, [0., 0.])
         original = [p for p in point_gen()]
@@ -41,13 +53,10 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         for o, m in zip(original, mutated):
             op_x, mp_x = o.positions["x"], m.positions["x"]
             op_y, mp_y = o.positions["y"], m.positions["y"]
-            # TODO: test upper & lower appropriately...how should they be?
             ou_x, mu_x = o.upper["x"], m.upper["x"]
             ou_y, mu_y = o.upper["y"], m.upper["y"]
             ol_x, ml_x = o.lower["x"], m.lower["x"]
             ol_y, ml_y = o.lower["y"], m.lower["y"]
-            # self.assertNotEqual(op_x, mp_x)
-            # self.assertNotEqual(op_y, mp_y)
             self.assertTrue(abs((op_x**2 + op_y**2) - (mp_x**2 + mp_y**2)) < float_error_tolerance)
 
         for i in range(len(original) - 1):
@@ -65,16 +74,18 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
                     (mutated[i + 1].positions["y"] * mutated[i].positions["y"])
             self.assertTrue(abs(o_dot - m_dot) < float_error_tolerance)
 
+            # check bounds still correct
+            self.assertEqual(original[i + 1].lower["x"], original[i].upper["x"])
+            self.assertEqual(original[i + 1].lower["y"], original[i].upper["y"])
+            self.assertEqual(mutated[i + 1].lower["x"], mutated[i].upper["x"])
+            self.assertEqual(mutated[i + 1].lower["y"], mutated[i].upper["y"])
+
     def test_mutate_cor(self):
         def point_gen():
             for j in range_(10):
                 for k in range_(10):
-                    pt = Point()
-                    pt.indexes = [j, k]
-                    pt.positions = {"x": j/10., "y": k/10.}
-                    pt.lower = {"x": (j-0.5)/10., "y": (k-0.5)/10.}
-                    pt.upper = {"x": (j+0.5)/10., "y": (k+0.5)/10.}
-                    yield pt
+                    pt = make_point(j, k)
+                yield pt
         CoR = [2., 3.]
         m = RotationMutator(["x", "y"], 30, CoR)
         original = [p for p in point_gen()]
@@ -120,12 +131,8 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         def point_gen():
             for j in range_(10):
                 for k in range_(10):
-                    pt = Point()
-                    pt.indexes = [j, k]
-                    pt.positions = {"x": j/10., "y": k/10.}
-                    pt.lower = {"x": (j-0.5)/10., "y": (k-0.5)/10.}
-                    pt.upper = {"x": (j+0.5)/10., "y": (k+0.5)/10.}
-                    yield pt
+                    pt = make_point(j, k)
+                yield pt
         m = RotationMutator(["x", "y"], 90, [0., 0.])
         original = [p for p in point_gen()]
         mutated = [m.mutate(p, i) for i, p in enumerate(point_gen())]
@@ -155,12 +162,8 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         def point_gen():
             for j in range_(10):
                 for k in range_(10):
-                    pt = Point()
-                    pt.indexes = [j, k]
-                    pt.positions = {"x": j/10., "y": k/10.}
-                    pt.lower = {"x": (j-0.5)/10., "y": (k-0.5)/10.}
-                    pt.upper = {"x": (j+0.5)/10., "y": (k+0.5)/10.}
-                    yield pt
+                    pt = make_point(j, k)
+                yield pt
         m1 = RotationMutator(["x", "y"], 30, [0., 0.])
         m2 = RotationMutator(["x", "y"], -30, [0., 0.])
         original = [p for p in point_gen()]
