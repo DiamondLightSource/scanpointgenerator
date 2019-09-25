@@ -62,19 +62,18 @@ class CompoundGenerator(Serializable):
         """list(Dimension): Dimension instances -
         valid only after calling prepare"""
 
+        self.generators = AGenerators(
+            [deserialize_object(g, Generator) for g in generators])
         self.excluders = AExcluders(
             [deserialize_object(e, Excluder) for e in excluders])
         self.mutators = AMutators(
             [deserialize_object(m, Mutator) for m in mutators])
+        self.duration = ADuration(duration)
+        self.continuous = AContinuous(continuous)
         self.axes = []
         self.units = {}
-        self.duration = ADuration(duration)
         self._dim_meta = {}
         self._prepared = False
-        self.continuous = AContinuous(continuous)
-
-        self.generators = AGenerators(
-            [deserialize_object(g, Generator) for g in generators])
 
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
@@ -84,7 +83,6 @@ class CompoundGenerator(Serializable):
         if len(self.axes) != len(set(self.axes)):
             raise ValueError("Axis names cannot be duplicated")
 
-        self._generator_dim_scaling = {}
 
     def prepare(self):
         """
@@ -96,7 +94,6 @@ class CompoundGenerator(Serializable):
             return
         self.dimensions = []
         self._dim_meta = {}
-        self._generator_dim_scaling = {}
 
         # we're going to mutate these structures
         excluders = list(self.excluders)
@@ -147,7 +144,7 @@ class CompoundGenerator(Serializable):
 
         for generator in generators:
             generator.prepare_positions()
-            self.dimensions.append(Dimension(generator))
+            self.dimensions.append(Dimension([generator]))
         # only the inner-most generator needs to have bounds calculated
         if self.continuous:
             generators[-1].prepare_bounds()
@@ -161,14 +158,6 @@ class CompoundGenerator(Serializable):
             d_end = self.dimensions.index(matched_dims[-1])
             if d_start != d_end:
                 # merge all excluders between d_start and d_end (inclusive)
-                alternate = self.dimensions[d_end].alternate
-                # verify consistent alternate settings (ignoring outermost dimesion where it doesn't matter)
-                for d in self.dimensions[max(1, d_start):d_end]:
-                    # filter out dimensions consisting of a single StaticPointGenerator, since alternation means nothing
-                    if len(d.generators) == 1 and isinstance(d.generators[0], StaticPointGenerator):
-                        continue
-                    if alternate != d.alternate:
-                        raise ValueError("Nested generators connected by regions must have the same alternate setting")
                 merged_dim = Dimension.merge_dimensions(self.dimensions[d_start:d_end+1])
                 self.dimensions = self.dimensions[:d_start] + [merged_dim] + self.dimensions[d_end+1:]
                 dim = merged_dim
@@ -193,16 +182,8 @@ class CompoundGenerator(Serializable):
             self._dim_meta[dim]["repeat"] = repeat
             tile *= dim.size
 
-        for dim in self.dimensions:
-            tile = 1
-            repeat = dim._max_length
-            for g in dim.generators:
-                repeat /= g.size
-                d = {"tile":tile, "repeat":repeat}
-                tile *= g.size
-                self._generator_dim_scaling[g] = d
-
         self._prepared = True
+
 
     def iterator(self):
         """
@@ -217,6 +198,7 @@ class CompoundGenerator(Serializable):
         for p in it:
             yield p
 
+
     def get_point(self, n):
         """
         Retrieve the desired point from the generator
@@ -226,56 +208,40 @@ class CompoundGenerator(Serializable):
         Returns:
             Point: The requested point
         """
-
         if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
         if n >= self.size:
             raise IndexError("Requested point is out of range")
         point = Point()
 
-        # need to know how far along each dimension we are
-        # and, in the case of alternating indices, how
-        # many times we've run through them
-        kc = 0 # the "cumulative" k for each dimension
+        # determine which point to extract from each dimension
+        # handling the fact that some dimensions "alternate"
+        accumulated_idx = 0
         for dim in self.dimensions:
-            i = int(n // self._dim_meta[dim]["repeat"])
-            i %= dim.size
-            k = dim.indices[i]
-            dim_reverse = False
-            if dim.alternate and kc % 2 == 1:
-                i = dim.size - i - 1
-                dim_reverse = True
-            kc *= dim.size
-            kc += k
-            k = dim.indices[i]
-            # need point k along each generator in dimension
-            # in alternating case, need to sometimes go backward
-            point.indexes.append(i)
-            for g in dim.generators:
-                j = int(k // self._generator_dim_scaling[g]["repeat"])
-                r = int(j // g.size)
-                j %= g.size
-                j_lower = j
-                j_upper = j + 1
-                if dim.alternate and g is not dim.generators[0] and r % 2 == 1:
-                    # the top level generator's direction is handled by
-                    # the fact that the reverse direction was appended
-                    j = g.size - j - 1
-                    j_lower = j + 1
-                    j_upper = j
-                elif dim_reverse and g is dim.generators[0]:
-                    # top level generator is running in reverse,
-                    # so bounds are swapped
-                    j_lower, j_upper = j_upper, j_lower
-                for axis in g.axes:
-                    point.positions[axis] = g.positions[axis][j]
-                    # apply "real" bounds to the "innermost" generator only
-                    if self.continuous and dim is self.dimensions[-1] and g is dim.generators[-1]:
-                        point.lower[axis] = g.bounds[axis][j_lower]
-                        point.upper[axis] = g.bounds[axis][j_upper]
+            k = int(n // self._dim_meta[dim]["repeat"])
+
+            dim_runs = k // dim.size
+            dim_idx = k % dim.size
+            idx = dim.indices[dim_idx]
+            if dim.alternate and accumulated_idx % 2 == 1:
+                dim_idx = dim.size - dim_idx - 1
+            for axis in dim.axes:
+                point.positions[axis] = dim.positions[axis][dim_idx]
+                if self.continuous and dim is self.dimensions[-1] and axis in dim.generators[-1].axes:
+                    if dim.alternate and accumulated_idx % 2 == 1:
+                        point.lower[axis] = dim.upper_bounds[axis][dim_idx]
+                        point.upper[axis] = dim.lower_bounds[axis][dim_idx]
                     else:
-                        point.lower[axis] = g.positions[axis][j]
-                        point.upper[axis] = g.positions[axis][j]
+                        point.upper[axis] = dim.upper_bounds[axis][dim_idx]
+                        point.lower[axis] = dim.lower_bounds[axis][dim_idx]
+                else:
+                    point.upper[axis] = point.positions[axis]
+                    point.lower[axis] = point.positions[axis]
+            point.indexes.append(dim_idx)
+
+            accumulated_idx *= dim.size
+            accumulated_idx += idx
+
         point.duration = self.duration
         for m in self.mutators:
             point = m.mutate(point, n)
