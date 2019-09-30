@@ -482,6 +482,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             self.assertEqual(e, a)
         self.assertEqual((181, 10), g.shape)
 
+
     def test_double_spiral_scan(self):
         line1 = LineGenerator(["l1"], "mm", -1, 2, 5)
         spiral_s = SpiralGenerator(["s1", "s2"], "mm", [1, 2], 5, 2.5, True)
@@ -494,52 +495,65 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g.prepare()
 
         points = []
-        l1s = []
-        tl2 = []
+        upper = []
+        lower = []
+        l1s_dim_points = []
+        l1s_unfiltered_points = []
+        tl2_dim_points = []
 
-        s_f = True
+        s_forward = True
+        t_forward = True
+        l2_forward = True
         for l1 in line1.positions["l1"]:
-            sp = zip(spiral_s.positions['s1'], spiral_s.positions['s2'])
-            sp = sp if s_f else list(sp)[::-1]
-            s_f = not s_f
-            l1s += [(s1, s2, l1) for (s1, s2) in sp]
-        l2_f = True
-        for (t1, t2) in zip(spiral_t.positions['t1'], spiral_t.positions['t2']):
-            l2p = line2.positions['l2'] if l2_f else line2.positions['l2'][::-1]
-            l2pu = line2.bounds['l2'][1:len(line2.positions['l2'])+1]
-            l2pl = line2.bounds['l2'][0:len(line2.positions['l2'])]
-            if not l2_f:
-                l2pu, l2pl = l2pl[::-1], l2pu[::-1]
-            l2_f = not l2_f
-            tl2 += [(l2, l2u, l2l, t1, t2) for (l2, l2u, l2l) in
-                zip(l2p, l2pu, l2pl) if l2*l2 + t1*t1 <= 1]
-        t_f = True
-        for (s1, s2, l1) in l1s:
-            inner = tl2 if t_f else tl2[::-1]
-            t_f = not t_f
-            points += [(l2, l2u, l2l, t1, t2, s1, s2, l1)
-                for (l2, l2u, l2l, t1, t2) in inner if s1*s1 + l1*l1 <= 1]
-        l1s_original = l1s
-        l1s = [(s1, s2, l1) for (s1, s2, l1) in l1s if s1*s1 + l1*l1 <= 1]
+            s_iter = list(zip(spiral_s.positions["s1"], spiral_s.positions["s2"]))
+            s_iter = s_iter if s_forward else reversed(s_iter)
 
-        expected = [{"l2":l2, "t1":t1, "t2":t2, "s1":s1, "s2":s2, "l1":l1}
-            for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
+            for (s1, s2) in s_iter:
+                l1s_unfiltered_points.append({"l1":l1, "s1":s1, "s2":s2})
+                if s1*s1 + l1*l1 <= 1:
+                    l1s_dim_points.append({"l1":l1, "s1":s1, "s2":s2})
+                    # this is a hack, this array represents one pass through the inner dimension
+                    tl2_dim_points = []
+
+                t_iter = list(zip(spiral_t.positions["t1"], spiral_t.positions["t2"]))
+                t_iter = t_iter if t_forward else reversed(t_iter)
+                for (t1, t2) in t_iter:
+                    if l2_forward:
+                        l2_iter = line2.positions["l2"]
+                        l2_upper_iter = line2.bounds["l2"][1:]
+                        l2_lower_iter = line2.bounds["l2"][:-1]
+                    else:
+                        l2_iter = line2.positions["l2"][::-1]
+                        l2_upper_iter = line2.bounds["l2"][:-1][::-1]
+                        l2_lower_iter = line2.bounds["l2"][1:][::-1]
+
+                    for (l2, l2l, l2u) in zip(l2_iter, l2_lower_iter, l2_upper_iter):
+                        if s1*s1 + l1*l1 <= 1 and l2*l2 + t1*t1 <= 1:
+                            points.append({"l1":l1, "s1":s1, "s2":s2, "t1":t1, "t2":t2, "l2":l2})
+                            upper.append({"l1":l1, "s1":s1, "s2":s2, "t1":t1, "t2":t2, "l2":l2u})
+                            lower.append({"l1":l1, "s1":s1, "s2":s2, "t1":t1, "t2":t2, "l2":l2l})
+                            tl2_dim_points.append({"t1":t1, "t2":t2, "l2":l2})
+
+                    l2_forward = not l2_forward
+                t_forward = not t_forward
+            s_forward = not s_forward
 
         expected_idx = []
-        t_f = (l1s_original.index(l1s[0])) % 2 == 0 # t_f is False
-        for d1 in range_(len(l1s)):
-            expected_idx += [[d1, d2] for d2 in (range_(len(tl2)) if t_f else
-                range_(len(tl2) - 1, -1, -1))]
-            t_f = not t_f
+        # is the first traversal forward or backwards?
+        t_forward = (l1s_unfiltered_points.index(l1s_dim_points[0])) % 2 == 0
+        for d1 in range_(len(l1s_dim_points)):
+            inner_dim_iter = range(len(tl2_dim_points))
+            if not t_forward: inner_dim_iter = reversed(inner_dim_iter)
+            expected_idx += [[d1, d2] for d2 in inner_dim_iter]
+            t_forward = not t_forward
 
-        expected_l2_lower = [l2l for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
-        expected_l2_upper = [l2u for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
+        g_points = list(g.iterator())
+        self.assertEqual(len(points), len(g_points))
+        self.assertEqual(lower, [p.lower for p in g_points])
+        self.assertEqual(points, [p.positions for p in g_points])
+        self.assertEqual(upper, [p.upper for p in g_points])
+        self.assertEqual(expected_idx, [p.indexes for p in g_points])
 
-        gpoints = list(g.iterator())
-        self.assertEqual(expected, [p.positions for p in gpoints])
-        self.assertEqual(expected_idx, [p.indexes for p in gpoints])
-        self.assertEqual(expected_l2_lower, [p.lower["l2"] for p in gpoints])
-        self.assertEqual(expected_l2_upper, [p.upper["l2"] for p in gpoints])
 
     def test_mutators(self):
         mutator_1 = MagicMock(spec=Mutator)
