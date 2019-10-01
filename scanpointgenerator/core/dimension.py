@@ -93,6 +93,25 @@ class Dimension(object):
         return points[self.indices]
 
 
+    def get_point(self, idx):
+        if not self._prepared:
+            raise ValueError("Must call prepare first")
+        axis_points = {axis:self.positions[axis][idx] for axis in self.positions}
+        return axis_points
+
+
+    def get_bounds(self, idx, reverse=False):
+        if not self._prepared:
+            raise ValueError("Must call prepare first")
+        if not reverse:
+            axis_upper, axis_lower = self.upper_bounds, self.lower_bounds
+        else:
+            axis_upper, axis_lower = self.lower_bounds, self.upper_bounds
+        lower = {axis:axis_lower[axis][idx] for axis in axis_lower}
+        upper = {axis:axis_upper[axis][idx] for axis in axis_upper}
+        return lower, upper
+
+
     def prepare(self):
         """
         Prepare data structures required to determine size and
@@ -164,8 +183,11 @@ class Dimension(object):
         self.indices = self.mask.nonzero()[0]
         self.size = len(self.indices)
         self.positions = {axis:axis_positions[axis][self.indices] for axis in axis_positions}
-        self.upper_bounds = {axis:axis_bounds_upper[axis][self.indices] for axis in axis_bounds_upper}
-        self.lower_bounds = {axis:axis_bounds_lower[axis][self.indices] for axis in axis_bounds_lower}
+        self.upper_bounds = {axis:self.positions[axis] for axis in self.positions}
+        self.lower_bounds = {axis:self.positions[axis] for axis in self.positions}
+        for axis in axis_bounds_lower:
+            self.upper_bounds[axis] = axis_bounds_upper[axis][self.indices]
+            self.lower_bounds[axis] = axis_bounds_lower[axis][self.indices]
         self._prepared = True
 
 

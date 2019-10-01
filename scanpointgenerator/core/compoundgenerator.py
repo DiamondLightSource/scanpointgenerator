@@ -223,20 +223,19 @@ class CompoundGenerator(Serializable):
             dim_runs = k // dim.size
             dim_idx = k % dim.size
             idx = dim.indices[dim_idx]
-            if dim.alternate and accumulated_idx % 2 == 1:
+            dim_in_reverse = dim.alternate and accumulated_idx % 2 == 1
+            if dim_in_reverse:
                 dim_idx = dim.size - dim_idx - 1
-            for axis in dim.axes:
-                point.positions[axis] = dim.positions[axis][dim_idx]
-                if self.continuous and dim is self.dimensions[-1] and axis in dim.generators[-1].axes:
-                    if dim.alternate and accumulated_idx % 2 == 1:
-                        point.lower[axis] = dim.upper_bounds[axis][dim_idx]
-                        point.upper[axis] = dim.lower_bounds[axis][dim_idx]
-                    else:
-                        point.upper[axis] = dim.upper_bounds[axis][dim_idx]
-                        point.lower[axis] = dim.lower_bounds[axis][dim_idx]
-                else:
-                    point.upper[axis] = point.positions[axis]
-                    point.lower[axis] = point.positions[axis]
+
+            dim_positions = dim.get_point(dim_idx)
+            point.positions.update(dim_positions)
+            if dim is self.dimensions[-1]:
+                lower, upper = dim.get_bounds(dim_idx, dim_in_reverse)
+                point.lower.update(lower)
+                point.upper.update(upper)
+            else:
+                point.lower.update(dim_positions)
+                point.upper.update(dim_positions)
             point.indexes.append(dim_idx)
 
             accumulated_idx *= dim.size
