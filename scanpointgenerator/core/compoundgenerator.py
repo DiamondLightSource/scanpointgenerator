@@ -216,14 +216,13 @@ class CompoundGenerator(Serializable):
 
         # determine which point to extract from each dimension
         # handling the fact that some dimensions "alternate"
-        accumulated_idx = 0
         for dim in self.dimensions:
             k = int(n // self._dim_meta[dim]["repeat"])
 
             dim_runs = k // dim.size
             dim_idx = k % dim.size
             idx = dim.indices[dim_idx]
-            dim_in_reverse = dim.alternate and accumulated_idx % 2 == 1
+            dim_in_reverse = dim.alternate and dim_runs % 2 == 1
             if dim_in_reverse:
                 dim_idx = dim.size - dim_idx - 1
 
@@ -237,9 +236,6 @@ class CompoundGenerator(Serializable):
                 point.lower.update(dim_positions)
                 point.upper.update(dim_positions)
             point.indexes.append(dim_idx)
-
-            accumulated_idx *= dim.size
-            accumulated_idx += idx
 
         point.duration = self.duration
         for m in self.mutators:
