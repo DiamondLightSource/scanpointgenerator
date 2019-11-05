@@ -32,6 +32,19 @@ class Dimension(object):
         self._prepared = False
         self.indices = []
 
+        # validate alternating constraints
+        # we currently do not allow a non-alternating generator inside an
+        # alternating one due to potentially "surprising" behaviour of the
+        # non-alternating generator (the dimension itself will be alternating)
+        started_alternating = False
+        for g in self.generators:
+            if started_alternating and not g.alternate:
+                raise ValueError(
+                        "Cannot nest non-alternating generators in "
+                        "alternating generators within a Dimension "
+                        "due to inconsistent output paths")
+            started_alternating = started_alternating or g.alternate
+
 
     def apply_excluder(self, excluder):
         """Add an excluder to the current Dimension"""

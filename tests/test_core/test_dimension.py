@@ -355,8 +355,8 @@ class DimensionTests(ScanPointGeneratorTest):
         z_pos = np.array([20, 21, 22])
         w_pos = np.array([30, 31, 32])
         gx = Mock(axes=["x"], positions={"x":x_pos}, bounds={"x":x_bounds}, size=3, alternate=True)
-        gy = Mock(axes=["y"], positions={"y":y_pos}, size=3, alternate=False)
-        gz = Mock(axes=["z"], positions={"z":z_pos}, size=3, alternate=True)
+        gy = Mock(axes=["y"], positions={"y":y_pos}, size=3, alternate=True)
+        gz = Mock(axes=["z"], positions={"z":z_pos}, size=3, alternate=False)
         gw = Mock(axes=["w"], positions={"w":w_pos}, size=3, alternate=False)
 
         mask = np.array([1, 1, 0, 1, 1, 1, 1, 0, 1] * 9)
@@ -368,8 +368,8 @@ class DimensionTests(ScanPointGeneratorTest):
         d.prepare()
 
         expected_x = np.append(np.tile(np.append(x_pos, x_pos[::-1]), 13), x_pos)[indices]
-        expected_y = np.repeat(np.tile(y_pos, 9), 3)[indices]
-        expected_z = np.repeat(np.append(np.append(z_pos, z_pos[::-1]), z_pos), 9)[indices]
+        expected_y = np.repeat(np.append(np.tile(np.append(y_pos, y_pos[::-1]), 4), y_pos), 3)[indices]
+        expected_z = np.tile(np.repeat(z_pos, 9), 3)[indices]
         expected_w = np.repeat(w_pos, 27)[indices]
         self.assertEqual(False, d.alternate)
         self.assertEqual(expected_x.tolist(), d.get_positions("x").tolist())
@@ -391,9 +391,15 @@ class DimensionTests(ScanPointGeneratorTest):
                 bounds={"y":np.array([0.5, 1.5, 2.5, 3.5])},
                 size=3,
                 alternate=False)
+        g3 = Mock(
+                axes=["z"],
+                positions={"z":np.array([1, 2, 3])},
+                bounds={"z":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=True)
 
-        d1 = Dimension([g1, g2])
-        d2 = Dimension([g2, g1])
+        d1 = Dimension([g1, g3])
+        d2 = Dimension([g2, g3])
         self.assertEqual(True, d1.alternate)
         self.assertEqual(False, d2.alternate)
 
@@ -401,6 +407,24 @@ class DimensionTests(ScanPointGeneratorTest):
         d2.prepare()
         self.assertEqual(True, d1.alternate)
         self.assertEqual(False, d2.alternate)
+
+
+    def test_dim_invalid_alternating(self):
+        g1 = Mock(
+                axes=["x"],
+                positions={"x":np.array([1, 2, 3])},
+                bounds={"x":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=True)
+        g2 = Mock(
+                axes=["y"],
+                positions={"y":np.array([1, 2, 3])},
+                bounds={"y":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=False)
+
+        with self.assertRaises(ValueError):
+            d = Dimension([g1, g2])
 
 
 
