@@ -1087,12 +1087,13 @@ class TestSerialisation(unittest.TestCase):
         expected_dict['mutators'] = mutators_list
         expected_dict['duration'] = -1
         expected_dict['continuous'] = True
+        expected_dict['delay_after'] = None
 
         d = self.g.to_dict()
 
         self.assertEqual(expected_dict, d)
 
-    def test_from_dict(self):
+    def test_from_dict(self): # todo Should test the delay_after?
 
         g1 = LineGenerator("x1", "mm", -1.0, 1.0, 5, False)
         g1_dict = g1.to_dict()

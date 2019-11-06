@@ -25,6 +25,7 @@ class Point(object):
         indexes (list): List of int indexes for each dataset dimension, fastest
             changing last. E.g. [15]
         duration (int): Int or None for duration of the point exposure
+        delay_after (float): Float or None. Insert a time delay after every point
     """
     def __init__(self):
         self.positions = {}
@@ -32,3 +33,4 @@ class Point(object):
         self.upper = {}
         self.indexes = []
         self.duration = None
+        self.delay_after = None

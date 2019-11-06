@@ -41,6 +41,8 @@ with Anno("Point durations in seconds (-1 for variable)"):
     ADuration = float
 with Anno("Make points continuous (set upper/lower bounds)"):
     AContinuous = bool
+with Anno("Time delay after each point"):
+    ADelay = float
 
 
 @Generator.register_subclass(
@@ -54,7 +56,8 @@ class CompoundGenerator(Serializable):
                  excluders=(),  # type: UExcluders
                  mutators=(),  # type: UMutators
                  duration=-1,  # type: ADuration
-                 continuous=True  # type: AContinuous
+                 continuous=True,  # type: AContinuous
+                 delay_after=None  # type: ADelay
                  ):
         # type: (...) -> None
         self.size = 0
@@ -77,6 +80,10 @@ class CompoundGenerator(Serializable):
         self._dim_meta = {}
         self._prepared = False
         self.continuous = AContinuous(continuous)
+        if (delay_after != None):
+            self.delay_after = ADelay(delay_after)
+        else:
+            self.delay_after = None
 
         self.generators = AGenerators(
             [deserialize_object(g, Generator) for g in generators])
