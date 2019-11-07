@@ -860,6 +860,15 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual({"y":"cm", "x":"mm"}, g.units)
         self.assertEqual(1, len(g.dimensions))
 
+    def test_delay_after(self):
+        x = LineGenerator("x", "mm", 0, 1, 1)
+
+        g = CompoundGenerator([x], [], [], duration=1, delay_after=2)
+        g.prepare()
+
+        delays = [point.delay_after for point in g.iterator()]
+        self.assertEqual([2], delays)
+
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""
 

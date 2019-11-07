@@ -289,6 +289,8 @@ class CompoundGenerator(Serializable):
                         point.lower[axis] = g.positions[axis][j]
                         point.upper[axis] = g.positions[axis][j]
         point.duration = self.duration
+        if (self.delay_after != None):
+            point.delay_after = self.delay_after
         for m in self.mutators:
             point = m.mutate(point, n)
         return point
