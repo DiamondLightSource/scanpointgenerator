@@ -77,14 +77,11 @@ class CompoundGenerator(Serializable):
         self.units = {}
         self._dim_meta = {}
         self._prepared = False
-        self.continuous = AContinuous(continuous)
         if delay_after is not None:
             self.delay_after = ADelay(delay_after)
         else:
             self.delay_after = None
 
-        self.generators = AGenerators(
-            [deserialize_object(g, Generator) for g in generators])
 
         for generator in self.generators:
             logging.debug("Generator passed to Compound init")
