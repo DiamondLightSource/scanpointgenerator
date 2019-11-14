@@ -1,15 +1,12 @@
 ###
 # Copyright (c) 2017 Diamond Light Source Ltd.
 #
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
-#
 # Contributors:
 #    Charles Mita - initial API and implementation and/or initial documentation
 #
 ###
+
+import itertools
 
 from scanpointgenerator.compat import np
 
@@ -20,21 +17,44 @@ class Dimension(object):
     Represents a single dimension within a scan.
     """
 
-    def __init__(self, generator):
-        self.axes = list(generator.axes)
-        """list(int): Unrolled axes within the dimension"""
+    def __init__(self, generators, excluders=None):
+        self.generators = list(generators)
+        self.excluders = list(excluders) if excluders is not None else []
+        self.axes = list(axis for g in self.generators for axis in g.axes)
+        """list(str): Unrolled axes within the dimension"""
         self.size = None
         """int: Size of the dimension"""
-        self.upper = [generator.positions[a].max((0,)) for a in generator.axes]
+        self.upper = [g.positions[a].max((0,)) for g in self.generators for a in g.axes]
         """list(float): Upper bound for the dimension"""
-        self.lower = [generator.positions[a].min((0,)) for a in generator.axes]
+        self.lower = [g.positions[a].min((0,)) for g in self.generators for a in g.axes]
         """list(float): Lower bound for the dimension"""
-        self.alternate = generator.alternate
-        self.generators = [generator]
-        self._masks = []
-        self._max_length = generator.size
+        self.alternate = self.generators[0].alternate
         self._prepared = False
         self.indices = []
+
+        # validate alternating constraints
+        # we currently do not allow a non-alternating generator inside an
+        # alternating one due to potentially "surprising" behaviour of the
+        # non-alternating generator (the dimension itself will be alternating)
+        started_alternating = False
+        for g in self.generators:
+            if started_alternating and not g.alternate:
+                raise ValueError(
+                        "Cannot nest non-alternating generators in "
+                        "alternating generators within a Dimension "
+                        "due to inconsistent output paths")
+            started_alternating = started_alternating or g.alternate
+
+
+    def apply_excluder(self, excluder):
+        """Add an excluder to the current Dimension"""
+        if self._prepared:
+            raise ValueError("Dimension already prepared")
+        if not set(excluder.axes) <= set(self.axes):
+            raise ValueError("Excluder axes '%s' do not apply to Dimension axes '%s'" \
+                    % (excluder.axes, self.axes))
+        self.excluders.append(excluder)
+
 
     def get_positions(self, axis):
         """
@@ -48,9 +68,8 @@ class Dimension(object):
         # check that this dimension is prepared
         if not self._prepared:
             raise ValueError("Must call prepare first")
-        # get the mesh map for this axis and use it to get the generator points
-        gen = [g for g in self.generators if axis in g.axes][0]
-        return gen.positions[axis][self.get_mesh_map(axis)]
+        return self.positions[axis]
+
 
     def get_mesh_map(self, axis):
         """
@@ -70,7 +89,7 @@ class Dimension(object):
         # just get index of points instead of actual point value
         points = np.arange(len(points))
 
-        if self.alternate:
+        if gen.alternate:
             points = np.append(points, points[::-1])
         tile = 0.5 if self.alternate else 1
         repeat = 1
@@ -86,119 +105,107 @@ class Dimension(object):
             points = np.tile(points, int(tile))
         return points[self.indices]
 
-    def apply_excluder(self, excluder):
-        """Apply an excluder with axes matching some axes in the dimension to
-        produce an internal mask"""
-        if self._prepared:
-            raise ValueError("Can not apply excluders after"
-                             "prepare has been called")
-        # find generators referenced by excluder
-        matched_gens = [g for g in self.generators if len(set(g.axes) & set(excluder.axes)) != 0]
-        if len(matched_gens) == 0:
-            raise ValueError("Excluder references axes not present in dimension : %s" % str(excluder.axes))
-        g_start = self.generators.index(matched_gens[0])
-        g_end = self.generators.index(matched_gens[-1])
-        point_arrays = {axis:[g for g in matched_gens if axis in g.axes][0].positions[axis] for axis in excluder.axes}
 
-        if self.alternate:
-            for axis in point_arrays.keys():
-                arr = point_arrays[axis]
-                point_arrays[axis] = np.append(arr, arr[::-1])
+    def get_point(self, idx):
+        if not self._prepared:
+            raise ValueError("Must call prepare first")
+        axis_points = {axis:self.positions[axis][idx] for axis in self.positions}
+        return axis_points
 
-        # scale up all point arrays using generators within the range
-        # inner generators are tiled by the size of outer generators
-        # outer generators have points repeated by the size of inner ones
-        axes_tiling = {axis:1 for axis in excluder.axes}
-        axes_repeats = {axis:1 for axis in excluder.axes}
-        axes_seen = []
-        axes_to_see = [axis for axis in excluder.axes]
-        for g in self.generators[g_start:g_end+1]:
-            found_axes = [axis for axis in g.axes if axis in excluder.axes]
-            axes_to_see = [axis for axis in axes_to_see if axis not in found_axes]
-            for axis in axes_to_see:
-                axes_tiling[axis] *= g.size
-            for axis in axes_seen:
-                axes_repeats[axis] *= g.size
-            axes_seen.extend(found_axes)
-        for axis in point_arrays.keys():
-            arr = point_arrays[axis]
-            point_arrays[axis] = np.tile(np.repeat(arr, axes_repeats[axis]), axes_tiling[axis])
 
-        arrays = [point_arrays[axis] for axis in excluder.axes]
-        excluder_mask = excluder.create_mask(*arrays)
+    def get_bounds(self, idx, reverse=False):
+        if not self._prepared:
+            raise ValueError("Must call prepare first")
+        if not reverse:
+            axis_upper, axis_lower = self.upper_bounds, self.lower_bounds
+        else:
+            axis_upper, axis_lower = self.lower_bounds, self.upper_bounds
+        lower = {axis:axis_lower[axis][idx] for axis in axis_lower}
+        upper = {axis:axis_upper[axis][idx] for axis in axis_upper}
+        return lower, upper
 
-        # record the tiling/repeat information for generators outside the axis range
-        tile = 0.5 if self.alternate else 1
-        repeat = 1
-        for g in self.generators[0:g_start]:
-            tile *= g.size
-        for g in self.generators[g_end+1:]:
-            repeat *= g.size
-
-        m = {"repeat":repeat, "tile":tile, "mask":excluder_mask}
-        self._masks.append(m)
 
     def prepare(self):
         """
-        Create and return a mask for every point in the dimension
-
-        e.g. (with [y1, y2, y3] and [x1, x2, x3] both alternating)
-        y:    y1, y1, y1, y2, y2, y2, y3, y3, y3
-        x:    x1, x2, x3, x3, x2, x1, x1, x2, x3
-        mask: m1, m2, m3, m4, m5, m6, m7, m8, m9
-
-        Returns:
-            np.array(int8): One dimensional mask array
+        Prepare data structures required to determine size and
+        filtered positions of the dimension.
+        Must be called before get_positions or get_mesh_map are called.
         """
-        if self._prepared:
-            return
-        mask = np.full(self._max_length, True, dtype=np.int8)
-        for m in self._masks:
-            assert len(m["mask"]) * m["repeat"] * m["tile"] == len(mask), \
-                "Mask lengths are not consistent"
-            expanded = np.repeat(m["mask"], m["repeat"])
-            if m["tile"] % 1 != 0:
-                ex = np.tile(expanded, int(m["tile"]))
-                expanded = np.append(ex, expanded[:int(len(expanded)//2)])
-            else:
-                expanded = np.tile(expanded, int(m["tile"]))
-            mask &= expanded
-        # we have to assume the "returned" mask may be edited in place
-        # so we have to store a copy
+        axis_positions = {}
+        axis_bounds_lower = {}
+        axis_bounds_upper = {}
+        masks = []
+        # scale up all position arrays
+        # inner generators are tiled by the size of out generators
+        # outer generators have positions repeated by the size of inner generators
+        repeats, tilings, dim_size = 1, 1, 1
+        for g in self.generators:
+            repeats *= g.size
+            dim_size *= g.size
+
+        for gen in self.generators:
+            repeats /= gen.size
+            for axis in gen.axes:
+                positions = gen.positions[axis]
+                if gen.alternate:
+                    positions = np.append(positions, positions[::-1])
+                    positions = np.repeat(positions, repeats)
+                    p = np.tile(positions, (tilings // 2))
+                    if tilings % 2 != 0:
+                        positions = np.append(p, positions[:int(len(positions)//2)])
+                    else:
+                        positions = p
+                else:
+                    positions = np.repeat(positions, repeats)
+                    positions = np.tile(positions, tilings)
+                axis_positions[axis] = positions
+            tilings *= gen.size
+
+        # produce excluder masks
+        for excl in self.excluders:
+            arrays = [axis_positions[axis] for axis in excl.axes]
+            excluder_mask = excl.create_mask(*arrays)
+            masks.append(excluder_mask)
+
+        # AND all masks together (empty mask is all values selected)
+        mask = masks[0] if len(masks) else np.full(dim_size, True, dtype=np.int8)
+        for m in masks[1:]:
+            mask &= m
+
+        gen = self.generators[-1]
+        if getattr(gen, "bounds", None):
+            tilings = np.prod(np.array([g.size for g in self.generators[:-1]]))
+            if gen.alternate:
+                tilings /= 2.
+            for axis in gen.axes:
+                upper_base = gen.bounds[axis][1:]
+                lower_base = gen.bounds[axis][:-1]
+                upper, lower = upper_base, lower_base
+                if gen.alternate:
+                    upper = np.append(upper_base, lower_base[::-1])
+                    lower = np.append(lower_base, upper_base[::-1])
+                upper = np.tile(upper, int(tilings))
+                lower = np.tile(lower, int(tilings))
+                if tilings % 1 != 0:
+                    upper = np.append(upper, upper_base)
+                    lower = np.append(lower, lower_base)
+                axis_bounds_upper[axis] = upper
+                axis_bounds_lower[axis] = lower
+
         self.mask = mask
         self.indices = self.mask.nonzero()[0]
         self.size = len(self.indices)
+        self.positions = {axis:axis_positions[axis][self.indices] for axis in axis_positions}
+        self.upper_bounds = {axis:self.positions[axis] for axis in self.positions}
+        self.lower_bounds = {axis:self.positions[axis] for axis in self.positions}
+        for axis in axis_bounds_lower:
+            self.upper_bounds[axis] = axis_bounds_upper[axis][self.indices]
+            self.lower_bounds[axis] = axis_bounds_lower[axis][self.indices]
         self._prepared = True
+
 
     @staticmethod
     def merge_dimensions(dimensions):
-        """Merge multiple dimensions into one, scaling structures as required
-
-        Args:
-            dimensions (list): dimensions to merge (outermost first)
-        Returns:
-            Dimension: squashed dimension
-        """
-        final_dim = Dimension(dimensions[0].generators[0])
-        final_dim.generators = []
-        final_dim.lower = []
-        final_dim.upper = []
-        final_dim.axes = []
-        final_dim._max_length = 1
-        # masks in the inner generator are tiled by the size of
-        # outer generators and outer generators have their elements
-        # repeated by the size of inner generators
-        for dim in dimensions:
-            inner_masks = [m.copy() for m in dim._masks] # copy masks to preserve input strucutres
-            for m in final_dim._masks:
-                m["repeat"] *= dim._max_length
-            for m in inner_masks:
-                m["tile"] *= final_dim._max_length
-            final_dim._masks += inner_masks
-            final_dim.axes += dim.axes
-            final_dim.generators += dim.generators
-            final_dim.upper += dim.upper
-            final_dim.lower += dim.lower
-            final_dim._max_length *= dim._max_length
-            final_dim.alternate = final_dim.alternate or dim.alternate
-        return final_dim
+        generators = itertools.chain.from_iterable(d.generators for d in dimensions)
+        excluders = itertools.chain.from_iterable(d.excluders for d in dimensions)
+        return Dimension(generators, excluders)

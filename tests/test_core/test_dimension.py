@@ -18,282 +18,227 @@ class DimensionTests(ScanPointGeneratorTest):
         g = Mock()
         g.axes = ["x", "y"]
         g.positions = {"x":np.array([0, 1, 2]), "y":np.array([10, 11, 12])}
+        g.bounds = {"x":np.array([-0.5, 0.5, 1.5, 2.5]), "y":np.array([9.5, 10.5, 11.5, 12.5])}
         g.size = 3
-        d = Dimension(g)
+        d = Dimension([g])
         d.prepare()
         self.assertEqual([g], d.generators)
+        self.assertEqual([], d.excluders)
         self.assertEqual(["x", "y"], d.axes)
-        self.assertEqual([], d._masks)
         self.assertEqual(g.alternate, d.alternate)
         self.assertEqual(g.size, d.size)
         self.assertEqual([2, 12], d.upper)
         self.assertEqual([0, 10], d.lower)
 
-    def test_merge_dimensions(self):
+
+    def test_two_generators_init(self):
         g, h = Mock(), Mock()
         g.axes, h.axes = ["gx", "gy"], ["hx", "hy"]
         g.size, h.size = 16, 64
+        g.alternate = False
+        h.alternate = False
         g.positions = {"gx":np.array([0, 1, 2]), "gy":np.array([10, 11, 12])}
+        g.bounds = {"gx":np.array([-0.5, 0.5, 1.5, 2.5]), "gy":np.array([9.5, 10.5, 11.5, 12.5])}
         h.positions = {"hx":np.array([0, -1, -2]), "hy":np.array([-10, -11, -12])}
-        outer, inner = Dimension(g), Dimension(h)
-        om1, om2 = Mock(), Mock()
-        im1, im2 = Mock(), Mock()
-        outer._masks = [{"repeat":2, "tile":3, "mask":om1},
-            {"repeat":5, "tile":7, "mask":om2}]
-        inner._masks = [{"repeat":11, "tile":13, "mask":im1},
-            {"repeat":17, "tile":19, "mask":im2}]
-        combined = Dimension.merge_dimensions([outer, inner])
+        h.bounds = {"hx":np.array([0.5, -0.5, -1.5, -2.5]), "hy":np.array([-9.5, -10.5, -11.5, -12.5])}
 
-        self.assertEqual(g.size * h.size, combined._max_length)
-        self.assertEqual(outer.alternate or inner.alternate, combined.alternate)
-        self.assertEqual(["gx", "gy", "hx", "hy"], combined.axes)
-        self.assertEqual([2, 12, 0, -10], combined.upper)
-        self.assertEqual([0, 10, -2, -12], combined.lower)
-        expected_masks = [
-            {"repeat":128, "tile":3, "mask":om1},
-            {"repeat":320, "tile":7, "mask":om2},
-            {"repeat":11, "tile":13*16, "mask":im1},
-            {"repeat":17, "tile":19*16, "mask":im2}]
-        self.assertEqual(expected_masks, combined._masks)
+        d = Dimension([g, h])
 
-    def test_merge_three(self):
+        self.assertEqual(False, d.alternate)
+        self.assertEqual(["gx", "gy", "hx", "hy"], d.axes)
+        self.assertEqual([2, 12, 0, -10], d.upper)
+        self.assertEqual([0, 10, -2, -12], d.lower)
+
+
+    def test_excluders_init(self):
+        g1, g2, g3 = Mock(), Mock(), Mock()
+        e1, e2 = Mock(), Mock()
+        g1.axes, g2.axes, g3.axes = ["g1"], ["g2"], ["g3"]
+        g1.size, g2.size, g3.size = 3, 4, 5
+        g1.positions = {"g1":np.array([0, 1, 2])}
+        g1.bounds = {"g1":np.array([-0.5, 0.5, 1.5, 2.5])}
+        g2.positions = {"g2":np.array([-1, 0, 1, 2])}
+        g2.bounds = {"g2":np.array([-1.5, -0.5, 0.5, 1.5, 2.5])}
+        g3.positions = {"g3":np.array([-2, 0, 2, 4, 6])}
+        g3.bounds = {"g3":np.array([-3, -1, 1, 3, 5, 7])}
+        g1.alternate = False
+        g2.alternate = False
+        g3.alternate = False
+        e1.axes = ["g1", "g2"]
+        e2.axes = ["g2", "g3"]
+
+        d = Dimension([g1, g2, g3], [e1, e2])
+
+        self.assertEqual(False, d.alternate)
+        self.assertEqual(["g1", "g2", "g3"], d.axes)
+        self.assertEqual([0, -1, -2], d.lower)
+        self.assertEqual([2, 2, 6], d.upper)
+
+
+    def test_positions_non_alternate(self):
         g1, g2, g3 = Mock(), Mock(), Mock()
         g1.axes, g2.axes, g3.axes = ["g1"], ["g2"], ["g3"]
         g1.size, g2.size, g3.size = 3, 4, 5
         g1.positions = {"g1":np.array([0, 1, 2])}
+        g1.bounds = {"g1":np.array([-0.5, 0.5, 1.5, 2.5])}
         g2.positions = {"g2":np.array([-1, 0, 1, 2])}
+        g2.bounds = {"g2":np.array([-1.5, -0.5, 0.5, 1.5, 2.5])}
         g3.positions = {"g3":np.array([-2, 0, 2, 4, 6])}
-        d1, d2, d3 = Dimension(g1), Dimension(g2), Dimension(g3)
-        d1_m, d2_m, d3_m = Mock(), Mock(), Mock()
-        d1._masks = [{"repeat":1, "tile":1, "mask":d1_m}]
-        d2._masks = [{"repeat":2, "tile":3, "mask":d2_m}]
-        d3._masks = [{"repeat":5, "tile":7, "mask":d3_m}]
+        g3.bounds = {"g3":np.array([-3, -1, 1, 3, 5, 7])}
+        g1.alternate = False
+        g2.alternate = False
+        g3.alternate = False
+        e1, e2 = Mock(), Mock()
+        e1.axes = ["g1", "g2"]
+        e2.axes = ["g2", "g3"]
+        m1 = np.repeat(np.array([0, 1, 0, 1, 1, 0]), 10)
+        m2 = np.tile(np.array([1, 0, 0, 1, 1, 1]), 10)
+        e1.create_mask.return_value = m1
+        e2.create_mask.return_value = m2
 
-        combined = Dimension.merge_dimensions([d1, d2, d3])
-
-        self.assertEqual(60, combined._max_length)
-        self.assertEqual(g1.alternate or g2.alternate or g3.alternate, combined.alternate)
-        self.assertEqual(["g1", "g2", "g3"], combined.axes)
-        self.assertEqual([0, -1, -2], combined.lower)
-        self.assertEqual([2, 2, 6], combined.upper)
-
-        expected_masks = [
-                {"repeat":20, "tile":1, "mask":d1_m},
-                {"repeat":10, "tile":9, "mask":d2_m},
-                {"repeat":5, "tile":84, "mask":d3_m}]
-        self.assertEqual(expected_masks, combined._masks)
-
-    def test_successive_merges(self):
-        g1, g2, h1, h2 = Mock(), Mock(), Mock(), Mock()
-        g1.axes, g2.axes = ["g1x"], ["g2x", "g2y"]
-        g1.positions = {"g1x":np.array([0, 1, 2, 3, 4])}
-        g2.positions = {
-            "g2x":np.array([10, 11, 12, 13, 14, 15, 16]),
-            "g2y":np.array([-10, -11, -12, -13, -14, -15, -16])}
-        h1.axes, h2.axes = ["h1x", "h1y"], ["h2x"]
-        h1.positions = {
-            "h1x":np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
-            "h1y":np.array([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21])}
-        h2.positions = {"h2x":np.array([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 9])}
-        g1.size, g2.size = 5, 7
-        h1.size, h2.size = 11, 13
-        g2mask = Mock()
-        h1mask = Mock()
-        dg1, dg2 = Dimension(g1), Dimension(g2)
-        dh1, dh2 = Dimension(h1), Dimension(h2)
-        dg2._masks = [{"repeat":1, "tile":1, "mask":g2mask}]
-        dh1._masks = [{"repeat":1, "tile":1, "mask":h1mask}]
-
-        outer = Dimension.merge_dimensions([dg1, dg2])
-        inner = Dimension.merge_dimensions([dh1, dh2])
-        self.assertEqual(5 * 7, outer._max_length)
-        self.assertEqual(11 * 13, inner._max_length)
-        self.assertEqual([{"repeat":1, "tile":5, "mask":g2mask}], outer._masks)
-        self.assertEqual([{"repeat":13, "tile":1, "mask":h1mask}], inner._masks)
-        self.assertEqual([4, 16, -10], outer.upper)
-        self.assertEqual([0, 10, -16], outer.lower)
-        self.assertEqual([11, 21, 9], inner.upper)
-        self.assertEqual([1, 1, 0], inner.lower)
-        combined = Dimension.merge_dimensions([outer, inner])
-
-        expected_masks = [
-            {"repeat":11*13, "tile":5, "mask":g2mask},
-            {"repeat":13, "tile":5*7, "mask":h1mask}]
-        self.assertEqual(expected_masks, combined._masks)
-        self.assertEqual(5 * 7 * 11 * 13, combined._max_length)
-        self.assertEqual(["g1x", "g2x", "g2y", "h1x", "h1y", "h2x"], combined.axes)
-        self.assertEqual([4, 16, -10, 11, 21, 9], combined.upper)
-        self.assertEqual([0, 10, -16, 1, 1, 0], combined.lower)
-
-    def test_prepare(self):
-        d = Dimension(Mock(axes=["x", "y"], positions={"x":np.array([0]), "y":np.array([0])}, size=30))
-        m1 = np.array([0, 1, 0, 1, 1, 0], dtype=np.int8)
-        m2 = np.array([1, 1, 0, 0, 1], dtype=np.int8)
-        d._masks = [
-            {"repeat":2, "tile":2.5, "mask":m1},
-            {"repeat":2, "tile":3, "mask":m2}]
-        e1 = np.array([0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0], dtype=np.int8)
-        e1 = np.append(np.tile(e1, 2), e1[:len(e1)//2])
-        e2 = np.array([1, 1, 1, 1, 0, 0, 0, 0, 1, 1], dtype=np.int8)
-        e2 = np.tile(e2, 3)
-        expected = e1 & e2
+        d = Dimension([g1, g2, g3], [e1, e2])
         d.prepare()
-        self.assertEqual(expected.tolist(), d.mask.tolist())
 
-    def test_apply_excluder_over_single_gen(self):
+        expected_mask = m1 & m2
+        expected_indices = expected_mask.nonzero()[0]
+        expected_g1 = np.repeat(g1.positions["g1"], 5 * 4)[expected_indices]
+        expected_g2 = np.tile(np.repeat(g2.positions["g2"], 5), 3)[expected_indices]
+        expected_g3 = np.tile(g3.positions["g3"], 3*4)[expected_indices]
+        self.assertEqual(expected_mask.tolist(), d.mask.tolist())
+        self.assertEqual(expected_indices.tolist(), d.indices.tolist())
+        self.assertEqual(expected_g1.tolist(), d.positions["g1"].tolist())
+        self.assertEqual(expected_g2.tolist(), d.positions["g2"].tolist())
+        self.assertEqual(expected_g3.tolist(), d.positions["g3"].tolist())
+
+
+    def test_multi_axis_per_generator(self):
+        g1, g2 = Mock(), Mock()
+        g1.axes = ["z"]
+        g2.axes = ["x", "y"]
+        g1.positions = {"z":np.array([100, 200, 300, 400])}
+        g1.bounds = {"z":np.array([50, 150, 250, 350, 450])}
+        g2.positions = {"x":np.array([10, 11, 12]), "y":np.array([-1, -2, -3])}
+        g2.bounds = {"x":np.array([9.5, 10.5, 11.5, 12.5]), "y":np.array([-0.5, -1.5, -2.5, -3.5])}
+        g1.size, g2.size = 4, 3
+        g1.alternate, g2.alternate = False, False
+        e1, e2 = Mock(), Mock()
+        e1.axes = ["x", "y"]
+        e2.axes = ["x", "z"]
+        m1 = np.array([1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0])
+        m2 = np.array([1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1])
+        e1.create_mask.return_value = m1
+        e2.create_mask.return_value = m2
+
+        d = Dimension([g1, g2], [e1, e2])
+        d.prepare()
+
+        expected_mask = m1 & m2
+        expected_indices = expected_mask.nonzero()[0]
+        expected_x = [10, 10, 11, 11]
+        expected_y = [-1, -1, -2, -2]
+        expected_z = [100, 300, 300, 400]
+        self.assertEqual(4, d.size)
+        self.assertEqual(expected_mask.tolist(), d.mask.tolist())
+        self.assertEqual(expected_indices.tolist(), d.indices.tolist())
+        self.assertEqual(expected_x, d.positions["x"].tolist())
+        self.assertEqual(expected_y, d.positions["y"].tolist())
+        self.assertEqual(expected_z, d.positions["z"].tolist())
+
+
+    def test_single_alternating_generator_with_excluder(self):
         x_pos = np.array([0, 1, 2, 3, 4, 5])
+        x_bounds = np.array([-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5])
         y_pos = np.array([10, 11, 12, 13, 14, 15])
-        g = Mock(axes=["x", "y"], positions={"x":x_pos, "y":y_pos})
-        g.alternate = False
-        mask = np.array([1, 1, 0, 1, 0, 0], dtype=np.int8)
-        e = Mock(axes=["x", "y"], create_mask=Mock(return_value=mask))
-        d = Dimension(g)
-        d.apply_excluder(e)
-        d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
-        self.assertEqual([{"repeat":1, "tile":1, "mask":mask.tolist()}], d._masks)
-        self.assertTrue((x_pos == e.create_mask.call_args[0][0]).all())
-        self.assertTrue((y_pos == e.create_mask.call_args[0][1]).all())
-
-    def test_apply_excluders_over_multiple_gens(self):
-        gx_pos = np.array([1, 2, 3, 4, 5])
-        gy_pos = np.zeros(5)
-        hx_pos = np.zeros(5)
-        hy_pos = np.array([-1, -2, -3])
-        mask = np.full(15, 1, dtype=np.int8)
-        e = Mock(axes=["gx", "hy"], create_mask=Mock(return_value=mask))
-        g = Mock(axes=["gx", "gy"], positions={"gx":gx_pos, "gy":gy_pos}, size=len(gx_pos), alternate=False)
-        h = Mock(axes=["hx", "hy"], positions={"hx":hx_pos, "hy":hy_pos}, size=len(hy_pos), alternate=False)
-        d = Dimension(g)
-        d.generators = [g, h]
-        d.size = g.size * h.size
-        d.apply_excluder(e)
-        d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
-        self.assertEqual([{"repeat":1, "tile":1, "mask":mask.tolist()}], d._masks)
-        self.assertTrue((np.repeat(np.array([1, 2, 3, 4, 5]), 3) == e.create_mask.call_args[0][0]).all())
-        self.assertTrue((np.tile(np.array([-1, -2, -3]), 5) == e.create_mask.call_args[0][1]).all())
-
-    def test_apply_excluders_over_single_alternating(self):
-        x_pos = np.array([1, 2, 3, 4, 5])
-        y_pos = np.array([10, 11, 12, 13, 14, 15])
-        g = Mock(axes=["x", "y"], positions={"x":x_pos, "y":y_pos})
+        y_bounds = np.array([9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5])
+        g = Mock(
+                axes=["x", "y"],
+                positions={"x":x_pos, "y":y_pos},
+                bounds={"x":x_bounds, "y":y_bounds},
+                size=6)
         g.alternate = True
         mask = np.array([1, 1, 0, 1, 0, 0], dtype=np.int8)
         e = Mock(axes=["x", "y"], create_mask=Mock(return_value=mask))
-        d = Dimension(g)
-        d.apply_excluder(e)
-        d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
-        self.assertEqual([{"repeat":1, "tile":0.5, "mask":mask.tolist()}], d._masks)
-        self.assertTrue((np.append(x_pos, x_pos[::-1]) == e.create_mask.call_args[0][0]).all())
-        self.assertTrue((np.append(y_pos, y_pos[::-1]) == e.create_mask.call_args[0][1]).all())
 
-    def test_apply_excluders_with_scaling(self):
-        g1_pos = np.array([1, 2, 3])
-        g2_pos = np.array([-1, -2])
-        mask_func = lambda px, py: np.full(len(px), 1, dtype=np.int8)
-        g1 = Mock(axes=["g1"], positions={"g1":g1_pos}, size=len(g1_pos))
-        g2 = Mock(axes=["g2"], positions={"g2":g2_pos}, size=len(g2_pos))
-        e = Mock(axes=["g1", "g2"], create_mask=Mock(side_effect=mask_func))
-        d = Dimension(g1)
-        d.alternate = True
-        d.generators = [Mock(size=5, axes=[]), g1, g2, Mock(size=7, axes=[])]
-        d.size = 5 * len(g1_pos) * len(g2_pos) * 7
-        d.apply_excluder(e)
-        d._masks[0]["mask"] = d._masks[0]["mask"].tolist()
-        expected_mask = [1] * 12
-        self.assertEqual([{"repeat":7, "tile":2.5, "mask":expected_mask}], d._masks)
-        self.assertTrue((np.repeat(np.append(g1_pos, g1_pos[::-1]), 2) == e.create_mask.call_args[0][0]).all())
-        self.assertTrue((np.tile(np.append(g2_pos, g2_pos[::-1]), 3) == e.create_mask.call_args[0][1]).all())
+        d = Dimension([g], [e])
 
-    def test_get_positions_single_gen(self):
-        gx_pos = np.tile(np.array([0, 1, 2, 3]), 4)
-        gy_pos = np.repeat(np.array([0, 1, 2, 3]), 4)
-        mask_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 1
-        g = Mock(axes=["gx", "gy"], positions={"gx":gx_pos, "gy":gy_pos}, size=16, alternate=False)
-        e = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
-        d = Dimension(g)
-        d.apply_excluder(e)
+        self.assertTrue(d.alternate)
+
         d.prepare()
-        self.assertEqual([1, 0, 1, 2, 1], d.get_positions("gx").tolist())
-        self.assertEqual([1, 2, 2, 2, 3], d.get_positions("gy").tolist())
 
-    def test_get_positions_after_merge(self):
-        gx_pos = np.array([0, 1, 2, 3])
-        gy_pos = np.array([0, 1, 2, 3])
-        mask_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 1
-        gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=False)
-        gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=False)
-        e = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
-        dx = Dimension(gx)
-        dy = Dimension(gy)
-        d = Dimension.merge_dimensions([dy, dx])
-        d.apply_excluder(e)
-        d.prepare()
-        self.assertEqual([1, 0, 1, 2, 1], d.get_positions("gx").tolist())
-        self.assertEqual([1, 2, 2, 2, 3], d.get_positions("gy").tolist())
+        expected_x = [0, 1, 3]
+        expected_y = [10, 11, 13]
+        self.assertEqual(expected_x, d.positions["x"].tolist())
+        self.assertEqual(expected_y, d.positions["y"].tolist())
 
-    def test_get_positions_with_alternating(self):
-        gx_pos = np.array([0, 1, 2, 3])
-        gy_pos = np.array([0, 1, 2, 3])
-        gz_pos = np.array([0, 1, 2, 3])
-        mask_xy_func = lambda px, py: (px-1)**2 + (py-2)**2 <= 2
-        mask_yz_func = lambda py, pz: (py-2)**2 + (pz-1)**2 <= 1
-        exy = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_xy_func))
-        eyz = Mock(axes=["gy", "gz"], create_mask=Mock(side_effect=mask_yz_func))
-        gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=True)
-        gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=True)
-        gz = Mock(axes=["gz"], positions={"gz":gz_pos}, size=4, alternate=True)
-        dx = Dimension(gx)
-        dy = Dimension(gy)
-        dz = Dimension(gz)
-        d = Dimension.merge_dimensions([dz, dy, dx])
-        d.apply_excluder(exy)
-        d.apply_excluder(eyz)
+
+    def test_positions_alternating(self):
+        g1, g2 = Mock(), Mock()
+        g1.axes = ["z"]
+        g2.axes = ["x", "y"]
+        g1.positions = {"z":np.array([100, 200, 300, 400])}
+        g1.bounds = {"z":np.array([50, 150, 250, 350, 450])}
+        g2.positions = {"x":np.array([10, 11, 12]), "y":np.array([-1, -2, -3])}
+        g2.bounds = {"x":np.array([9.5, 10.5, 11.5, 12.5]), "y":np.array([-0.5, -1.5, -2.5, -3.5])}
+        g1.size, g2.size = 4, 3
+        g1.alternate, g2.alternate = False, True
+        e1, e2 = Mock(), Mock()
+        e1.axes = ["x", "y"]
+        e2.axes = ["x", "z"]
+        m1 = np.array([1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1])
+        m2 = np.array([1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1])
+        e1.create_mask.return_value = m1
+        e2.create_mask.return_value = m2
+
+        d = Dimension([g1, g2], [e1, e2])
         d.prepare()
-        self.assertEqual(15, d.size)
-        self.assertEqual(
-            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
-            d.get_positions("gz").tolist())
-        self.assertEqual(
-            [2, 2, 2, 3, 3, 3, 2, 2, 2, 1, 1, 1, 2, 2, 2],
-            d.get_positions("gy").tolist())
-        self.assertEqual(
-            [0, 1, 2, 0, 1, 2, 2, 1, 0, 0, 1, 2, 0, 1, 2],
-            d.get_positions("gx").tolist())
+
+        expected_mask = m1 & m2
+        expected_indices = expected_mask.nonzero()[0]
+        expected_x = [10, 11, 12, 11, 12, 11, 10]
+        expected_y = [-1, -2, -3, -2, -3, -2, -1]
+        expected_z = [100, 100, 200, 200, 300, 400, 400]
+        self.assertEqual(7, d.size)
+        self.assertEqual(expected_mask.tolist(), d.mask.tolist())
+        self.assertEqual(expected_indices.tolist(), d.indices.tolist())
+        self.assertEqual(expected_x, d.positions["x"].tolist())
+        self.assertEqual(expected_y, d.positions["y"].tolist())
+        self.assertEqual(expected_z, d.positions["z"].tolist())
+
 
     def test_single_axis_excluder(self):
         x_pos = np.array([0, 1, 2, 3, 4, 5])
+        x_bounds = np.array([-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5])
         y_pos = np.array([10, 11, 12, 13, 14, 15])
-        g = Mock(axes=["x", "y"], positions={"x":x_pos, "y":y_pos}, size=len(x_pos))
+        y_bounds = np.array([9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5])
+        g = Mock(axes=["x", "y"],
+                positions={"x":x_pos, "y":y_pos},
+                bounds={"x":x_bounds, "y":y_bounds},
+                size=len(x_pos))
         g.alternate = False
         e = Mock(axes=["x"], create_mask=lambda x: (2 <= x) & (x < 4) | (x == 5))
-        d = Dimension(g)
-        d.apply_excluder(e)
+        d = Dimension([g], [e])
         d.prepare()
 
         self.assertEqual([2, 3, 5], d.get_positions('x').tolist())
         self.assertEqual([12, 13, 15], d.get_positions('y').tolist())
 
+
     def test_excluder_over_spread_axes(self):
         gw_pos = np.array([0.1, 0.2])
+        gw_bounds = np.array([0.05, 0.15, 0.25])
         gx_pos = np.array([0, 1, 2, 3])
         gy_pos = np.array([10, 11, 12, 13])
         gz_pos = np.array([100, 101, 102, 103])
         go_pos = np.array([1000, 1001, 1002])
         mask_xz_func = lambda px, pz: (px-1)**2 + (pz-102)**2 <= 1
         exz = Mock(axes=["gx", "gz"], create_mask=Mock(side_effect=mask_xz_func))
-        gw = Mock(axes=["gw"], positions={"gw":gw_pos}, size=2, alternate=False)
+        gw = Mock(axes=["gw"], positions={"gw":gw_pos}, bounds={"gw":gw_bounds}, size=2, alternate=False)
         gx = Mock(axes=["gx"], positions={"gx":gx_pos}, size=4, alternate=False)
         gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=4, alternate=False)
         gz = Mock(axes=["gz"], positions={"gz":gz_pos}, size=4, alternate=False)
         go = Mock(axes=["go"], positions={"go":go_pos}, size=3, alternate=False)
-        dw = Dimension(gw)
-        dx = Dimension(gx)
-        dy = Dimension(gy)
-        dz = Dimension(gz)
-        do = Dimension(go)
-        d = Dimension.merge_dimensions([do, dz, dy, dx, dw])
 
-        d.apply_excluder(exz)
+        d = Dimension([go, gz, gy, gx, gw], [exz])
         d.prepare()
 
         x_positions = np.tile(np.array([0, 1, 2, 3]), 16)
@@ -312,19 +257,24 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual(expected_y, d.get_positions("gy").tolist())
         self.assertEqual(expected_z, d.get_positions("gz").tolist())
 
+
     def test_spread_excluder_multi_axes_per_gen(self):
         gx1_pos = np.array([1, 2, 3, 4, 5])
+        gx1_bounds = np.array([0.5, 1.5, 2.5, 3.5, 4.5, 5.5])
         gx2_pos = np.array([11, 10, 9, 8, 7])
+        gx2_bounds = np.array([11.5, 10.5, 9.5, 8.5, 7.5, 6.5])
         gy_pos = np.array([-1, 0, 1])
         gz_pos = np.array([1, 0, -1, -2, -3])
         mask_x1z_func = lambda px, pz: (px-4)**2 + (pz+1)**2 <= 1
         exz = Mock(axes=["gx1", "gz"], create_mask=Mock(side_effect=mask_x1z_func))
-        gx = Mock(axes=["gx1", "gx2"], positions={"gx1":gx1_pos, "gx2":gx2_pos}, size=5, alternate=False)
+        gx = Mock(axes=["gx1", "gx2"],
+                positions={"gx1":gx1_pos, "gx2":gx2_pos},
+                bounds={"gx1":gx1_bounds, "gx2":gx2_bounds},
+                size=5, alternate=False)
         gy = Mock(axes=["gy"], positions={"gy":gy_pos}, size=3, alternate=False)
         gz = Mock(axes=["gz"], positions={"gz":gz_pos}, size=5, alternate=False)
-        d = Dimension.merge_dimensions([Dimension(gz), Dimension(gy), Dimension(gx)])
+        d = Dimension([gz, gy, gx], [exz])
 
-        d.apply_excluder(exz)
         d.prepare()
 
         x1_positions = np.tile(gx1_pos, 15)
@@ -343,20 +293,21 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual(expected_y, d.get_positions("gy").tolist())
         self.assertEqual(expected_z, d.get_positions("gz").tolist())
 
+
     def test_high_dimensional_excluder(self):
         w_pos = np.array([0, 1, 2, 3, 4, 5])
+        w_bounds = np.array([-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5])
         x_pos = np.array([0, 1, 2, 3, 4, 5])
         y_pos = np.array([0, 1, 2, 3, 4, 5])
         z_pos = np.array([0, 1, 2, 3, 4, 5])
         mask_function = lambda pw, px, py, pz: (pw-2)**2 + (px-2)**2 + (py-1)**2 + (pz-3)**2 <= 1.1
         excluder = Mock(axes=["w", "x", "y", "z"], create_mask=Mock(side_effect=mask_function))
-        gw = Mock(axes=["w"], positions={"w":w_pos}, size=len(w_pos), alternate=False)
+        gw = Mock(axes=["w"], positions={"w":w_pos}, bounds={"w":w_bounds}, size=len(w_pos), alternate=False)
         gx = Mock(axes=["x"], positions={"x":x_pos}, size=len(x_pos), alternate=False)
         gy = Mock(axes=["y"], positions={"y":y_pos}, size=len(y_pos), alternate=False)
         gz = Mock(axes=["z"], positions={"z":z_pos}, size=len(z_pos), alternate=False)
-        d = Dimension.merge_dimensions([Dimension(gz), Dimension(gy), Dimension(gx), Dimension(gw)])
+        d = Dimension([gz, gy, gx, gw], [excluder])
 
-        d.apply_excluder(excluder)
         d.prepare()
 
         w_positions = np.tile(w_pos, len(x_pos) * len(y_pos) * len(z_pos))
@@ -374,28 +325,107 @@ class DimensionTests(ScanPointGeneratorTest):
         self.assertEqual(y_expected, d.get_positions("y").tolist())
         self.assertEqual(z_expected, d.get_positions("z").tolist())
 
+
     def test_get_mesh_map(self):
         # Set up a generator, with 3x4 grid with alternating x and a circular
         # excluder such that the four 'corners' of the grid are excluded
         gx_pos = np.array([0.1, 0.2, 0.3])
+        gx_bounds = np.array([0.05, 0.15, 0.25, 0.35])
         gy_pos = np.array([1.1, 1.2, 1.3, 1.4])
         mask_func = lambda px, py: (px - 0.2) ** 2 + (py - 1.25) ** 2 <= 0.0225
-        gx = Mock(axes=["gx"], positions={"gx": gx_pos}, size=3,
+        gx = Mock(axes=["gx"], positions={"gx": gx_pos}, bounds={"gx":gx_bounds}, size=3,
                   alternate=True)
         gy = Mock(axes=["gy"], positions={"gy": gy_pos}, size=4,
                   alternate=False)
         e = Mock(axes=["gx", "gy"], create_mask=Mock(side_effect=mask_func))
 
-        dx = Dimension(gx)
-        dy = Dimension(gy)
-        d = Dimension.merge_dimensions([dy, dx])
-        d.apply_excluder(e)
+        d = Dimension([gy, gx], [e])
         d.prepare()
 
         self.assertEqual([1, 2, 1, 0, 0, 1, 2, 1],
                          d.get_mesh_map("gx").tolist())
         self.assertEqual([0, 1, 1, 1, 2, 2, 2, 3],
                          d.get_mesh_map("gy").tolist())
+
+
+    def test_mixed_alternating_generators(self):
+        x_pos = np.array([0, 1, 2])
+        x_bounds = np.array([-0.5, 0.5, 1.5, 2.5])
+        y_pos = np.array([10, 11, 12])
+        z_pos = np.array([20, 21, 22])
+        w_pos = np.array([30, 31, 32])
+        gx = Mock(axes=["x"], positions={"x":x_pos}, bounds={"x":x_bounds}, size=3, alternate=True)
+        gy = Mock(axes=["y"], positions={"y":y_pos}, size=3, alternate=True)
+        gz = Mock(axes=["z"], positions={"z":z_pos}, size=3, alternate=False)
+        gw = Mock(axes=["w"], positions={"w":w_pos}, size=3, alternate=False)
+
+        mask = np.array([1, 1, 0, 1, 1, 1, 1, 0, 1] * 9)
+        indices = np.nonzero(mask)[0]
+        e = Mock(axes=["x", "y", "z", "w"])
+        e.create_mask.return_value=mask
+
+        d = Dimension([gw, gz, gy, gx], [e])
+        d.prepare()
+
+        expected_x = np.append(np.tile(np.append(x_pos, x_pos[::-1]), 13), x_pos)[indices]
+        expected_y = np.repeat(np.append(np.tile(np.append(y_pos, y_pos[::-1]), 4), y_pos), 3)[indices]
+        expected_z = np.tile(np.repeat(z_pos, 9), 3)[indices]
+        expected_w = np.repeat(w_pos, 27)[indices]
+        self.assertEqual(False, d.alternate)
+        self.assertEqual(expected_x.tolist(), d.get_positions("x").tolist())
+        self.assertEqual(expected_y.tolist(), d.get_positions("y").tolist())
+        self.assertEqual(expected_z.tolist(), d.get_positions("z").tolist())
+        self.assertEqual(expected_w.tolist(), d.get_positions("w").tolist())
+
+
+    def test_dim_alternate_condition(self):
+        g1 = Mock(
+                axes=["x"],
+                positions={"x":np.array([1, 2, 3])},
+                bounds={"x":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=True)
+        g2 = Mock(
+                axes=["y"],
+                positions={"y":np.array([1, 2, 3])},
+                bounds={"y":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=False)
+        g3 = Mock(
+                axes=["z"],
+                positions={"z":np.array([1, 2, 3])},
+                bounds={"z":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=True)
+
+        d1 = Dimension([g1, g3])
+        d2 = Dimension([g2, g3])
+        self.assertEqual(True, d1.alternate)
+        self.assertEqual(False, d2.alternate)
+
+        d1.prepare()
+        d2.prepare()
+        self.assertEqual(True, d1.alternate)
+        self.assertEqual(False, d2.alternate)
+
+
+    def test_dim_invalid_alternating(self):
+        g1 = Mock(
+                axes=["x"],
+                positions={"x":np.array([1, 2, 3])},
+                bounds={"x":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=True)
+        g2 = Mock(
+                axes=["y"],
+                positions={"y":np.array([1, 2, 3])},
+                bounds={"y":np.array([0.5, 1.5, 2.5, 3.5])},
+                size=3,
+                alternate=False)
+
+        with self.assertRaises(ValueError):
+            d = Dimension([g1, g2])
+
 
 
 if __name__ == "__main__":
