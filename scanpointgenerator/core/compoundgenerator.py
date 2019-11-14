@@ -80,7 +80,7 @@ class CompoundGenerator(Serializable):
         self._dim_meta = {}
         self._prepared = False
         self.continuous = AContinuous(continuous)
-        if (delay_after != None):
+        if delay_after is not None:
             self.delay_after = ADelay(delay_after)
         else:
             self.delay_after = None
