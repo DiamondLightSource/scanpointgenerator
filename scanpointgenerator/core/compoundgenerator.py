@@ -52,7 +52,7 @@ class CompoundGenerator(Serializable):
                  mutators=(),  # type: UMutators
                  duration=-1,  # type: ADuration
                  continuous=True,  # type: AContinuous
-                 delay_after=None  # type: ADelay
+                 delay_after=0  # type: ADelay
                  ):
         # type: (...) -> None
         self.size = 0
@@ -77,10 +77,9 @@ class CompoundGenerator(Serializable):
         self.units = {}
         self._dim_meta = {}
         self._prepared = False
-        if delay_after is not None:
-            self.delay_after = ADelay(delay_after)
-        else:
-            self.delay_after = None
+        self.delay_after = ADelay(delay_after)
+        if self.delay_after < 0.0:
+            self.delay_after = 0.0
 
 
         for generator in self.generators:
@@ -246,8 +245,7 @@ class CompoundGenerator(Serializable):
             point.indexes.append(dim_idx)
 
         point.duration = self.duration
-        if self.delay_after is not None:
-            point.delay_after = self.delay_after
+        point.delay_after = self.delay_after
         for m in self.mutators:
             point = m.mutate(point, n)
         return point

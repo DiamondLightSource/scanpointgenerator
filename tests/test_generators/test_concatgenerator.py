@@ -156,7 +156,7 @@ class ConcatGeneratorTest(ScanPointGeneratorTest):
         expected_dict['mutators'] = []
         expected_dict['duration'] = -1.0
         expected_dict['continuous'] = True
-        expected_dict['delay_after'] = None
+        expected_dict['delay_after'] = 0
         d = comp.to_dict()
         self.assertEqual(expected_dict, d)
 
