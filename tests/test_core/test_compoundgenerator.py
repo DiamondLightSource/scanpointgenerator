@@ -11,7 +11,7 @@ from scanpointgenerator import LissajousGenerator
 from scanpointgenerator import StaticPointGenerator
 from scanpointgenerator import ROIExcluder
 from scanpointgenerator import SquashingExcluder
-from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI
+from scanpointgenerator.rois import CircularROI, RectangularROI, EllipticalROI, SectorROI, PolygonalROI
 from scanpointgenerator.mutators import RandomOffsetMutator
 from scanpointgenerator.compat import range_, np
 
@@ -65,6 +65,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g.prepare()
         x.prepare_positions.assert_not_called()
 
+
     def test_iterator(self):
         x = LineGenerator("x", "mm", 1.0, 2.0, 5, False)
         y = LineGenerator("y", "mm", 1.0, 2.0, 5, False)
@@ -76,6 +77,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_pos, [p.positions for p in points])
         expected_indexes = [[y, x] for y in range_(0, 5) for x in range_(0, 5)]
         self.assertEqual(expected_indexes, [p.indexes for p in points])
+
 
     def test_get_point(self):
         x = LineGenerator("x", "mm", -1., 1, 5, False)
@@ -98,6 +100,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         expected_idx = [[z, xy] for z in range_(5)
             for xy in range_(len(xy_expected))]
         self.assertEqual(expected_idx, idx)
+
 
     def test_get_point_large_scan(self):
         s = SpiralGenerator(["x", "y"], "mm", [0, 0], 6, 1) #114 points
@@ -134,6 +137,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             for k in e.keys():
                 self.assertAlmostEqual(e[k], p[k])
 
+
     def test_alternating_simple(self):
         y = LineGenerator("y", "mm", 1, 5, 5)
         x = LineGenerator("x", "mm", 1, 5, 5, alternate=True)
@@ -156,6 +160,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_idx, [p.indexes for p in points])
         self.assertEqual(expected_lower, [p.lower["x"] for p in points])
         self.assertEqual(expected_upper, [p.upper["x"] for p in points])
+
 
     def test_alternating_three_axis(self):
         z = LineGenerator("z", "mm", 1, 2, 2)
@@ -186,6 +191,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_lower, [p.lower["x"] for p in points])
         self.assertEqual(expected_upper, [p.upper["x"] for p in points])
 
+
     def test_alternating_with_region(self):
         y = LineGenerator("y", "mm", 1, 5, 5, True)
         x = LineGenerator("x", "mm", 1, 5, 5, True)
@@ -207,6 +213,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected, [p.positions for p in points])
         self.assertEqual(expected_idx, [p.indexes for p in points])
         self.assertEqual((len(expected),), g.shape)
+
 
     def test_inner_alternating(self):
         z = LineGenerator("z", "mm", 1, 5, 5)
@@ -242,6 +249,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected, [p.positions for p in points])
         self.assertEqual(expected_idx, [p.indexes for p in points])
 
+
     def test_two_dim_inner_alternates(self):
         wg = LineGenerator("w", "mm", 0, 1, 2)
         zg = LineGenerator("z", "mm", 0, 1, 2)
@@ -254,11 +262,210 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g = CompoundGenerator([wg, zg, yg, xg], [e1, e2], [])
         g.prepare()
         actual = [p.positions for p in g.iterator()]
-        expected = [(0, 3, 1, 0), (0, 2, 1, 0), (1, 1, 1, 0), (0, 1, 1, 0),
-            (0, 1, 0, 1), (1, 1, 0, 1), (0, 2, 0, 1), (0, 3, 0, 1)]
+        expected = [(0, 1, 1, 0), (1, 1, 1, 0), (0, 2, 1, 0), (0, 3, 1, 0),
+                (0, 3, 0, 1), (0, 2, 0, 1), (1, 1, 0, 1), (0, 1, 0, 1)]
         expected = [{"x":float(x), "y":float(y), "z":float(z), "w":float(w)}
             for (x, y, z, w) in expected]
         self.assertEqual(expected, actual)
+
+
+    def test_three_dim_alternating_no_filter(self):
+        zg = LineGenerator("z", "mm", 0, 2, 3, True)
+        yg = LineGenerator("y", "mm", 0, 3, 4, True)
+        xg = LineGenerator("x", "mm", 0, 2, 3, True)
+        r1 = CircularROI([0, 0], 1000)
+        e1 = ROIExcluder([r1], ["x", "y"])
+        e2 = ROIExcluder([r1], ["x", "z"])
+        g1 = CompoundGenerator([zg, yg, xg], [], [])
+        g2 = CompoundGenerator([zg, yg, xg], [e1], [])
+        g3 = CompoundGenerator([zg, yg, xg], [e2], [])
+        g1.prepare()
+        g2.prepare()
+        g3.prepare()
+        self.assertEquals((3, 4, 3), g1.shape)
+        self.assertEquals((3, 12), g2.shape)
+        self.assertEquals((36,), g3.shape)
+        self.assertEqual(["z", "y", "x"], g1.axes)
+        self.assertEqual(["z", "y", "x"], g2.axes)
+        self.assertEqual(["z", "y", "x"], g3.axes)
+        expected = [
+                {'z':0, 'y':0, 'x':0}, {'z':0, 'y':0, 'x':1}, {'z':0, 'y':0, 'x':2},
+                {'z':0, 'y':1, 'x':2}, {'z':0, 'y':1, 'x':1}, {'z':0, 'y':1, 'x':0},
+                {'z':0, 'y':2, 'x':0}, {'z':0, 'y':2, 'x':1}, {'z':0, 'y':2, 'x':2},
+                {'z':0, 'y':3, 'x':2}, {'z':0, 'y':3, 'x':1}, {'z':0, 'y':3, 'x':0},
+                {'z':1, 'y':3, 'x':0}, {'z':1, 'y':3, 'x':1}, {'z':1, 'y':3, 'x':2},
+                {'z':1, 'y':2, 'x':2}, {'z':1, 'y':2, 'x':1}, {'z':1, 'y':2, 'x':0},
+                {'z':1, 'y':1, 'x':0}, {'z':1, 'y':1, 'x':1}, {'z':1, 'y':1, 'x':2},
+                {'z':1, 'y':0, 'x':2}, {'z':1, 'y':0, 'x':1}, {'z':1, 'y':0, 'x':0},
+                {'z':2, 'y':0, 'x':0}, {'z':2, 'y':0, 'x':1}, {'z':2, 'y':0, 'x':2},
+                {'z':2, 'y':1, 'x':2}, {'z':2, 'y':1, 'x':1}, {'z':2, 'y':1, 'x':0},
+                {'z':2, 'y':2, 'x':0}, {'z':2, 'y':2, 'x':1}, {'z':2, 'y':2, 'x':2},
+                {'z':2, 'y':3, 'x':2}, {'z':2, 'y':3, 'x':1}, {'z':2, 'y':3, 'x':0},
+                ]
+
+        expected_lower_bounds = [
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                ]
+        expected_upper_bounds = [
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                ]
+
+        p1 = list(g1.iterator())
+        p2 = list(g2.iterator())
+        p3 = list(g3.iterator())
+        self.assertEqual(len(expected), len(p1))
+        self.assertEqual(len(expected), len(p2))
+        self.assertEqual(len(expected), len(p3))
+        for i, p in enumerate(p1):
+            self.assertEqual(expected[i], p.positions)
+        for i, p in enumerate(p2):
+            self.assertEqual(expected[i], p.positions)
+        for i, p in enumerate(p3):
+            self.assertEqual(expected[i], p.positions)
+        self.assertEqual(expected_lower_bounds, [p.lower["x"] for p in p1])
+        self.assertEqual(expected_lower_bounds, [p.lower["x"] for p in p2])
+        self.assertEqual(expected_lower_bounds, [p.lower["x"] for p in p3])
+        self.assertEqual(expected_upper_bounds, [p.upper["x"] for p in p1])
+        self.assertEqual(expected_upper_bounds, [p.upper["x"] for p in p2])
+        self.assertEqual(expected_upper_bounds, [p.upper["x"] for p in p3])
+
+
+    def test_three_axis_alternating_filtered(self):
+        zg = LineGenerator("z", "mm", 0, 2, 3, True)
+        yg = LineGenerator("y", "mm", 0, 3, 4, True)
+        xg = LineGenerator("x", "mm", 0, 2, 3, True)
+        r = CircularROI([0, 0], 2.2)
+        e = ROIExcluder([r], ["x", "y"])
+        g = CompoundGenerator([zg, yg, xg], [e], [])
+        g.prepare()
+        self.assertEqual((3, 6), g.shape)
+
+        expected = [
+                {'z':0, 'y':0, 'x':0}, {'z':0, 'y':0, 'x':1}, {'z':0, 'y':0, 'x':2},
+                {'z':0, 'y':1, 'x':1}, {'z':0, 'y':1, 'x':0},
+                {'z':0, 'y':2, 'x':0},
+                {'z':1, 'y':2, 'x':0},
+                {'z':1, 'y':1, 'x':0}, {'z':1, 'y':1, 'x':1},
+                {'z':1, 'y':0, 'x':2}, {'z':1, 'y':0, 'x':1}, {'z':1, 'y':0, 'x':0},
+                {'z':2, 'y':0, 'x':0}, {'z':2, 'y':0, 'x':1}, {'z':2, 'y':0, 'x':2},
+                {'z':2, 'y':1, 'x':1}, {'z':2, 'y':1, 'x':0},
+                {'z':2, 'y':2, 'x':0},
+                ]
+
+        expected_lower_bounds = [
+                -0.5, 0.5, 1.5, 1.5, 0.5, -0.5,
+                0.5, -0.5, 0.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 1.5, 0.5, -0.5,
+                ]
+        expected_upper_bounds = [
+                0.5, 1.5, 2.5, 0.5, -0.5, 0.5,
+                -0.5, 0.5, 1.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 0.5, -0.5, 0.5,
+                ]
+
+        points = list(g.iterator())
+        self.assertEqual(len(expected), len(points))
+        for i, p in enumerate(points):
+            self.assertEqual(expected[i], p.positions)
+        self.assertEqual(expected_lower_bounds, [p.lower["x"] for p in points])
+        self.assertEqual(expected_upper_bounds, [p.upper["x"] for p in points])
+
+
+    def test_three_axis_alternating_outer_filtered(self):
+        zg = LineGenerator("z", "mm", 0, 2, 3, True)
+        yg = LineGenerator("y", "mm", 0, 3, 4, True)
+        xg = LineGenerator("x", "mm", 0, 2, 3, True)
+        r = CircularROI([0, 0], 2.2)
+        e = ROIExcluder([r], ["y", "z"])
+        g = CompoundGenerator([zg, yg, xg], [e], [])
+        g.prepare()
+        self.assertEqual((6, 3), g.shape)
+
+        expected = [
+                {'z':0, 'y':0, 'x':0}, {'z':0, 'y':0, 'x':1}, {'z':0, 'y':0, 'x':2},
+                {'z':0, 'y':1, 'x':2}, {'z':0, 'y':1, 'x':1}, {'z':0, 'y':1, 'x':0},
+                {'z':0, 'y':2, 'x':0}, {'z':0, 'y':2, 'x':1}, {'z':0, 'y':2, 'x':2},
+                {'z':1, 'y':1, 'x':2}, {'z':1, 'y':1, 'x':1}, {'z':1, 'y':1, 'x':0},
+                {'z':1, 'y':0, 'x':0}, {'z':1, 'y':0, 'x':1}, {'z':1, 'y':0, 'x':2},
+                {'z':2, 'y':0, 'x':2}, {'z':2, 'y':0, 'x':1}, {'z':2, 'y':0, 'x':0},
+                ]
+
+        expected_lower_bounds = [
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5,
+                ]
+
+        expected_upper_bounds = [
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5,
+                ]
+
+        expected_indexes = [
+                [0, 0], [0, 1], [0, 2], [1, 2], [1, 1], [1, 0],
+                [2, 0], [2, 1], [2, 2], [3, 2], [3, 1], [3, 0],
+                [4, 0], [4, 1], [4, 2], [5, 2], [5, 1], [5, 0],
+                ]
+
+        points = list(g.iterator())
+        self.assertEqual(len(expected), len(points))
+        for i, p in enumerate(points):
+            self.assertEqual(expected[i], p.positions)
+        self.assertEqual(expected_lower_bounds, [p.lower["x"] for p in points])
+        self.assertEqual(expected_upper_bounds, [p.upper["x"] for p in points])
+        self.assertEqual(expected_indexes, [p.indexes for p in g.iterator()])
+
+
+    def test_three_axis_alternating_all_filtered(self):
+        z1g = LineGenerator("z1", "mm", 0, 2, 3, True)
+        z2g = LineGenerator("z2", "mm", 0, 100, 2, True) # dummy axis to emulate 1D excluder
+        yg = LineGenerator("y", "mm", 0, 3, 4, True)
+        xg = LineGenerator("x", "mm", 0, 2, 3, True)
+        r1 = CircularROI([0, 0], 2.8)
+        r2 = CircularROI([2.5, 0], 1.5)
+        e1 = ROIExcluder([r1], ["x", "y"])
+        e2 = ROIExcluder([r2], ["z1", "z2"])
+        g = CompoundGenerator([z2g, z1g, yg, xg], [e1, e2], [])
+        g.prepare()
+        self.assertEqual((2, 8), g.shape)
+
+        expected = [
+                {'z1':1, 'z2':0, 'x':0, 'y':0}, {'z1':1, 'z2':0, 'x':1, 'y':0},
+                {'z1':1, 'z2':0, 'x':2, 'y':0}, {'z1':1, 'z2':0, 'x':2, 'y':1},
+                {'z1':1, 'z2':0, 'x':1, 'y':1}, {'z1':1, 'z2':0, 'x':0, 'y':1},
+                {'z1':1, 'z2':0, 'x':0, 'y':2}, {'z1':1, 'z2':0, 'x':1, 'y':2},
+                {'z1':2, 'z2':0, 'x':1, 'y':2}, {'z1':2, 'z2':0, 'x':0, 'y':2},
+                {'z1':2, 'z2':0, 'x':0, 'y':1}, {'z1':2, 'z2':0, 'x':1, 'y':1},
+                {'z1':2, 'z2':0, 'x':2, 'y':1}, {'z1':2, 'z2':0, 'x':2, 'y':0},
+                {'z1':2, 'z2':0, 'x':1, 'y':0}, {'z1':2, 'z2':0, 'x':0, 'y':0},
+                ]
+
+        expected_lower_bounds = [
+                -0.5, 0.5, 1.5, 2.5, 1.5, 0.5, -0.5, 0.5,
+                1.5, 0.5, -0.5, 0.5, 1.5, 2.5, 1.5, 0.5]
+
+        expected_upper_bounds = [
+                0.5, 1.5, 2.5, 1.5, 0.5, -0.5, 0.5, 1.5,
+                0.5, -0.5, 0.5, 1.5, 2.5, 1.5, 0.5, -0.5]
+
+        points = list(g.iterator())
+        self.assertEqual(len(expected), len(points))
+        for i, p in enumerate(points):
+            self.assertEqual(expected[i], p.positions)
+        self.assertEqual(expected_lower_bounds, [p.lower["x"] for p in points])
+        self.assertEqual(expected_upper_bounds, [p.upper["x"] for p in points])
+
 
     def test_three_dim_middle_alternates(self):
         tg = LineGenerator("t", "mm", 1, 5, 5)
@@ -292,6 +499,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         actual = [p.positions for p in list(g.iterator())]
         for e, a in zip(expected, actual):
             self.assertEqual(e, a)
+
 
     def test_triple_alternating_linked_gen(self):
         tg = LineGenerator("t", "mm", 1, 5, 5)
@@ -327,6 +535,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         for e, a in zip(expected, actual):
             self.assertEqual(e, a)
 
+
     def test_alternating_regions_2(self):
         z = LineGenerator("z", "mm", 1, 5, 5)
         y = LineGenerator("y", "mm", 1, 5, 5, True)
@@ -353,6 +562,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             if (p["x"]-3)**2 + (p["y"]-3)**2 <= 1.5**2
             and (p["z"]-3)**2 + (p["y"]-3)**2 <= 1.5**2]
         self.assertEqual(expected, actual)
+
 
     def test_alternating_complex(self):
         tg = LineGenerator("t", "mm", 1, 5, 5)
@@ -386,6 +596,130 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             (p["z"] >= 3 and p["z"] <= 5 and p["y"] >= 3 and p["y"] <= 5)]
         self.assertEqual(expected, points)
 
+
+    def test_mixed_alternating_simple(self):
+        zg = LineGenerator("z", "mm", 1, 5, 5)
+        yg = LineGenerator("y", "mm", 1, 5, 5)
+        xg = LineGenerator("x", "mm", 1, 5, 5, True)
+        e = SquashingExcluder(["x", "y"])
+        g = CompoundGenerator([zg, yg, xg], [e], [])
+        g.prepare()
+        expected = []
+        expected_idx = []
+        expected_dim_x = [
+                1, 2, 3, 4, 5,
+                5, 4, 3, 2, 1,
+                1, 2, 3, 4, 5,
+                5, 4, 3, 2, 1,
+                1, 2, 3, 4, 5]
+        expected_dim_y = [
+                1, 1, 1, 1, 1,
+                2, 2, 2, 2, 2,
+                3, 3, 3, 3, 3,
+                4, 4, 4, 4, 4,
+                5, 5, 5, 5, 5]
+        for n1, z in enumerate(range_(1, 6)):
+            for n2, (x, y) in enumerate(zip(expected_dim_x, expected_dim_y)):
+                expected.append({"z":float(z), "y":float(y), "x":float(x)})
+                expected_idx.append([n1, n2])
+        points = [p.positions for p in list(g.iterator())]
+        self.assertEqual(expected, points)
+        self.assertEqual(expected_idx, [p.indexes for p in list(g.iterator())])
+
+
+    def test_mixed_dim_complex(self):
+        tg = LineGenerator("t", "mm", 1, 5, 5, False)
+        zg = LineGenerator("z", "mm", 11, 13, 3, True)
+        yg = LineGenerator("y", "mm", 21, 23, 3, True)
+        xg = LineGenerator("x", "mm", 31, 33, 3, False)
+        wg = LineGenerator("w", "mm", 41, 43, 3, True)
+        m1 = np.array([0, 0, 1, 1, 0, 1, 1, 1, 0])
+        m2 = np.array([1, 1, 0, 1, 1, 0, 1, 0, 1])
+        e1 = MagicMock(spec=Excluder([]), axes=["x", "w"])
+        e2 = MagicMock(spec=Excluder([]), axes=["z", "y"])
+        e1.create_mask.return_value=m1
+        e2.create_mask.return_value=m2
+        i1, i2 = np.nonzero(m1)[0], np.nonzero(m2)[0]
+
+        g = CompoundGenerator([tg, zg, yg, xg, wg], [e1, e2], [])
+        g.prepare()
+        d1_w = np.array([41, 42, 43, 43, 42, 41, 41, 42, 43])[i1]
+        d1_x = np.array([31, 31, 31, 32, 32, 32, 33, 33, 33])[i1]
+        d2_y = np.array([21, 22, 23, 23, 22, 21, 21, 22, 23])[i2]
+        d2_z = np.array([11, 11, 11, 12, 12, 12, 13, 13, 13])[i2]
+
+        expected = []
+        expected_idx = []
+        d2_y_alt = d2_y
+        d2_z_alt = d2_z
+        d2_idx = list(range_(len(d2_z)))
+        d2_idx_alt = d2_idx
+
+        for n1, t in enumerate(range_(1, 6)):
+            for n2, y, z in zip(d2_idx_alt, d2_y_alt, d2_z_alt):
+                for n3, (w, x) in enumerate(zip(d1_w, d1_x)):
+                    expected.append({"t":float(t), "z":float(z), "y":float(y),
+                        "x":float(x), "w":float(w)})
+                    expected_idx.append([n1, n2, n3])
+            d2_y_alt = d2_y_alt[::-1]
+            d2_z_alt = d2_z_alt[::-1]
+            d2_idx_alt = d2_idx_alt[::-1]
+        points = [p.positions for p in list(g.iterator())]
+        indexes = [p.indexes for p in list(g.iterator())]
+        self.assertEqual(expected, points)
+        self.assertEqual(expected_idx, indexes)
+
+
+    def test_alternating_dim_inside_filtered(self):
+        tg = LineGenerator("t", "mm", 1, 5, 5, False)
+        zg = LineGenerator("z", "mm", 11, 13, 3, False)
+        yg = LineGenerator("y", "mm", 21, 23, 3, True)
+        xg = LineGenerator("x", "mm", 31, 33, 3, True)
+        wg = LineGenerator("w", "mm", 41, 43, 3, True)
+        m1 = np.array([0, 0, 1, 1, 0, 1, 1, 1, 0])
+        m2 = np.array([1, 1, 0, 1, 1, 0, 1, 0, 1])
+        e1 = MagicMock(spec=Excluder([]), axes=["x", "w"])
+        e2 = MagicMock(spec=Excluder([]), axes=["z", "y"])
+        e1.create_mask.return_value=m1
+        e2.create_mask.return_value=m2
+        i1, i2 = np.nonzero(m1)[0], np.nonzero(m2)[0]
+
+        g = CompoundGenerator([tg, zg, yg, xg, wg], [e1, e2], [])
+        g.prepare()
+        d1_w = np.array([41, 42, 43, 43, 42, 41, 41, 42, 43])[i1]
+        d1_x = np.array([31, 31, 31, 32, 32, 32, 33, 33, 33])[i1]
+        d2_y = np.array([21, 22, 23, 23, 22, 21, 21, 22, 23])[i2]
+        d2_z = np.array([11, 11, 11, 12, 12, 12, 13, 13, 13])[i2]
+        d1_idx = list(range_(len(np.nonzero(m1)[0])))
+
+        expected = []
+        expected_idx = []
+
+        d1_w_alt = d1_w
+        d1_x_alt = d1_x
+        d1_idx_alt = d1_idx
+        m1_alt = m1
+
+        for n1, t in enumerate(range_(1, 6)):
+            n2 = 0
+            for (y, z) in zip(d2_y, d2_z):
+                idx_iter = iter(d1_idx_alt)
+                for (w, x, m1v) in zip(d1_w_alt, d1_x_alt, m1_alt):
+                    n3 = next(idx_iter)
+                    expected.append({"t":float(t), "z":float(z), "y":float(y),
+                        "x":float(x), "w":float(w)})
+                    expected_idx.append([n1, n2, n3])
+                n2 += 1
+                d1_x_alt = d1_x_alt[::-1]
+                d1_w_alt = d1_w_alt[::-1]
+                d1_idx_alt = d1_idx_alt[::-1]
+
+        points = [p.positions for p in list(g.iterator())]
+        indexes = [p.indexes for p in list(g.iterator())]
+        self.assertEqual(expected, points)
+        self.assertEqual(expected_idx, indexes)
+
+
     def test_line_spiral(self):
         expected = [{'y': -0.3211855677650875, 'x': 0.23663214944574582, 'z': 0.0},
                      {'y': -0.25037538922751695, 'x': -0.6440318266552169, 'z': 0.0},
@@ -406,6 +740,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(len(expected), len(points))
         for i, p in enumerate(points):
             self.assertEqual(expected[i], p.positions)
+
 
     def test_line_lissajous(self):
         expected = [{'y': 0.0, 'x': 0.5, 'z': 0.0},
@@ -434,6 +769,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         for i, p in enumerate(points):
             self.assertEqual(expected[i], p.positions)
 
+
     def test_horrible_scan(self):
         lissajous = LissajousGenerator(
             ["j1", "j2"], "mm", [-0.5, 0.7], [2, 3.5], 7, 100)
@@ -449,38 +785,36 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g = CompoundGenerator([lissajous, line2, line1, spiral], [e1, e2, e3], [])
         g.prepare()
 
-        l2_f = True
-        l1_f = True
-        s_f = True
-        points = []
-        for (j1, j2) in zip(lissajous.positions["j1"], lissajous.positions["j2"]):
-            l2p = line2.positions["l2"] if l2_f else line2.positions["l2"][::-1]
-            l2_f = not l2_f
-            for l2 in l2p:
-                l1p = line1.positions["l1"] if l1_f else line1.positions["l1"][::-1]
-                l1_f = not l1_f
-                for l1 in l1p:
-                    sp = zip(spiral.positions["s1"], spiral.positions["s2"]) if s_f \
-                        else zip(spiral.positions["s1"][::-1], spiral.positions["s2"][::-1])
-                    s_f = not s_f
-                    for (s1, s2) in sp:
-                        points.append((s1, s2, l1, l2, j1, j2))
+        d1_s1 = np.append(spiral.positions["s1"], spiral.positions["s1"][::-1])
+        d1_s1 = np.append(np.tile(d1_s1, 2), spiral.positions["s1"])
+        d1_s2 = np.append(spiral.positions["s2"], spiral.positions["s2"][::-1])
+        d1_s2 = np.append(np.tile(d1_s2, 2), spiral.positions["s2"])
+        d1_l1 = np.repeat(line1.positions["l1"], len(spiral.positions["s1"]))
+        d1_m = ((d1_s2+1)**2 + (d1_l1+1)**2 <= 16) & ((d1_s1-1)**2 + (d1_s2-1)**2 <= 4)
+        d1_i = np.nonzero(d1_m)[0]
 
-        self.assertEqual(lissajous.size * line2.size * line1.size * spiral.size, len(points))
-        points = [(s1, s2, l1, l2, j1, j2) for (s1, s2, l1, l2, j1, j2) in points if
-            (j1-1)**2 + (l2-1)**2 <= 4 and
-            (s2+1)**2 + (l1+1)**2 <= 16 and
-            (s1-1)**2 + (s2-1)**2 <= 4]
-        self.assertEqual(len(points), g.size)
-        generated_points = list(g.iterator())
-        self.assertEqual(len(points), len(generated_points))
+        d2_j1 = np.repeat(lissajous.positions["j1"], len(line2.positions["l2"]))
+        d2_j2 = np.repeat(lissajous.positions["j2"], len(line2.positions["l2"]))
+        d2_l2 = np.append(line2.positions["l2"], line2.positions["l2"][::-1])
+        d2_l2 = np.tile(d2_l2, int(lissajous.size//2))
+        d2_m = ((d2_j1-1)**2 + (d2_l2-1)**2) <= 4
+        d2_i = np.nonzero(d2_m)[0]
 
-        actual = [p.positions for p in generated_points]
-        expected = [{"j1":j1, "j2":j2, "l2":l2, "l1":l1, "s1":s1, "s2":s2}
-            for (s1, s2, l1, l2, j1, j2) in points]
-        for e, a in zip(expected, actual):
-            self.assertEqual(e, a)
+        expected = []
+        expected_idx = []
+
+        d1_i_alt = d1_i
+        n1_alt = list(range_(len(d1_i)))
+        for n2, (j1, j2, l2) in enumerate(zip(d2_j1[d2_i], d2_j2[d2_i], d2_l2[d2_i])):
+            for n1, s1, s2, l1 in zip(n1_alt, d1_s1[d1_i_alt], d1_s2[d1_i_alt], d1_l1[d1_i_alt]):
+                expected.append({"j1":j1, "j2":j2, "l2":l2, "l1":l1, "s1":s1, "s2":s2})
+                expected_idx.append([n2, n1])
+            d1_i_alt = d1_i_alt[::-1]
+            n1_alt = n1_alt[::-1]
+
         self.assertEqual((181, 10), g.shape)
+        self.assertEqual(expected, [p.positions for p in g.iterator()])
+
 
     def test_double_spiral_scan(self):
         line1 = LineGenerator(["l1"], "mm", -1, 2, 5)
@@ -493,53 +827,56 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g = CompoundGenerator([line1, spiral_s, spiral_t, line2], [e1, e2], [])
         g.prepare()
 
-        points = []
-        l1s = []
-        tl2 = []
+        d1_s1 = np.append(spiral_s.positions["s1"], spiral_s.positions["s1"][::-1])
+        d1_s1 = np.append(np.tile(d1_s1, 2), spiral_s.positions["s1"])
+        d1_s2 = np.append(spiral_s.positions["s2"], spiral_s.positions["s2"][::-1])
+        d1_s2 = np.append(np.tile(d1_s2, 2), spiral_s.positions["s2"])
+        d1_l1 = np.repeat(line1.positions["l1"], spiral_s.size)
+        d1_m = d1_s1*d1_s1 + d1_l1*d1_l1 <= 1
+        d1_i = np.nonzero(d1_m)[0]
 
-        s_f = True
-        for l1 in line1.positions["l1"]:
-            sp = zip(spiral_s.positions['s1'], spiral_s.positions['s2'])
-            sp = sp if s_f else list(sp)[::-1]
-            s_f = not s_f
-            l1s += [(s1, s2, l1) for (s1, s2) in sp]
-        l2_f = True
-        for (t1, t2) in zip(spiral_t.positions['t1'], spiral_t.positions['t2']):
-            l2p = line2.positions['l2'] if l2_f else line2.positions['l2'][::-1]
-            l2pu = line2.bounds['l2'][1:len(line2.positions['l2'])+1]
-            l2pl = line2.bounds['l2'][0:len(line2.positions['l2'])]
-            if not l2_f:
-                l2pu, l2pl = l2pl[::-1], l2pu[::-1]
-            l2_f = not l2_f
-            tl2 += [(l2, l2u, l2l, t1, t2) for (l2, l2u, l2l) in
-                zip(l2p, l2pu, l2pl) if l2*l2 + t1*t1 <= 1]
-        t_f = True
-        for (s1, s2, l1) in l1s:
-            inner = tl2 if t_f else tl2[::-1]
-            t_f = not t_f
-            points += [(l2, l2u, l2l, t1, t2, s1, s2, l1)
-                for (l2, l2u, l2l, t1, t2) in inner if s1*s1 + l1*l1 <= 1]
-        l1s_original = l1s
-        l1s = [(s1, s2, l1) for (s1, s2, l1) in l1s if s1*s1 + l1*l1 <= 1]
+        d2_l2 = np.append(line2.positions["l2"], line2.positions["l2"][::-1])
+        d2_l2_u = np.append(line2.bounds["l2"][1:], line2.bounds["l2"][:-1][::-1])
+        d2_l2_l = np.append(line2.bounds["l2"][:-1], line2.bounds["l2"][1:][::-1])
+        d2_l2 = np.tile(d2_l2, int(spiral_t.size // 2))
+        d2_l2_u = np.tile(d2_l2_u, int(spiral_t.size // 2))
+        d2_l2_l = np.tile(d2_l2_l, int(spiral_t.size // 2))
+        if len(d2_l2) != spiral_t.size:
+            d2_l2 = np.append(d2_l2, line2.positions["l2"])
+            d2_l2_u = np.append(d2_l2_u, line2.bounds["l2"][1:])
+            d2_l2_l = np.append(d2_l2_l, line2.bounds["l2"][:-1])
+        d2_t1 = np.repeat(spiral_t.positions["t1"], line2.size)
+        d2_t2 = np.repeat(spiral_t.positions["t2"], line2.size)
+        d2_m = d2_l2*d2_l2 + d2_t1*d2_t1 <= 1
+        d2_i = np.nonzero(d2_m)[0]
 
-        expected = [{"l2":l2, "t1":t1, "t2":t2, "s1":s1, "s2":s2, "l1":l1}
-            for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
-
+        expected = []
+        expected_lower = []
+        expected_upper = []
         expected_idx = []
-        t_f = (l1s_original.index(l1s[0])) % 2 == 0 # t_f is False
-        for d1 in range_(len(l1s)):
-            expected_idx += [[d1, d2] for d2 in (range_(len(tl2)) if t_f else
-                range_(len(tl2) - 1, -1, -1))]
-            t_f = not t_f
 
-        expected_l2_lower = [l2l for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
-        expected_l2_upper = [l2u for (l2, l2u, l2l, t1, t2, s1, s2, l1) in points]
+        d2_i_alt = d2_i
+        d2_l2_l_alt = d2_l2_l
+        d2_l2_u_alt = d2_l2_u
+        n2_alt = list(range(len(d2_i)))
+        for n1, (l1, s1, s2) in enumerate(zip(d1_l1[d1_i], d1_s1[d1_i], d1_s2[d1_i])):
+            for n2, t1, t2, l2, l2u, l2l in zip(
+                    n2_alt, d2_t1[d2_i_alt], d2_t2[d2_i_alt],
+                    d2_l2[d2_i_alt], d2_l2_u_alt[d2_i_alt], d2_l2_l_alt[d2_i_alt]):
+                expected.append({"l1":l1, "s1":s1, "s2":s2, "t1":t1, "t2":t2, "l2":l2})
+                expected_upper.append({"l1":l1, "s1":s1, "s2":s2, "t1":t1, "t2":t2, "l2":l2u})
+                expected_lower.append({"l1":l1, "s1":s1, "s2":s2, "t1":t1, "t2":t2, "l2":l2l})
+                expected_idx.append([n1, n2])
+            d2_i_alt = d2_i_alt[::-1]
+            n2_alt = n2_alt[::-1]
+            d2_l2_l_alt, d2_l2_u_alt = d2_l2_u_alt, d2_l2_l_alt
 
-        gpoints = list(g.iterator())
-        self.assertEqual(expected, [p.positions for p in gpoints])
-        self.assertEqual(expected_idx, [p.indexes for p in gpoints])
-        self.assertEqual(expected_l2_lower, [p.lower["l2"] for p in gpoints])
-        self.assertEqual(expected_l2_upper, [p.upper["l2"] for p in gpoints])
+        g_points = list(g.iterator())
+        self.assertEqual(expected_lower, [p.lower for p in g_points])
+        self.assertEqual(expected, [p.positions for p in g_points])
+        self.assertEqual(expected_upper, [p.upper for p in g_points])
+        self.assertEqual(expected_idx, [p.indexes for p in g_points])
+
 
     def test_mutators(self):
         mutator_1 = MagicMock(spec=Mutator)
@@ -560,6 +897,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
             x_pos += 1
         self.assertEqual(6, x_pos)
 
+
     def test_grid_rect_region(self):
         xg = LineGenerator("x", "mm", 1, 10, 10)
         yg = LineGenerator("y", "mm", 1, 10, 10)
@@ -578,6 +916,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([2, 0], p.indexes)
         self.assertEqual((5, 3), (p.positions['y'], p.positions['x']))
 
+
     def test_grid_double_rect_region_then_not_reduced(self):
         xg = LineGenerator("x", "mm", 1, 10, 10)
         yg = LineGenerator("y", "mm", 1, 10, 10)
@@ -588,6 +927,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         g.prepare()
 
         self.assertEqual(2, len(g.excluders[0].rois))
+
 
     def test_multi_roi_excluder(self):
         x = LineGenerator("x", "mm", 0.0, 4.0, 5, alternate=True)
@@ -611,6 +951,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         positions = [point.positions for point in list(g.iterator())]
 
         self.assertEqual(positions, expected_positions)
+
 
     def test_excluder_spread_axes(self):
         sp = SpiralGenerator(["s1", "s2"], ["mm", "mm"], centre=[0, 0], radius=1, scale=0.5, alternate=True)
@@ -640,6 +981,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
 
         self.assertEqual(positions, expected_positions)
 
+
     def test_bounds_applied_in_rectangle_roi_secial_case(self):
         x = LineGenerator("x", "mm", 0, 1, 2, True)
         y = LineGenerator("y", "mm", 0, 1, 2, True)
@@ -655,6 +997,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual({"x":1.5, "y":1}, p.lower)
         self.assertEqual({"x":1, "y":1}, p.positions)
         self.assertEqual({"x":0.5, "y":1}, p.upper)
+
 
     def test_no_bounds_for_non_continuous(self):
         x_points = np.array([1, 2])
@@ -677,6 +1020,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(expected_positions, lower)
         self.assertEqual(expected_positions, upper)
 
+
     def test_staticpointgen(self):
         m = StaticPointGenerator(3)
         g = CompoundGenerator([m], [], [])
@@ -696,6 +1040,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual([], g.dimensions[0].lower)
         self.assertEqual([], g.dimensions[0].axes)
         self.assertEqual(3, g.dimensions[0].size)
+
 
     def test_inner_staticpointgen(self):
         x = LineGenerator("x", "mm", 0, 1, 3, False)
@@ -718,6 +1063,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                 for d in g.dimensions]
         self.assertEqual(expected_dimensions, dimensions)
 
+
     def test_line_with_staticpointgen(self):
         x = LineGenerator("x", "mm", 0, 1, 3, False)
         m = StaticPointGenerator(5)
@@ -738,6 +1084,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         dimensions = [{"axes":d.axes, "size":d.size, "alternate":d.alternate, "upper":d.upper, "lower":d.lower}
                 for d in g.dimensions]
         self.assertEqual(expected_dimensions, dimensions)
+
 
     def test_alternating_line_with_staticpointgen(self):
         x = LineGenerator("x", "mm", 0, 1, 3, True)
@@ -765,6 +1112,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
                 for d in g.dimensions]
         self.assertEqual(expected_dimensions, dimensions)
 
+
     def test_intermediate_staticpointgen(self):
         x = LineGenerator("x", "mm", 0, 1, 3, False)
         y = LineGenerator("y", "cm", 2, 3, 4, False)
@@ -787,6 +1135,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual({"y":"cm", "x":"mm"}, g.units)
         self.assertEqual(3, len(g.dimensions))
 
+
     def test_staticpointgen_with_axis(self):
         x = LineGenerator("x", "mm", 0, 1, 3, False)
         y = LineGenerator("y", "cm", 2, 3, 4, False)
@@ -807,6 +1156,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual((4, 3, 5), g.shape)
         self.assertEqual(["y", "x", "repeats"], g.axes)
         self.assertEqual({"y": "cm", "x": "mm", "repeats": ""}, g.units)
+
 
     def test_staticpointgen_with_axis_and_excluder(self):
         x = LineGenerator("x", "mm", 0, 1, 3, False)
@@ -831,6 +1181,7 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(["y", "x", "repeats"], g.axes)
         self.assertEqual({"y": "cm", "x": "mm", "repeats": ""}, g.units)
         self.assertEqual(2, len(g.dimensions))
+
 
     def test_staticpointgen_in_alternating(self):
         x = LineGenerator("x", "mm", 0, 1, 3, True)
@@ -859,6 +1210,8 @@ class CompoundGeneratorTest(ScanPointGeneratorTest):
         self.assertEqual(["y", "x"], g.axes)
         self.assertEqual({"y":"cm", "x":"mm"}, g.units)
         self.assertEqual(1, len(g.dimensions))
+
+
 
 class CompoundGeneratorInternalDataTests(ScanPointGeneratorTest):
     """Tests on datastructures internal to CompoundGenerator"""

@@ -20,6 +20,7 @@ ZSIZE = 10 if os.name == "java" else 100
 TIMELIMIT = 8 if os.name == "java" else 16
 
 class CompoundGeneratorPerformanceTest(ScanPointGeneratorTest):
+    @unittest.skip("Unsuitable")
     def test_200_million_time_constraint(self):
         start_time = time.time()
 
