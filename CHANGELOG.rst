@@ -6,15 +6,23 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `Unreleased`_
 -------------
 
+`3-0`_ - 2019-11-14
+-------------------
+
 Added:
 
 - ZipGenerator
 - ConcatGenerator
+- delay_after argument to CompoundGenerator
 
 Changed:
 
 - LineGenerator single points case puts point in centre of start/stop
 - Licence changed back to Apache License 2.0
+- excluders and mutator arguments to CompoundGenerator default to []
+- Dimensions may contain alternating and non-alternating generators, but in some
+  complex cases this may change the order that generators are executed. See #68
+
 
 `2-3`_ - 2019-08-09
 -------------------
@@ -210,7 +218,8 @@ Added:
 
 - Initial structure with Line and Nested generators
 
-.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/2-3...HEAD
+.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/3-0...HEAD
+.. _3-0: https://github.com/dls-controls/scanpointgenerator/compare/2-3..3-0
 .. _2-3: https://github.com/dls-controls/scanpointgenerator/compare/2-2-1...2-3
 .. _2-2-1: https://github.com/dls-controls/scanpointgenerator/compare/2-2...2-2-1
 .. _2-2: https://github.com/dls-controls/scanpointgenerator/compare/2-1-1...2-2
