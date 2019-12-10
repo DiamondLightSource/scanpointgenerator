@@ -16,7 +16,7 @@ from annotypes import Serializable, Anno, Union, Array, Sequence, \
 from scanpointgenerator.compat import range_, np
 from scanpointgenerator.core.dimension import Dimension
 from scanpointgenerator.core.generator import Generator
-from scanpointgenerator.core.point import Point
+from scanpointgenerator.core.point import Point, Points
 from scanpointgenerator.core.excluder import Excluder
 from scanpointgenerator.excluders.roiexcluder import ROIExcluder
 from scanpointgenerator.core.mutator import Mutator
@@ -185,7 +185,9 @@ class CompoundGenerator(Serializable):
         tile = 1
         for dim in self.dimensions:
             repeat /= dim.size
+            # Tile = number of times this dimension is tiled
             self._dim_meta[dim]["tile"] = tile
+            # Repeat = number of times each point is repeated
             self._dim_meta[dim]["repeat"] = repeat
             tile *= dim.size
 
@@ -228,7 +230,6 @@ class CompoundGenerator(Serializable):
 
             dim_runs = k // dim.size
             dim_idx = k % dim.size
-            idx = dim.indices[dim_idx]
             dim_in_reverse = dim.alternate and dim_runs % 2 == 1
             if dim_in_reverse:
                 dim_idx = dim.size - dim_idx - 1
@@ -249,3 +250,112 @@ class CompoundGenerator(Serializable):
         for m in self.mutators:
             point = m.mutate(point, n)
         return point
+
+
+    def get_points(self, start, finish):
+        """
+        Retrieve a Points object: a wrapper for an array of Point from the generator
+
+        Args:
+            start (int), finish (int): indices of the first point and final+1th point to include
+            i.e. get_points(1, 5) would return a Points of Point 1, 2, 3 & 4 but not 5.
+        Returns:
+            Points: a wrapper object with the data of the requested Point [plural]
+        """
+        if not self._prepared:
+            raise ValueError("CompoundGenerator has not been prepared")
+        if finish >= self.size:
+            raise IndexError("Requested points extend out of range")
+        if finish <= start:
+            raise IndexError("Final point lower or equal to index of first point, would return nothing")
+        ''' 
+        situations:
+            dim N constant, dim N+1 constant (e.g. 1,1 -> 1,1)
+            dim N constant, dim N+1 increasing: (e.g. n,1->n,5)
+            dim N increasing, dim N+1 increasing: (n,1->n+1,2) N[n],N+1[start]->N[n],N+1[max]->N[n+1],N+1[0]->...->N[K],N+1[finish]
+            dim N increasing, dim N+1 decreasing: (n,2->n+1,1) as above
+            dim N increasing, dim N+1 constant: (n,1->n+1,1) as above
+            for each pair of consecutive dim N, N+1
+                => must be first dim M where changes (even if it's outermost).
+                => All dimensions outside M must have single point
+                => M must be within single dimension "run"
+                => All dimensions inside M must tile
+            innermost dim must be moving
+        '''
+        indices = np.arange(start, finish)
+        points = Points()
+        found_m = False
+        length = len(indices)
+               
+        for dim in self.dimensions:
+            
+            point_repeat = self._dim_meta[dim]["repeat"]
+            point_indices = indices // point_repeat  # Number of point this step is on
+            
+            if not found_m:
+                found_m = point_indices[0] != point_indices[-1]
+                
+                if found_m:
+                   points.extract(self._points_from_m(dim, point_indices))
+                else:
+                    points.extract(self._points_above_m(dim, point_indices[0], length))
+            else:
+                points.extract(self._points_from_below_m(dim, point_indices, point_repeat))
+            
+        points.duration = np.full(len(indices), self.duration)
+        points.delay_after = np.full(len(indices), self.delay_after)
+        return points
+    
+    def _points_above_m(self, dim, index, length):
+        if dim.alternate:
+            index = dim.size - index - 1
+        ''' This dimension does not step, all points are the same point, cannot be the lowest dimension '''
+        return Points.points_from_axis_points(dim.get_point(index), index, length)
+    
+    def _points_from_m(self, dim, indices):
+        points_from_m = Points()
+        axes = dim.axes
+
+        ''' This is the first dimension to step: it could be the first, last or Nth dimension, but it cannot finish a run '''
+        dim_run = indices[0] // dim.size # Must start and finish in same run
+        point_indices = indices % dim.size
+        dim_in_reverse = dim.alternate and dim_run % 2 == 1
+        dir = 1
+        if dim_in_reverse:
+            dir = -1
+        for axis in axes:
+            dimension_positions = {axis:dim.get_positions(axis)[point_indices][::dir]}
+            points_from_m.positions.update(dimension_positions)
+            if dim is self.dimensions[-1]:
+                lower_bounds = {axis:dim.lower_bounds[axis][point_indices][dir]}
+                upper_bounds = {axis:dim.upper_bounds[axis][point_indices][dir]}
+                if dim_in_reverse:
+                    points_from_m.lower.update(upper_bounds)
+                    points_from_m.lower.update(lower_bounds)
+                else:
+                    points_from_m.lower.update(lower_bounds)
+                    points_from_m.upper.update(upper_bounds)
+            else:
+                points_from_m.lower.update(dimension_positions)
+                points_from_m.upper.update(dimension_positions)
+        points_from_m.indexes = point_indices
+        return points_from_m
+    
+    def _points_from_below_m(self, dim, indices, point_repeat):
+        points_from_below_m = Points()
+        axes = dim.axes
+        ''' This dimension must step and finish a run through a dimension, must allow for alternating '''
+        dim_run = indices // dim.size
+        point_indices = indices % dim.size
+        point_indices = [(dim.size - point_indices[i] - 1) if (dim.alternate and (dim_run[i] % 2 == 1)) else point_indices[i] for i in range(len(point_indices))]
+        for axis in axes:
+            dimension_positions = {axis:dim.get_positions(axis)[point_indices]}
+            points_from_below_m.positions.update(dimension_positions)
+            if dim is self.dimensions[-1]:
+                points_from_below_m.lower.update({axis:dim.lower_bounds[axis][point_indices]})
+                points_from_below_m.upper.update({axis:dim.upper_bounds[axis][point_indices]})
+            else:
+                points_from_below_m.lower.update(dimension_positions)
+                points_from_below_m.upper.update(dimension_positions)
+        points_from_below_m.indexes = point_indices
+        return points_from_below_m
