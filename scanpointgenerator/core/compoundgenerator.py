@@ -342,14 +342,10 @@ class CompoundGenerator(Serializable):
         return points_from_m
     
     def _points_from_below_m(self, dim, indices, point_repeat):
-        print "---"
-        print indices
-        print point_repeat
         points_from_below_m = Points()
         axes = dim.axes
         ''' This dimension must step and finish a run through a dimension, must allow for alternating '''
         dim_run = indices // dim.size
-        print dim_run
         point_indices = indices % dim.size
         point_indices = [(dim.size - point_indices[i] - 1) if (dim.alternate and (dim_run[i] % 2 == 1)) else point_indices[i] for i in range(len(point_indices))]
         for axis in axes:
