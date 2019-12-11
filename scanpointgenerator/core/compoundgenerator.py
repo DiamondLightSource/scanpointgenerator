@@ -264,7 +264,7 @@ class CompoundGenerator(Serializable):
         """
         if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
-        if finish >= self.size:
+        if finish > self.size or start < 0:
             raise IndexError("Requested points extend out of range")
         if finish <= start:
             raise IndexError("Final point lower or equal to index of first point, would return nothing")
@@ -327,8 +327,8 @@ class CompoundGenerator(Serializable):
             dimension_positions = {axis:dim.get_positions(axis)[point_indices][::dir]}
             points_from_m.positions.update(dimension_positions)
             if dim is self.dimensions[-1]:
-                lower_bounds = {axis:dim.lower_bounds[axis][point_indices][dir]}
-                upper_bounds = {axis:dim.upper_bounds[axis][point_indices][dir]}
+                lower_bounds = {axis:dim.lower_bounds[axis][point_indices][::dir]}
+                upper_bounds = {axis:dim.upper_bounds[axis][point_indices][::dir]}
                 if dim_in_reverse:
                     points_from_m.lower.update(upper_bounds)
                     points_from_m.lower.update(lower_bounds)
@@ -342,10 +342,14 @@ class CompoundGenerator(Serializable):
         return points_from_m
     
     def _points_from_below_m(self, dim, indices, point_repeat):
+        print "---"
+        print indices
+        print point_repeat
         points_from_below_m = Points()
         axes = dim.axes
         ''' This dimension must step and finish a run through a dimension, must allow for alternating '''
         dim_run = indices // dim.size
+        print dim_run
         point_indices = indices % dim.size
         point_indices = [(dim.size - point_indices[i] - 1) if (dim.alternate and (dim_run[i] % 2 == 1)) else point_indices[i] for i in range(len(point_indices))]
         for axis in axes:
