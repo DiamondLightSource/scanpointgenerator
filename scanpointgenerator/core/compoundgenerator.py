@@ -264,7 +264,7 @@ class CompoundGenerator(Serializable):
         """
         if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
-        if finish >= self.size:
+        if finish > self.size or start < 0:
             raise IndexError("Requested points extend out of range")
         if finish <= start:
             raise IndexError("Final point lower or equal to index of first point, would return nothing")
@@ -327,8 +327,8 @@ class CompoundGenerator(Serializable):
             dimension_positions = {axis:dim.get_positions(axis)[point_indices][::dir]}
             points_from_m.positions.update(dimension_positions)
             if dim is self.dimensions[-1]:
-                lower_bounds = {axis:dim.lower_bounds[axis][point_indices][dir]}
-                upper_bounds = {axis:dim.upper_bounds[axis][point_indices][dir]}
+                lower_bounds = {axis:dim.lower_bounds[axis][point_indices][::dir]}
+                upper_bounds = {axis:dim.upper_bounds[axis][point_indices][::dir]}
                 if dim_in_reverse:
                     points_from_m.lower.update(upper_bounds)
                     points_from_m.lower.update(lower_bounds)
