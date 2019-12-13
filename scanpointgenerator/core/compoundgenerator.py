@@ -294,7 +294,7 @@ class CompoundGenerator(Serializable):
             point_indices = indices // point_repeat  # Number of point this step is on
             found_m = np.any(point_indices != point_indices[0]) # For alternating case
             if found_m:
-                points.extract(self._points_from_below_m(dim, point_indices))
+                points.extract(self._points_from_below_m(dim, point_indices, length))
             else:
                 points.extract(self._points_above_m(dim, point_indices[0], length))
         points.duration = np.full(length, self.duration)
@@ -309,7 +309,7 @@ class CompoundGenerator(Serializable):
         ''' This dimension does not step, all points are the same point, cannot be the lowest dimension '''
         return Points.points_from_axis_points(dim.get_point(int(index)), index, length)
     
-    def _points_from_below_m(self, dim, indices):
+    def _points_from_below_m(self, dim, indices, length):
         points_from_below_m = Points()
         ''' This dimension must step and finish a run through a dimension, must allow for alternating '''
         dim_run = indices // dim.size
