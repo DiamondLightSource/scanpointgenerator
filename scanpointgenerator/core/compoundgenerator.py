@@ -283,14 +283,14 @@ class CompoundGenerator(Serializable):
                 => M behaves like all dimensions within it
             innermost dim must be moving
         '''
-        indices = np.arange(start, finish, dtype=int)
+        indices = np.arange(start, finish)
 
         points = Points()
         found_m = False
         length = len(indices)
                
         for dim in self.dimensions:
-            point_repeat = self._dim_meta[dim]["repeat"]
+            point_repeat = int(self._dim_meta[dim]["repeat"])
             point_indices = indices // point_repeat  # Number of point this step is on
             found_m = np.any(point_indices != point_indices[0]) # For alternating case
             if found_m:
@@ -316,6 +316,7 @@ class CompoundGenerator(Serializable):
         point_indices = indices % dim.size
         if dim.alternate:
             point_indices = [(dim.size - point_indices[i] - 1) if (dim_run[i] % 2 == 1) else point_indices[i] for i in range(len(point_indices))]
+
         dimension_positions = {axis:dim.positions[axis][point_indices] for axis in dim.axes}
         points_from_below_m.positions.update(dimension_positions)
         

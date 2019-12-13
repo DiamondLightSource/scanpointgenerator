@@ -66,7 +66,7 @@ class GetPointsTest(ScanPointGeneratorTest):
         np.testing.assert_array_equal(x, C.upper["x"])
         np.testing.assert_array_equal(y, C.positions["y"])
         np.testing.assert_array_equal(y_dn, C.lower["y"])
-        np.testing.assert_array_equal(y_up, C.upper["y"])#
+        np.testing.assert_array_equal(y_up, C.upper["y"])
         
     def test_random_offset(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)

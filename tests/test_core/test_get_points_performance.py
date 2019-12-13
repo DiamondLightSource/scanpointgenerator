@@ -22,7 +22,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         g = CompoundGenerator([z, w], [], [])
         g.prepare() # 9e4 points
         start_time = time.time()
-        C = g.get_points(0, 9e4)
+        C = g.get_points(0, 90000)
         end_time = time.time()
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*9)
@@ -35,7 +35,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         g = CompoundGenerator([a, z, w], [], [])
         g.prepare() # 9e4 points
         start_time = time.time()
-        C = g.get_points(0, 3e4)
+        C = g.get_points(0, 30000)
         end_time = time.time()
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*3)
@@ -48,7 +48,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         g = CompoundGenerator([z, w, a], [], [])
         g.prepare() # 9e4 points 
         start_time = time.time()
-        C = g.get_points(0, 3e4)
+        C = g.get_points(0, 30000)
         end_time = time.time()
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*3)
@@ -64,7 +64,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         g = CompoundGenerator([b, c, d, e, f, a], [], [])
         g.prepare() # 1e6 points
         start_time = time.time()
-        C = g.get_points(0, 1e6)
+        C = g.get_points(0, 1000000)
         end_time = time.time()
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*100)
