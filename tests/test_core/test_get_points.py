@@ -8,9 +8,10 @@ from scanpointgenerator import CompoundGenerator, Generator
 from scanpointgenerator import LineGenerator, StaticPointGenerator
 from scanpointgenerator import Point
 from scanpointgenerator import CircularROI, ROIExcluder
+from scanpointgenerator import RandomOffsetMutator
 from scanpointgenerator.compat import range_, np
 
-class get_points_test(ScanPointGeneratorTest):
+class GetPointsTest(ScanPointGeneratorTest):
 
     def setUp(self):
         l1 = LineGenerator("x", "mm", 0, 5, 5)
@@ -45,7 +46,7 @@ class get_points_test(ScanPointGeneratorTest):
         comp.prepare()
         np.testing.assert_array_equal(np.asarray([[0,0,0],[0,0,1],[0,0,2],[0,0,3],[0,0,4],[0,1,0],[0,1,1],[0,1,2],[0,1,3],[0,1,4],[0,2,0]]), comp.get_points(0, 11).indexes)
         np.testing.assert_array_equal(np.asarray([[0,3,1],[0,3,2],[0,3,3],[0,3,4],[0,4,0],[0,4,1],[0,4,2],[0,4,3],[0,4,4],[1,4,0],[1,4,1]]), comp.get_points(16, 27).indexes) 
-
+        
     def test_roi(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)
         l2 = LineGenerator("y", "mm", 0.5, 5.5, 6)
@@ -65,4 +66,14 @@ class get_points_test(ScanPointGeneratorTest):
         np.testing.assert_array_equal(x, C.upper["x"])
         np.testing.assert_array_equal(y, C.positions["y"])
         np.testing.assert_array_equal(y_dn, C.lower["y"])
-        np.testing.assert_array_equal(y_up, C.upper["y"])
+        np.testing.assert_array_equal(y_up, C.upper["y"])#
+        
+    def test_random_offset(self):
+        l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)
+        l2 = LineGenerator("y", "mm", 0.5, 5.5, 6)
+        m1 = RandomOffsetMutator(12, ["x", "y"], [0.1, 0.1])
+        self.comp = CompoundGenerator([l1, l2], [], [m1], 5, True, 7)
+        self.comp.prepare()
+        # Comp.size = 5, only these points included
+        C = self.comp.get_points(0, 8)
+        np.testing.assert_array_almost_equal([0.458672, 1.543717, 2.582332, 3.514304, 4.558364, 5.528023, 0.574501, 1.452161], C.positions["y"])

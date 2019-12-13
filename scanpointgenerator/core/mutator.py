@@ -8,7 +8,8 @@
 #
 ###
 
-from annotypes import Serializable
+from annotypes import Serializable, Union, Array
+from scanpointgenerator.core.point import Point, Points
 
 from scanpointgenerator.core import Point
 UPoint = Union[Point, Points]
