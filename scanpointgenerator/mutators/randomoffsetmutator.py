@@ -7,7 +7,7 @@
 #
 ###
 
-import collections
+import collections, array
 
 from annotypes import Anno, Union, Array, Sequence
 
@@ -64,7 +64,12 @@ class RandomOffsetMutator(Mutator):
         x &= 0xFFFFFFFF
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
-        r = float(x) / float(0xFFFFFFFF) # r in interval [0, 1]
+        if hasattr(x, "dtype") or isinstance(x, array.array):
+            # It's a numpy array or stdlib array
+            r = x.astype(float)
+        else:
+            r = float(x)
+        r /= float(0xFFFFFFFF) # r in interval [0, 1]
         r = r * 2 - 1 # r in [-1, 1]
         return m * r
 

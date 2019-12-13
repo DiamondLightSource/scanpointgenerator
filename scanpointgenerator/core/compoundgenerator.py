@@ -283,7 +283,7 @@ class CompoundGenerator(Serializable):
                 => M behaves like all dimensions within it
             innermost dim must be moving
         '''
-        indices = np.arange(start, finish)
+        indices = np.arange(start, finish, dtype=int)
 
         points = Points()
         found_m = False
@@ -299,6 +299,8 @@ class CompoundGenerator(Serializable):
                 points.extract(self._points_above_m(dim, point_indices[0], length))
         points.duration = np.full(len(indices), self.duration)
         points.delay_after = np.full(len(indices), self.delay_after)
+        for m in self.mutators:
+            points = m.mutate(points, indices)
         return points
     
     def _points_above_m(self, dim, index, length):
