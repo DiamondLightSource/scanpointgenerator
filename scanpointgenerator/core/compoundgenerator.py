@@ -287,7 +287,7 @@ class CompoundGenerator(Serializable):
 
         points = Points()
         found_m = False
-        length = len(indices)
+        length = finish-start
                
         for dim in self.dimensions:
             point_repeat = int(self._dim_meta[dim]["repeat"])
@@ -297,8 +297,8 @@ class CompoundGenerator(Serializable):
                 points.extract(self._points_from_below_m(dim, point_indices))
             else:
                 points.extract(self._points_above_m(dim, point_indices[0], length))
-        points.duration = np.full(len(indices), self.duration)
-        points.delay_after = np.full(len(indices), self.delay_after)
+        points.duration = np.full(length, self.duration)
+        points.delay_after = np.full(length, self.delay_after)
         for m in self.mutators:
             points = m.mutate(points, indices)
         return points
@@ -315,7 +315,7 @@ class CompoundGenerator(Serializable):
         dim_run = indices // dim.size
         point_indices = indices % dim.size
         if dim.alternate:
-            point_indices = [(dim.size - point_indices[i] - 1) if (dim_run[i] % 2 == 1) else point_indices[i] for i in range(len(point_indices))]
+            point_indices = [(dim.size - point_indices[i] - 1) if (dim_run[i] % 2 == 1) else point_indices[i] for i in range(length)]
 
         dimension_positions = {axis:dim.positions[axis][point_indices] for axis in dim.axes}
         points_from_below_m.positions.update(dimension_positions)
