@@ -9,6 +9,7 @@
 ###
 
 import logging
+import array
 
 from annotypes import Serializable, Anno, Union, Array, Sequence, \
     deserialize_object
@@ -294,7 +295,7 @@ class CompoundGenerator(Serializable):
             point_indices = indices // point_repeat  # Number of point this step is on
             found_m = np.any(point_indices != point_indices[0]) # For alternating case
             if found_m:
-                points.extract(self._points_from_below_m(dim, point_indices, length))
+                points.extract(self._points_from_below_m(dim, point_indices))
             else:
                 points.extract(self._points_above_m(dim, point_indices[0], length))
         points.duration = np.full(length, self.duration)
@@ -309,20 +310,25 @@ class CompoundGenerator(Serializable):
         ''' This dimension does not step, all points are the same point, cannot be the lowest dimension '''
         return Points.points_from_axis_points(dim.get_point(int(index)), index, length)
     
-    def _points_from_below_m(self, dim, indices, length):
+    def _points_from_below_m(self, dim, indices):
         points_from_below_m = Points()
         ''' This dimension must step and finish a run through a dimension, must allow for alternating '''
         dim_run = indices // dim.size
         point_indices = indices % dim.size
         if dim.alternate:
-            point_indices = [(dim.size - point_indices[i] - 1) if (dim_run[i] % 2 == 1) else point_indices[i] for i in range(length)]
-
+            point_indices = np.where(dim_run % 2 == 1, dim.size - point_indices - 1, point_indices)
         dimension_positions = {axis:dim.positions[axis][point_indices] for axis in dim.axes}
         points_from_below_m.positions.update(dimension_positions)
         
         if dim is self.dimensions[-1]:
-            points_from_below_m.lower.update({axis:dim.lower_bounds[axis][point_indices] for axis in dim.axes})
-            points_from_below_m.upper.update({axis:dim.upper_bounds[axis][point_indices] for axis in dim.axes})
+            if dim.alternate:
+                points_from_below_m.lower.update({axis:np.where(dim_run % 2 == 1, dim.upper_bounds[axis][point_indices],
+                                                    dim.lower_bounds[axis][point_indices]) for axis in dim.axes})
+                points_from_below_m.upper.update({axis:np.where(dim_run % 2 == 1, dim.lower_bounds[axis][point_indices],
+                                                    dim.upper_bounds[axis][point_indices]) for axis in dim.axes})
+            else:
+                points_from_below_m.lower.update({axis:dim.lower_bounds[axis][point_indices] for axis in dim.axes})
+                points_from_below_m.upper.update({axis:dim.upper_bounds[axis][point_indices] for axis in dim.axes})
         else:
             points_from_below_m.lower.update(dimension_positions)
             points_from_below_m.upper.update(dimension_positions)

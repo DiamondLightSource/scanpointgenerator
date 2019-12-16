@@ -7,6 +7,7 @@
 #    Joseph Ware
 #
 ###
+import array
 
 from scanpointgenerator.compat import np
 
@@ -55,12 +56,33 @@ class Points(object):
         self.indexes = []
         self.duration = None
         self.delay_after = None
+
+    def __len__(self):
+        return len(self.indexes)
     
+    def __getitem__(self, sliced):
+        ''' input:
+        sliced (int or slice)- index of a Point or a slice of many Point to consolidate into a Points
+        returns: Point or Points object with each field reduced to the relevant indices
+        '''
+        if isinstance(sliced, int):
+            # Single position
+            point = Point()
+        else:
+            point = Points()
+        point.positions = {axis:self.positions[axis][sliced] for axis in self.positions}
+        point.upper = {axis:self.upper[axis][sliced] for axis in self.upper}
+        point.lower = {axis:self.lower[axis][sliced] for axis in self.lower}
+        point.indexes = self.indexes[sliced]
+        point.duration = self.duration[sliced]
+        point.delay_after = self.delay_after[sliced]
+        return point
+
     def extract(self, points):
         self.positions.update(points.positions)
         self.lower.update(points.lower)
         self.upper.update(points.upper)
-        if (len(self.indexes)):
+        if len(self.indexes): # if indices is not empty: assumption that length of indices is consistent
             self.indexes = np.column_stack((self.indexes, points.indexes))
         else:
             self.indexes = points.indexes
