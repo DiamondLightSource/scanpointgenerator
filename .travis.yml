@@ -21,13 +21,13 @@ cache:
 
 before_install:
   - export JYTHON_URL='http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar'
-  - export REQUIRED_JARS="org.eclipse.january_1.0.0.v201610161242.jar"
-  - export REQUIRED_JARS="ch.qos.logback.core_1.1.7.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="org.eclipse.january_2.1.4.v201805300956.jar"
+  - export REQUIRED_JARS="ch.qos.logback.core_1.2.3.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="org.apache.commons.math3_3.6.1.jar:$REQUIRED_JARS"
-  - export REQUIRED_JARS="slf4j.api_1.7.21.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="slf4j.api_1.7.25.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="uk.ac.diamond.jama_1.0.3.jar:$REQUIRED_JARS"
-  - export REQUIRED_JARS="org.eclipse.dawnsci.analysis.api_1.1.0.v20161111-1001.jar:$REQUIRED_JARS"
-  - export REQUIRED_JARS="org.eclipse.dawnsci.nexus_1.0.0.v20161115-1503.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="org.eclipse.dawnsci.analysis.api_1.1.0.v20180518-1519.jar:$REQUIRED_JARS"
+  - export REQUIRED_JARS="org.eclipse.dawnsci.nexus_1.0.0.v20180429-1749.jar:$REQUIRED_JARS"
   - if [ "$JYTHON" == "true" ]; then
       jdk_switcher use oraclejdk8;
       if [ ! -f "$HOME/jython/.cache" ]; then
@@ -39,17 +39,17 @@ before_install:
       export OLD_PATH=$PATH;
       export PATH=$HOME/jython/bin:$PATH;
       if [ ! -f "$HOME/jython_deps/.cache" ]; then
-        export DAWN_URL='http://opengda.org/DawnDiamond/2.3/downloads/builds-release/DawnDiamond-2.3.1.v20161216-0929-linux64.zip';
+        export DAWN_URL='https://alfred.diamond.ac.uk/DawnDiamond/2.9/downloads/builds-release/DawnDiamond-2.9.0.v20180618-1117-linux64.zip';
         wget $DAWN_URL -O $HOME/dawn.zip;
         unzip -q $HOME/dawn.zip -d $HOME/dawn;
-        export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.3.1.v20161216-0929-linux64);
-        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.3.0/scisoftpy $HOME/jython_deps/numpy;
-        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.3.0/* $HOME/jython_deps;
-        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.analysis_1.3.0.v20161209-0938/* $HOME/jython_deps;
-        cp -r $DAWN/plugins/org.eclipse.dawnsci.analysis.dataset_1.0.0.v20161202-1040/* $HOME/jython_deps;
-        cp -r $DAWN/plugins/org.dawnsci.boofcv_1.0.0.v20161123-1542/* $HOME/jython_deps;
-        cp -r $DAWN/plugins/hdf.hdf5lib_1.10.0.v20160527-1525/* $HOME/jython_deps;
-        cp -r $DAWN/plugins/org.eclipse.dawnsci.hdf5_1.3.0.v20161102-0954/* $HOME/jython_deps;
+        export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.9.0.v20180618-1117-linux64);
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/scisoftpy $HOME/jython_deps/numpy;
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.analysis_1.3.0.v20180614-1405/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.eclipse.dawnsci.analysis.dataset_1.0.0.v20180306-1203/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.dawnsci.boofcv_1.0.0.v20170620-1616/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/hdf.hdf5lib_1.10.2.v20180419-1005/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.eclipse.dawnsci.hdf5_1.3.0.v20180504-1031/* $HOME/jython_deps;
         IFS=":";
         for j in $REQUIRED_JARS; do
           cp $DAWN/plugins/$j $HOME/jython_deps/;
