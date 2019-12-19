@@ -267,8 +267,6 @@ class CompoundGenerator(Serializable):
             raise ValueError("CompoundGenerator has not been prepared")
         if finish > self.size or start < 0:
             raise IndexError("Requested points extend out of range")
-        if finish <= start:
-            raise IndexError("Final point lower or equal to index of first point, would return nothing")
         ''' 
         situations:
             dim N constant, dim N+1 constant (e.g. 1,1 -> 1,1)
@@ -284,12 +282,14 @@ class CompoundGenerator(Serializable):
                 => M behaves like all dimensions within it
             innermost dim must be moving
         '''
-        indices = np.arange(start, finish)
+        if finish == start:
+            return Points()
+        length = int(abs(finish-start))
+        indices = np.arange(start, finish, int(length/(finish-start)))
 
         points = Points()
         found_m = False
-        length = finish-start
-               
+
         for dim in self.dimensions:
             point_repeat = int(self._dim_meta[dim]["repeat"])
             point_indices = indices // point_repeat  # Number of point this step is on
@@ -316,7 +316,7 @@ class CompoundGenerator(Serializable):
         dim_run = indices // dim.size
         point_indices = indices % dim.size
         if dim.alternate:
-            point_indices = np.where(dim_run % 2 == 1, dim.size - point_indices - 1, point_indices)
+            point_indices = (np.where(dim_run % 2 == 1, dim.size - point_indices - 1, point_indices))
         dimension_positions = {axis:dim.positions[axis][point_indices] for axis in dim.axes}
         points_from_below_m.positions.update(dimension_positions)
         

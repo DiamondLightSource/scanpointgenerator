@@ -90,11 +90,10 @@ class Points(object):
     @staticmethod
     def points_from_axis_points(axis_point, index, length):
         points = Points()
-        for axis in axis_point:
-            dimension_points = {axis:np.full(length, axis_point[axis])}
-            points.positions.update(dimension_points)
-            points.lower.update(dimension_points)
-            points.upper.update(dimension_points)
+        dimension_points = {axis:np.full(length, axis_point[axis]) for axis in axis_point}
+        points.positions.update(dimension_points)
+        points.lower.update(dimension_points)
+        points.upper.update(dimension_points)
         points.indexes = np.full(length, index)
         return points
     

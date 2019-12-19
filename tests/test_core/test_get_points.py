@@ -58,8 +58,20 @@ class GetPointsTest(ScanPointGeneratorTest):
         self.assertEqual(list([-0.125, 0.125, 0.375, 0.625, 0.375, 0.125]), points.lower["x"].tolist())
         self.assertEqual(list([0.125, 0.375, 0.625, 0.375, 0.125, -0.125]), points.upper["x"].tolist())
 
+    def test_backwards(self):
+        l1 = LineGenerator("x", "mm", 0, 0.5, 3, True)
+        l2 = LineGenerator("y", "nm", 0, 0.1, 2)
+        comp = CompoundGenerator([l2, l1], [], [])
+        comp.prepare()
+        fpoints = comp.get_points(0, 6)
+        bpoints = comp.get_points(5,-1)
+        for i in range(0,5):
+            for axis in fpoints.positions:
+                self.assertEqual(fpoints.positions[axis][i], bpoints.positions[axis][5-i])
+                self.assertEqual(fpoints.lower[axis][i], bpoints.lower[axis][5-i])
+                self.assertEqual(fpoints.upper[axis][i], bpoints.upper[axis][5-i])
+            self.assertTrue(np.all(fpoints.indexes[i] == bpoints.indexes[5-i]))
 
-        
     def test_roi(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)
         l2 = LineGenerator("y", "mm", 0.5, 5.5, 6)
