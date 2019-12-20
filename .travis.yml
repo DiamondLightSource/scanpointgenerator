@@ -39,11 +39,11 @@ before_install:
       export PATH=$HOME/jython/bin:$PATH;
       if [ ! -f "$HOME/jython_deps/.cache" ]; then
         export DAWN_URL='https://alfred.diamond.ac.uk/DawnDiamond/2.9/downloads/builds-release/DawnDiamond-2.9.0.v20180618-1117-linux64.zip';
-        export JANUARY_URL='https://download.eclipse.org/january/releases/2.3/repository.zip'
+        export JANUARY_URL='https://download.eclipse.org/january/releases/2.3/repository.zip';
         wget $DAWN_URL -O $HOME/dawn.zip;
-        wget $JANUARY_URL -O $HOME/january.zip
+        wget $JANUARY_URL -O $HOME/january.zip;
         unzip -q $HOME/dawn.zip -d $HOME/dawn;
-        unzip -q $HOME/january.zip -d $HOME/january
+        unzip -q $HOME/january.zip -d $HOME/january;
         export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.8.0.v20180411-0936-linux64);
         cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/scisoftpy $HOME/jython_deps/numpy;
         cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/* $HOME/jython_deps;
