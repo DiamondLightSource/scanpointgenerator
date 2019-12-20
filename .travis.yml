@@ -44,7 +44,7 @@ before_install:
         wget $JANUARY_URL -O $HOME/january.zip;
         unzip -q $HOME/dawn.zip -d $HOME/dawn;
         unzip -q $HOME/january.zip -d $HOME/january;
-        export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.8.0.v20180411-0936-linux64);
+        export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.9.0.v20180618-1117-linux64);
         cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/scisoftpy $HOME/jython_deps/numpy;
         cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/* $HOME/jython_deps;
         cp -r $DAWN/plugins/uk.ac.diamond.scisoft.analysis_1.3.0.v20180614-1405/* $HOME/jython_deps;
@@ -52,11 +52,11 @@ before_install:
         cp -r $DAWN/plugins/org.dawnsci.boofcv_1.0.0.v20170620-1616/* $HOME/jython_deps;
         cp -r $DAWN/plugins/hdf.hdf5lib_1.10.2.v20180419-1005/* $HOME/jython_deps;
         cp -r $DAWN/plugins/org.eclipse.dawnsci.hdf5_1.3.0.v20180504-1031/* $HOME/jython_deps;
-        cp -r $HOME/january/repository/plugins/org.eclipse.january_2.3.0.v201909112144.jar $HOME/jython_deps/;
         IFS=":";
         for j in $REQUIRED_JARS; do
           cp $DAWN/plugins/$j $HOME/jython_deps/;
         done;
+        cp $HOME/january/repository/plugins/org.eclipse.january_2.3.0.v201909112144.jar $HOME/jython_deps;
         touch $HOME/jython_deps/.cache;
       fi
     fi
