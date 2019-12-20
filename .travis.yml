@@ -75,6 +75,7 @@ install:
       for j in $REQUIRED_JARS; do
         export CLASSPATH="$CLASSPATH:$HOME/jython_deps/$j";
       done;
+      export CLASSPATH="$CLASSPATH:$HOME/jython_deps/org.eclipse.january_2.3.0.v201909112144.jar";
       unset IFS;
       echo "CLASSPATH:";
       echo "$CLASSPATH";
