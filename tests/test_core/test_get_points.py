@@ -99,9 +99,10 @@ class GetPointsTest(ScanPointGeneratorTest):
         m1 = RandomOffsetMutator(12, ["x", "y"], [0.1, 0.1])
         self.comp = CompoundGenerator([l1, l2], [], [m1], 5, True, 7)
         self.comp.prepare()
+        pos = self.comp.get_point(0, 8).positions["y"]
         for i in range(8):
             self.assertAlmostEqual([0.458672, 1.543717, 2.582332, 3.514304, 4.558364, 5.528023, 0.574501, 1.452161][i],
-                               self.comp.get_points(0, 8).positions["y"][i], delta=0.0001)
+                               pos[i], delta=0.0001)
 
     def test_slicing(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)
@@ -112,7 +113,8 @@ class GetPointsTest(ScanPointGeneratorTest):
         # Comp.size = 5, only these points included
         points= self.comp.get_points(0, 8)
         self.assertEqual(8, len(points))
-        self.assertAlmostEqual([0.458672], points[0].positions["y"], delta=0.0001)
+        ''' When points sliced within integer as below, it returns a point, with a float not a list of floats '''
+        self.assertAlmostEqual(0.458672, points[0].positions["y"], delta=0.0001)
         for i in [0, 1]:
             self.assertAlmostEqual([0.458672, 1.543717][i], points[0:2].positions["y"][i], delta=0.0001)
             self.assertAlmostEqual([0.58572882, 0.54016338][i], points[4:2:-1].positions["x"][i], delta=0.0001)
