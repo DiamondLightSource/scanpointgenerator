@@ -99,7 +99,7 @@ class GetPointsTest(ScanPointGeneratorTest):
         m1 = RandomOffsetMutator(12, ["x", "y"], [0.1, 0.1])
         self.comp = CompoundGenerator([l1, l2], [], [m1], 5, True, 7)
         self.comp.prepare()
-        pos = self.comp.get_point(0, 8).positions["y"]
+        pos = self.comp.get_points(0, 8).positions["y"]
         for i in range(8):
             self.assertAlmostEqual([0.458672, 1.543717, 2.582332, 3.514304, 4.558364, 5.528023, 0.574501, 1.452161][i],
                                pos[i], delta=0.0001)
