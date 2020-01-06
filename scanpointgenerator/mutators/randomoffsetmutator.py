@@ -64,8 +64,8 @@ class RandomOffsetMutator(Mutator):
         x &= 0xFFFFFFFF
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
-        if hasattr(x, "dtype") or isinstance(x, array.array):
-            # It's a numpy array or stdlib array
+        if hasattr(x, "dtype"):
+            # It's a numpy array
             r = x.astype(float)
         else:
             r = float(x)
