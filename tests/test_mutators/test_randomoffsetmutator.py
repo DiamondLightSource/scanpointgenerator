@@ -115,10 +115,10 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         p.upper = {"x":1.5, "y":2.25}
         m = RandomOffsetMutator(1, ["y"], [0.01])
         q = m.mutate(p, 0)
+        # Generated with Python 3.7.3, but should be consistent with all Python/Jython
         self.assertAlmostEqual(2.004543372572992, q.positions["y"])
         self.assertAlmostEqual(2.2504572137539407, q.upper["y"])
         self.assertAlmostEqual(1.747351784863824, q.lower["y"])
-
 
 class TestSerialisation(unittest.TestCase):
 
