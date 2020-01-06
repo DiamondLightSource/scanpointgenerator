@@ -9,9 +9,8 @@
 ###
 
 from annotypes import Serializable, Union, Array
-from scanpointgenerator.core.point import Point, Points
+from scanpointgenerator.core import Point, Points
 
-from scanpointgenerator.core import Point
 UPoint = Union[Point, Points]
 UInt = Union[int, Array[int]]
 
@@ -27,7 +26,7 @@ class Mutator(Serializable):
 
         Args:
             point: Point or Points object to mutate
-            index: inde[x/ces] of the Point[s] to mutate
+            index: ind[ex/ikces] of the Point[s] to mutate
 
         Returns:
             Point: Mutated point

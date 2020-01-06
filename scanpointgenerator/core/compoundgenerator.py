@@ -288,7 +288,6 @@ class CompoundGenerator(Serializable):
         indices = np.arange(start, finish, int(length/(finish-start)))
 
         points = Points()
-        found_m = False
 
         for dim in self.dimensions:
             point_repeat = int(self._dim_meta[dim]["repeat"])
@@ -312,7 +311,10 @@ class CompoundGenerator(Serializable):
     
     def _points_from_below_m(self, dim, indices):
         points_from_below_m = Points()
-        ''' This dimension must step and finish a run through a dimension, must allow for alternating '''
+        '''
+        This dimension must step and may finish a run through a dimension, alternate.
+        One of these will be the innermost dimension, so must calculate bounds
+        '''
         dim_run = indices // dim.size
         point_indices = indices % dim.size
         if dim.alternate:
