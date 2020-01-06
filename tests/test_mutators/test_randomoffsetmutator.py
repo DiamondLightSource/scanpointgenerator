@@ -107,6 +107,19 @@ class RandomOffsetMutatorTest(ScanPointGeneratorTest):
         ry = [r.lower["y"] for r in points[1:]]
         self.assertListAlmostEqual(ly, ry)
 
+    def test_consistent_python_jython(self):
+        p = Point()
+        p.indexes = [0]
+        p.positions = {"x":1, "y":2}
+        p.lower = {"x":0.5, "y":1.75}
+        p.upper = {"x":1.5, "y":2.25}
+        m = RandomOffsetMutator(1, ["y"], [0.01])
+        q = m.mutate(p, 0)
+        set.assertAlmostEquals(2.004543372572992, q.positions["y"])
+        set.assertAlmostEquals(2.2504572137539407, q.upper["y"])
+        set.assertAlmostEquals(1.747351784863824, q.lower["y"])
+
+
 class TestSerialisation(unittest.TestCase):
 
     def setUp(self):
