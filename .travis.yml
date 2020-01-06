@@ -21,13 +21,13 @@ cache:
 
 before_install:
   - export JYTHON_URL='http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar'
+  - export REQUIRED_JARS="org.eclipse.january_2.3.0.v201909112144.jar"
   - export REQUIRED_JARS="ch.qos.logback.core_1.2.3.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="org.apache.commons.math3_3.6.1.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="slf4j.api_1.7.25.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="uk.ac.diamond.jama_1.0.3.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="org.eclipse.dawnsci.analysis.api_1.2.0.v20191029-1012.jar:$REQUIRED_JARS"
   - export REQUIRED_JARS="org.eclipse.dawnsci.nexus_1.1.0.v20191025-1230.jar:$REQUIRED_JARS"
-  - export REQUIRED_JARS="org.eclipse.january_2.3.0.v201909112144.jar:REQUIRED_JARS"
   - if [ "$JYTHON" == "true" ]; then
       jdk_switcher use oraclejdk8;
       if [ ! -f "$HOME/jython/.cache" ]; then
