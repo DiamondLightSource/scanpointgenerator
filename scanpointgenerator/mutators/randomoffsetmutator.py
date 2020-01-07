@@ -7,7 +7,7 @@
 #
 ###
 
-import collections, array
+import collections
 
 from annotypes import Anno, Union, Array, Sequence
 
@@ -51,6 +51,11 @@ class RandomOffsetMutator(Mutator):
 
     def calc_offset(self, axis, idx):
         m = self.max_offset[self.axes.index(axis)]
+        print ("m")
+        print (m)
+        print ("idx")
+        print (idx)
+        print (type(idx))
         x = (idx << 4) + (0 if len(axis) == 0 else ord(axis[0]))
         x ^= (self.seed << 12)
         # Apply hash algorithm to x for pseudo-randomness
@@ -71,25 +76,18 @@ class RandomOffsetMutator(Mutator):
             r = float(x)
         r /= float(0xFFFFFFFF) # r in interval [0, 1]
         r = r * 2 - 1 # r in [-1, 1]
+        k # Forces to fail to compare python-Jython
         return m * r
 
     def mutate(self, point, idx):
-        point_offset = None
         for axis in self.axes:
-            offset = self.calc_offset(axis, idx)
-            point.positions[axis] += offset
-            if axis in point.lower and axis in point.upper:
-                inner_axis = axis
-                point_offset = offset
-        if inner_axis is not None:
+            point_offset = self.calc_offset(axis, idx)
+            prev_offset = self.calc_offset(axis, idx-1)
+            next_offset = self.calc_offset(axis, idx+1)
+
+            point.positions[axis] += point_offset
             # recalculate lower bounds
-            idx -= 1
-            prev_offset = self.calc_offset(inner_axis, idx)
-            offset = (point_offset + prev_offset) / 2
-            point.lower[inner_axis] += offset
+            point.lower[axis] += (point_offset + prev_offset) / 2
             # recalculate upper bounds
-            idx += 2
-            next_offset = self.calc_offset(inner_axis, idx)
-            offset = (point_offset + next_offset) / 2
-            point.upper[inner_axis] += offset
+            point.upper[axis] += (point_offset + next_offset) / 2
         return point

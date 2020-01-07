@@ -100,9 +100,16 @@ class GetPointsTest(ScanPointGeneratorTest):
         self.comp = CompoundGenerator([l1, l2], [], [m1], 5, True, 7)
         self.comp.prepare()
         pos = self.comp.get_points(0, 8).positions["y"]
+        print ("pos/type(pos)/rev")
+        print (type(pos))
+        print (pos)
+        rev = self.comp.get_points(8, 0).positions["y"]
+        print (rev)
         for i in range(8):
             self.assertAlmostEqual([0.458672, 1.543717, 2.582332, 3.514304, 4.558364, 5.528023, 0.574501, 1.452161][i],
-                               pos[i], delta=0.0001)
+                        pos[i], delta=0.0001)
+            self.assertAlmostEqual([0.458672, 1.543717, 2.582332, 3.514304, 4.558364, 5.528023, 0.574501, 1.452161][i],
+                        rev[8-i], delta=0.0001)
 
     def test_slicing(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)

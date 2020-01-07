@@ -4,12 +4,11 @@
 # Contributors:
 #    Tom Cobb - initial API and implementation and/or initial documentation
 #    Gary Yendell - initial API and implementation and/or initial documentation
-#    Joseph Ware
 #
 ###
-import array
 
 from scanpointgenerator.compat import np
+
 
 class Point(object):
     """Contains information about for each scan point
@@ -33,6 +32,7 @@ class Point(object):
         self.indexes = []
         self.duration = None
         self.delay_after = None
+
 
 class Points(object):
     """Contains information about multiple points
@@ -82,7 +82,7 @@ class Points(object):
         self.positions.update(points.positions)
         self.lower.update(points.lower)
         self.upper.update(points.upper)
-        if len(self.indexes): # if indices is not empty: assumption that length of indices is consistent
+        if len(self.indexes):  # if indices is not empty: assumption that length of indices is consistent
             self.indexes = np.column_stack((self.indexes, points.indexes))
         else:
             self.indexes = points.indexes
@@ -96,4 +96,3 @@ class Points(object):
         points.upper.update(dimension_points)
         points.indexes = np.full(length, index)
         return points
-    

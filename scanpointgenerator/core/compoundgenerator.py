@@ -9,7 +9,6 @@
 ###
 
 import logging
-import array
 
 from annotypes import Serializable, Anno, Union, Array, Sequence, \
     deserialize_object
