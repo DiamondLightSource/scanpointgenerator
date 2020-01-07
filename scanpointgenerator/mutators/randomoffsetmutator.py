@@ -57,7 +57,6 @@ class RandomOffsetMutator(Mutator):
         print (idx)
         print (type(idx))
         print ("x")
-        print (x)
         x = (idx << 4) + (0 if len(axis) == 0 else ord(axis[0]))
         print (x)
         x ^= (self.seed << 12)
@@ -76,14 +75,17 @@ class RandomOffsetMutator(Mutator):
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
         print ("prefloat")
+        print (type(x))
         print (x)
         if hasattr(x, "dtype"):
             # It's a numpy array
             r = x.astype(float)
         else:
             r = float(x)
+        print (type(x))
         print ("postfloat")
         print (r)
+        print (type(r))
         r /= float(0xFFFFFFFF) # r in interval [0, 1]
         r = r * 2 - 1 # r in [-1, 1]
         k # Forces to fail to compare python-Jython
