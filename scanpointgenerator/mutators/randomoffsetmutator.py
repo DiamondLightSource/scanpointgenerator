@@ -11,7 +11,7 @@ import collections
 
 from annotypes import Anno, Union, Array, Sequence
 
-from scanpointgenerator.core import Mutator
+from scanpointgenerator.core import Mutator, Points
 
 with Anno("Seed for random offset generator"):
     ASeed = int
@@ -51,22 +51,12 @@ class RandomOffsetMutator(Mutator):
 
     def calc_offset(self, axis, idx):
         m = self.max_offset[self.axes.index(axis)]
-        print ("m")
-        print (m)
-        print ("idx")
-        print (idx)
-        print (type(idx))
-        print ("x")
         x = (idx << 4) + (0 if len(axis) == 0 else ord(axis[0]))
-        print (x)
         x ^= (self.seed << 12)
-        print (x)
         # Apply hash algorithm to x for pseudo-randomness
         # Robert Jenkins 32 bit hash (avalanches well)
         x = (x + 0x7ED55D16) + (x << 12)
-        print (x)
         x &= 0xFFFFFFFF # act as 32 bit unsigned before doing any right-shifts
-        print (x)
         x = (x ^ 0xC761C23C) ^ (x >> 19)
         x = (x + 0x165667B1) + (x << 5)
         x = (x + 0xD3A2646C) ^ (x << 9)
@@ -74,24 +64,22 @@ class RandomOffsetMutator(Mutator):
         x &= 0xFFFFFFFF
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
-        print ("prefloat")
-        print (type(x))
-        print (x)
-        if hasattr(x, "dtype"):
-            # It's a numpy array
-            r = x.astype(float)
-        else:
-            r = float(x)
-        print (type(x))
-        print ("postfloat")
-        print (r)
-        print (type(r))
+        r = float(x)
         r /= float(0xFFFFFFFF) # r in interval [0, 1]
         r = r * 2 - 1 # r in [-1, 1]
-        k # Forces to fail to compare python-Jython
         return m * r
 
     def mutate(self, point, idx):
+        if isinstance(point, Points):
+            # It's a numpy array:
+            ''' 
+            In Jython, int -> long conversion does not happen automatically within an array, unlike in Cython
+            Therefore, we must mutate each point individually if we want to maintain backwards consistency
+            '''
+            mutated = Points()
+            for i in range(len(idx)):
+                mutated += self.mutate(point[i], idx[i])
+            return mutated
         for axis in self.axes:
             point_offset = self.calc_offset(axis, idx)
             prev_offset = self.calc_offset(axis, idx-1)

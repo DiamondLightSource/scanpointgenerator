@@ -59,7 +59,18 @@ class Points(object):
 
     def __len__(self):
         return len(self.indexes)
-    
+
+    def __add__(self, other):
+        '''
+        Adds a Point or Points object to this Points. Adds the positions, bounds, ind[ex/ices] of the other object to
+        self, maintaining duration, delay_after
+        '''
+        self.positions = {axis: self.positions[axis]+other.positions[axis] for axis in self.positions}
+        self.upper = {axis: self.upper[axis]+other.upper[axis] for axis in self.upper}
+        self.lower = {axis: self.lower[axis]+other.lower[axis] for axis in self.lower}
+        self.indexes = self.indexes+other.indexes
+        return self
+
     def __getitem__(self, sliced):
         ''' input:
         sliced (int or slice)- index of a Point or a slice of many Point to consolidate into a Points
@@ -70,9 +81,9 @@ class Points(object):
             point = Point()
         else:
             point = Points()
-        point.positions = {axis:self.positions[axis][sliced] for axis in self.positions}
-        point.upper = {axis:self.upper[axis][sliced] for axis in self.upper}
-        point.lower = {axis:self.lower[axis][sliced] for axis in self.lower}
+        point.positions = {axis: self.positions[axis][sliced] for axis in self.positions}
+        point.upper = {axis: self.upper[axis][sliced] for axis in self.upper}
+        point.lower = {axis: self.lower[axis][sliced] for axis in self.lower}
         point.indexes = self.indexes[sliced]
         point.duration = self.duration[sliced]
         point.delay_after = self.delay_after[sliced]
