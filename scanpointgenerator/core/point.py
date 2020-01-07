@@ -61,14 +61,18 @@ class Points(object):
         return len(self.indexes)
 
     def __add__(self, other):
-        '''
-        Adds a Point or Points object to this Points. Adds the positions, bounds, ind[ex/ices] of the other object to
-        self, maintaining duration, delay_after
+        ''' input:
+        other (Point or Points)
+        Adds the positions, bounds, ind[ex/ices] of the other object to self, maintaining duration, delay_after
+        returns: self
         '''
         self.positions = {axis: self.positions[axis]+other.positions[axis] for axis in self.positions}
         self.upper = {axis: self.upper[axis]+other.upper[axis] for axis in self.upper}
         self.lower = {axis: self.lower[axis]+other.lower[axis] for axis in self.lower}
-        self.indexes = self.indexes+other.indexes
+        if len(self):
+            self.indexes += other.indexes
+        else:
+            self.indexes = other.indexes
         return self
 
     def __getitem__(self, sliced):

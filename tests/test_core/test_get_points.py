@@ -72,6 +72,33 @@ class GetPointsTest(ScanPointGeneratorTest):
                 self.assertEqual(fpoints.upper[axis][i], bpoints.upper[axis][5-i])
             self.assertTrue(np.all(fpoints.indexes[i] == bpoints.indexes[5-i]))
 
+    def test_adding_points(self):
+        l1 = LineGenerator("x", "mm", 0, 0.5, 5, True)
+        l2 = LineGenerator("y", "nm", 0, 0.1, 5)
+        comp = CompoundGenerator([l2, l1], [], [])
+        comp.prepare()
+        apoints = comp.get_points(0, 5)
+        apoints += comp.get_points(5, 10)
+        cpoints = comp.get_points(0, 10)
+        for i in range(0,10):
+            for axis in apoints.positions:
+                self.assertEqual(apoints.positions[axis][i], cpoints.positions[axis][5-i])
+
+    def test_adding_point_to_points(self):
+        l1 = LineGenerator("x", "mm", 0, 0.5, 5, True)
+        l2 = LineGenerator("y", "nm", 0, 0.1, 5)
+        comp = CompoundGenerator([l2, l1], [], [])
+        comp.prepare()
+        apoints = comp.get_points(0, 5)
+        apoints += comp.get_points(5)
+        apoints += comp.get_point(6)
+        apoints += comp.get_points(7)
+        cpoints = comp.get_points(0, 7)
+        for i in range(0,7):
+            for axis in apoints.positions:
+                self.assertEqual(apoints.positions[axis][i], cpoints.positions[axis][5-i])
+            self.assertTrue(np.all(apoints.indexes[i] == apoints.indexes[5-i]))
+
     def test_roi(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)
         l2 = LineGenerator("y", "mm", 0.5, 5.5, 6)
