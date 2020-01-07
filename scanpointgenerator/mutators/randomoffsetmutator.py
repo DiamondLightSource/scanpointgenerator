@@ -56,12 +56,18 @@ class RandomOffsetMutator(Mutator):
         print ("idx")
         print (idx)
         print (type(idx))
+        print ("x")
+        print (x)
         x = (idx << 4) + (0 if len(axis) == 0 else ord(axis[0]))
+        print (x)
         x ^= (self.seed << 12)
+        print (x)
         # Apply hash algorithm to x for pseudo-randomness
         # Robert Jenkins 32 bit hash (avalanches well)
         x = (x + 0x7ED55D16) + (x << 12)
+        print (x)
         x &= 0xFFFFFFFF # act as 32 bit unsigned before doing any right-shifts
+        print (x)
         x = (x ^ 0xC761C23C) ^ (x >> 19)
         x = (x + 0x165667B1) + (x << 5)
         x = (x + 0xD3A2646C) ^ (x << 9)
@@ -69,11 +75,15 @@ class RandomOffsetMutator(Mutator):
         x &= 0xFFFFFFFF
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
+        print ("prefloat")
+        print (x)
         if hasattr(x, "dtype"):
             # It's a numpy array
             r = x.astype(float)
         else:
             r = float(x)
+        print ("postfloat")
+        print (r)
         r /= float(0xFFFFFFFF) # r in interval [0, 1]
         r = r * 2 - 1 # r in [-1, 1]
         k # Forces to fail to compare python-Jython
