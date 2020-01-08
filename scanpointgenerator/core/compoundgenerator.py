@@ -251,7 +251,6 @@ class CompoundGenerator(Serializable):
             point = m.mutate(point, n)
         return point
 
-
     def get_points(self, start, finish):
         """
         Retrieve a Points object: a wrapper for an array of Point from the generator
@@ -284,7 +283,7 @@ class CompoundGenerator(Serializable):
         if finish == start:
             return Points()
         length = int(abs(finish-start))
-        indices = np.arange(start, finish, int(length/(finish-start)))
+        indices = np.arange(start, finish, np.sign(finish-start))
 
         points = Points()
 
@@ -301,12 +300,13 @@ class CompoundGenerator(Serializable):
         for m in self.mutators:
             points = m.mutate(points, indices)
         return points
-    
-    def _points_above_m(self, dim, index, length):
-        if dim.alternate:
+
+    @staticmethod
+    def _points_above_m(dim, index, length):
+        if dim.alternate and ((index // dim.size) % 2 == 1):
             index = dim.size - index - 1
         ''' This dimension does not step, all points are the same point, cannot be the lowest dimension '''
-        return Points.points_from_axis_points(dim.get_point(int(index)), index, length)
+        return Points.points_from_axis_point(dim.get_point(int(index)), index, length)
     
     def _points_from_below_m(self, dim, indices):
         points_from_below_m = Points()
@@ -323,16 +323,23 @@ class CompoundGenerator(Serializable):
         
         if dim is self.dimensions[-1]:
             if dim.alternate:
-                points_from_below_m.lower.update({axis:np.where(dim_run % 2 == 1, dim.upper_bounds[axis][point_indices],
-                                                    dim.lower_bounds[axis][point_indices]) for axis in dim.axes})
-                points_from_below_m.upper.update({axis:np.where(dim_run % 2 == 1, dim.lower_bounds[axis][point_indices],
-                                                    dim.upper_bounds[axis][point_indices]) for axis in dim.axes})
+                points_from_below_m.lower.update({axis: np.where(dim_run % 2 == 1,
+                                                                 dim.upper_bounds[axis][point_indices],
+                                                                 dim.lower_bounds[axis][point_indices])
+                                                  for axis in dim.axes})
+                points_from_below_m.upper.update({axis: np.where(dim_run % 2 == 1,
+                                                                 dim.lower_bounds[axis][point_indices],
+                                                                 dim.upper_bounds[axis][point_indices])
+                                                  for axis in dim.axes})
             else:
-                points_from_below_m.lower.update({axis:dim.lower_bounds[axis][point_indices] for axis in dim.axes})
-                points_from_below_m.upper.update({axis:dim.upper_bounds[axis][point_indices] for axis in dim.axes})
+                points_from_below_m.lower.update({axis: dim.lower_bounds[axis][point_indices].copy()
+                                                  for axis in dim.axes})
+                points_from_below_m.upper.update({axis: dim.upper_bounds[axis][point_indices].copy()
+                                                  for axis in dim.axes})
         else:
-            points_from_below_m.lower.update(dimension_positions)
-            points_from_below_m.upper.update(dimension_positions)
+            # Must return copy not view so that bounds can be mutated correctly
+            points_from_below_m.lower.update({axis: dimension_positions[axis].copy() for axis in dimension_positions})
+            points_from_below_m.upper.update({axis: dimension_positions[axis].copy() for axis in dimension_positions})
             
         points_from_below_m.indexes = point_indices
         return points_from_below_m
