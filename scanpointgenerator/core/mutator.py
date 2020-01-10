@@ -26,7 +26,7 @@ class Mutator(Serializable):
 
         Args:
             point: Point or Points object to mutate
-            index: ind[ex/ikces] of the Point[s] to mutate
+            index: ind[ex/ices] of the Point[s] to mutate
 
         Returns:
             Point: Mutated point

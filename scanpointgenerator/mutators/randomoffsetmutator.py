@@ -11,7 +11,8 @@ import collections
 
 from annotypes import Anno, Union, Array, Sequence
 
-from scanpointgenerator.core import Mutator, Points
+from scanpointgenerator.compat import np
+from scanpointgenerator.core import Mutator
 
 with Anno("Seed for random offset generator"):
     ASeed = int
@@ -64,30 +65,33 @@ class RandomOffsetMutator(Mutator):
         x &= 0xFFFFFFFF
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
-        r = float(x)
+        if hasattr(x, "dtype"):
+            r = x.astype(float)
+        else:
+            r = float(x)
         r /= float(0xFFFFFFFF) # r in interval [0, 1]
         r = r * 2 - 1 # r in [-1, 1]
         return m * r
 
     def mutate(self, point, idx):
-        if isinstance(point, Points):
+        if hasattr(idx, "dtype"):
             # It's a numpy array:
             ''' 
-            In Jython, int -> long conversion does not happen automatically within an array, unlike in Cython
-            Therefore, we must mutate each point individually if we want to maintain backwards consistency
+            In Jython, int -> long conversion does not happen automatically within an array, therefore manually do it
+            Additionally, for all but innermost dimension, lower = upper = view of positions- mutating any mutates all
+            Point[s] do not explicitly preserve information about innermost dimension, so copy for all axes.
             '''
-            mutated = Points()
-            for i in range(len(idx)):
-                mutated += self.mutate(point[i], idx[i])
-            return mutated
+            idx = idx.astype(np.uint32)
+            point.lower = {axis: point.lower[axis].copy() for axis in point.lower}
+            point.upper = {axis: point.upper[axis].copy() for axis in point.upper}
+        else:
+            idx = np.uint32(idx)
         for axis in self.axes:
             point_offset = self.calc_offset(axis, idx)
-            prev_offset = self.calc_offset(axis, idx-1)
-            next_offset = self.calc_offset(axis, idx+1)
-
+            low_offset = (self.calc_offset(axis, idx-1) + point_offset) / 2
+            high_offset = (self.calc_offset(axis, idx+1) + point_offset) / 2
             point.positions[axis] += point_offset
-            # recalculate lower bounds
-            point.lower[axis] += (point_offset + prev_offset) / 2
-            # recalculate upper bounds
-            point.upper[axis] += (point_offset + next_offset) / 2
+            # recalculate lower & upper bounds
+            point.lower[axis] += low_offset
+            point.upper[axis] += high_offset
         return point

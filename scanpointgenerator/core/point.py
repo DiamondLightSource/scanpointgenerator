@@ -9,7 +9,6 @@
 
 import numpy as np
 
-
 class Point(object):
     """Contains information about for each scan point
 

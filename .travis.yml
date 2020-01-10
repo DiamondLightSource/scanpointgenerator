@@ -38,22 +38,24 @@ before_install:
       fi;
       export OLD_PATH=$PATH;
       export PATH=$HOME/jython/bin:$PATH;
-      export DAWN_URL='https://alfred.diamond.ac.uk/DawnDiamond/2.16/downloads/builds-release/DawnDiamond-2.16.1.v20191126-1007-linux64.zip';
-      wget $DAWN_URL -O $HOME/dawn.zip;
-      unzip -q $HOME/dawn.zip -d $HOME/dawn;
-      export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.16.1.v20191126-1007-linux64);
-      cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/scisoftpy $HOME/jython_deps/numpy;
-      cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/* $HOME/jython_deps;
-      cp -r $DAWN/plugins/uk.ac.diamond.scisoft.analysis_1.5.0.v20191118-1501/* $HOME/jython_deps;
-      cp -r $DAWN/plugins/org.eclipse.dawnsci.analysis.dataset_1.1.0.v20191021-1259/* $HOME/jython_deps;
-      cp -r $DAWN/plugins/org.dawnsci.boofcv_1.0.0.v20191014-1522/* $HOME/jython_deps;
-      cp -r $DAWN/plugins/hdf.hdf5lib_1.10.5.v20190918-1220/* $HOME/jython_deps;
-      cp -r $DAWN/plugins/org.eclipse.dawnsci.hdf5_1.5.0.v20191022-1538/* $HOME/jython_deps;
-      IFS=":";
-      for j in $REQUIRED_JARS; do
-        cp $DAWN/plugins/$j $HOME/jython_deps/;
-      done;
+      if [ ! -f "$HOME/jython_deps/.cache" ]; then
+        export DAWN_URL='https://alfred.diamond.ac.uk/DawnDiamond/2.16/downloads/builds-release/DawnDiamond-2.16.1.v20191126-1007-linux64.zip';
+        wget $DAWN_URL -O $HOME/dawn.zip;
+        unzip -q $HOME/dawn.zip -d $HOME/dawn;
+        export DAWN=$(readlink -f $HOME/dawn/DawnDiamond-2.16.1.v20191126-1007-linux64);
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/scisoftpy $HOME/jython_deps/numpy;
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.python_1.4.0/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/uk.ac.diamond.scisoft.analysis_1.5.0.v20191118-1501/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.eclipse.dawnsci.analysis.dataset_1.1.0.v20191021-1259/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.dawnsci.boofcv_1.0.0.v20191014-1522/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/hdf.hdf5lib_1.10.5.v20190918-1220/* $HOME/jython_deps;
+        cp -r $DAWN/plugins/org.eclipse.dawnsci.hdf5_1.5.0.v20191022-1538/* $HOME/jython_deps;
+        IFS=":";
+        for j in $REQUIRED_JARS; do
+          cp $DAWN/plugins/$j $HOME/jython_deps/;
+        done;
       touch $HOME/jython_deps/.cache;
+      fi
     fi
 
 install:

@@ -332,14 +332,15 @@ class CompoundGenerator(Serializable):
                                                                  dim.upper_bounds[axis][point_indices])
                                                   for axis in dim.axes})
             else:
-                points_from_below_m.lower.update({axis: dim.lower_bounds[axis][point_indices].copy()
+                points_from_below_m.lower.update({axis: dim.lower_bounds[axis][point_indices]
                                                   for axis in dim.axes})
-                points_from_below_m.upper.update({axis: dim.upper_bounds[axis][point_indices].copy()
+                points_from_below_m.upper.update({axis: dim.upper_bounds[axis][point_indices]
                                                   for axis in dim.axes})
         else:
-            # Must return copy not view so that bounds can be mutated correctly
-            points_from_below_m.lower.update({axis: dimension_positions[axis].copy() for axis in dimension_positions})
-            points_from_below_m.upper.update({axis: dimension_positions[axis].copy() for axis in dimension_positions})
+            points_from_below_m.lower.update({axis: dimension_positions[axis]
+                                              for axis in dimension_positions})
+            points_from_below_m.upper.update({axis: dimension_positions[axis]
+                                              for axis in dimension_positions})
             
         points_from_below_m.indexes = point_indices
         return points_from_below_m

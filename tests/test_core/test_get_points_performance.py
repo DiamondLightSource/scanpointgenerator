@@ -14,7 +14,9 @@ from scanpointgenerator import RandomOffsetMutator
 TIMELIMIT = 3 if os.name == "java" else 1
 # Goal is 10khz, 1s per 10,000(10e4) points
 
+
 class GetPointsPerformanceTest(ScanPointGeneratorTest):
+
     #@unittest.skip("Unsuitable")
     def test_90_thousand_time_constraint(self):
         z = LineGenerator("z", "mm", 0, 1, 300, True)
@@ -69,7 +71,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*100)
     
-    @unittest.skip("Unsuitable")
+    #@unittest.skip("Unsuitable")
     def test_1_time_constraint_complex(self):
         a = LineGenerator("a", "mm", 0, 1, 10, True)
         b = LineGenerator("b", "mm", 0, 1, 10)
@@ -114,7 +116,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*0.28)
     
-    @unittest.skip("Unsuitable")
+    #@unittest.skip("Unsuitable")
     def test_time_constraint_complex(self):
         a = LineGenerator("a", "eV", 0, 1, 10)
         b = LineGenerator("b", "rad", 0, 1, 10)

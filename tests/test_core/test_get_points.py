@@ -22,7 +22,9 @@ class GetPointsTest(ScanPointGeneratorTest):
     def test_simple_points(self):
         points= self.comp.get_points(7, 12)
         self.assertEqual(list([[0, 1, 2],[0, 1, 3],[0, 1, 4],[0, 2, 0],[0, 2, 1]]), points.indexes.tolist())
+        # Lower = Bounds for outer dimension
         self.assertEqual(list([0., 0., 0., 0., 0.]), points.lower['x'].tolist())
+        # Lower != bounds for innermost dimension
         self.assertEqual(list([1.25, 1.25, 1.25, 2.5 , 2.5]), points.lower['y'].tolist())
         self.assertEqual(list([1.875,  3.125,  4.375, -0.625,  0.625]), points.lower['z'].tolist())
         self.assertTrue(np.all(np.full(5, 5) == points.duration))
@@ -56,6 +58,7 @@ class GetPointsTest(ScanPointGeneratorTest):
         points = comp.get_points(0, 6)
         self.assertEqual(list([0., 0., 0., 0.1, 0.1, 0.1]), points.lower["y"].tolist())
         self.assertEqual(list([0., 0., 0., 0.1, 0.1, 0.1]), points.upper["y"].tolist())
+        # Bounds go in the correct direction for an alternating dimension
         self.assertEqual(list([-0.125, 0.125, 0.375, 0.625, 0.375, 0.125]), points.lower["x"].tolist())
         self.assertEqual(list([0.125, 0.375, 0.625, 0.375, 0.125, -0.125]), points.upper["x"].tolist())
 
@@ -92,6 +95,7 @@ class GetPointsTest(ScanPointGeneratorTest):
         comp.prepare()
         # 0, 1, 2, 3, 4
         apoints = comp.get_points(0, 5)
+        # nothing
         apoints += comp.get_points(5, 5)
         # 5
         apoints += comp.get_point(5)
@@ -136,13 +140,35 @@ class GetPointsTest(ScanPointGeneratorTest):
         m1 = RandomOffsetMutator(12, ["x", "y"], [0.1, 0.1])
         self.comp = CompoundGenerator([l1, l2], [], [m1], 5, True, 7)
         self.comp.prepare()
-        pos = self.comp.get_points(0, 8).positions["y"]
-        rev = self.comp.get_points(7, -1).positions["y"]
+        pos = self.comp.get_points(0, 8)
+        shortpos = self.comp.get_points(0, 4)
+        rev = self.comp.get_points(7, -1)
+        shortrev = self.comp.get_points(3, -1)
+        positions = [0.438320, 0.430532, 0.462758, 0.540163, 0.585728, 0.565177, 1.402957, 1.461795]
+        uppy = [1.001194, 2.063024, 3.048318, 4.036334, 5.043193, 6.051262, 1.013331, 1.984931]
+        lowx = [0.515187, 0.434426, 0.446645, 0.501460, 0.562946, 0.575453, 1.484067, 1.432376]
         for i in range(8):
-            self.assertAlmostEqual([0.458672, 1.543717, 2.582332, 3.514304, 4.558364, 5.528023, 0.574501, 1.452161][i],
-                        pos[i], delta=0.0001)
-            self.assertAlmostEqual([0.458672, 1.543717, 2.582332, 3.514304, 4.558364, 5.528023, 0.574501, 1.452161][i],
-                        rev[7-i], delta=0.0001)
+            point = self.comp.get_point(i)
+            a = (pos.positions["x"][i], pos.lower["x"][i], pos.upper["y"][i])
+            b = (rev.positions["x"][7-i], rev.lower["x"][7-i], rev.upper["y"][7-i])
+            c = (point.positions["x"], point.lower["x"], point.upper["y"])
+
+            for k in [a, b, c]:
+                self.assertAlmostEqual(positions[i], k[0], delta=0.0001)
+                self.assertAlmostEqual(lowx[i], k[1], delta=0.0001)
+                self.assertAlmostEqual(uppy[i], k[2], delta=0.0001)
+        # Test for when one dimension is stationary and so points = bounds
+        for i in range(3):
+            point = self.comp.get_point(i)
+            a = (shortpos.positions["x"][i], shortpos.lower["x"][i], shortpos.upper["y"][i])
+            b = (shortrev.positions["x"][3 - i], shortrev.lower["x"][3 - i], shortrev.upper["y"][3 - i])
+            c = (point.positions["x"], point.lower["x"], point.upper["y"])
+
+            for k in [a, b, c]:
+                self.assertAlmostEqual(positions[i], k[0], delta=0.0001)
+                self.assertAlmostEqual(lowx[i], k[1], delta=0.0001)
+                self.assertAlmostEqual(uppy[i], k[2], delta=0.0001)
+
 
     def test_slicing(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)
@@ -152,7 +178,6 @@ class GetPointsTest(ScanPointGeneratorTest):
         self.comp.prepare()
         points = self.comp.get_points(0, 8)
         self.assertEqual(8, len(points))
-        ''' When points sliced within integer as below, it returns a point, with a float not a list of floats '''
         self.assertAlmostEqual(0.45867, points[0].positions["y"], delta=0.0001)
         for i in [0, 1]:
             self.assertAlmostEqual([0.45867, 1.54371][i], points[0:2].positions["y"][i], delta=0.0001)
@@ -180,9 +205,27 @@ class GetPointsTest(ScanPointGeneratorTest):
             point = self.comp.get_point(i+5)  # get_point
             addi_points += point
             # a = b, a = c, a = d => a = b = c = d
-            self.assertAlmostEqual(points.positions["x"][i], point.positions["x"])
-            self.assertAlmostEqual(points.positions["x"][i], addi_points.positions["x"][i])
-            self.assertAlmostEqual(points.positions["x"][i], apoints.positions["x"][i])
-            self.assertAlmostEqual(points.positions["y"][i], point.positions["y"])
-            self.assertAlmostEqual(points.positions["y"][i], addi_points.positions["y"][i])
-            self.assertAlmostEqual(points.positions["y"][i], apoints.positions["y"][i])
+            a = (points.positions["x"][i], points.lower["x"][i], "a")
+            b = (point.positions["x"], point.lower["x"], "b")
+            c = (addi_points.positions["x"][i], addi_points.lower["x"][i], "c")
+            d = (apoints.positions["x"][i], apoints.lower["x"][i], "d")
+            for k in [b, c, d]:
+                self.assertAlmostEqual(a[0], k[0])
+                self.assertAlmostEqual(a[1], k[1])
+        # One dimension stationary therefore bounds = points
+        apoints = self.comp.get_points(8, 10)
+        apoints += self.comp.get_points(10, 12)
+        mpoints = self.comp.get_points(8, 12)
+        addi_points = Points()
+        for i in range(4):
+            point = self.comp.get_point(8+i)
+            addi_points += point
+            # a = b, a = c, a = d => a = b = c = d
+            a = (points.positions["x"][3+i], points.lower["x"][3+i])
+            b = (point.positions["x"], point.lower["x"])
+            c = (addi_points.positions["x"][i], addi_points.lower["x"][i])
+            d = (apoints.positions["x"][i], apoints.lower["x"][i])
+            e = (mpoints.positions["x"][i], mpoints.lower["x"][i])
+            for k in [b, c, d, e]:
+                self.assertAlmostEqual(a[0], k[0])
+                self.assertAlmostEqual(a[1], k[1])
