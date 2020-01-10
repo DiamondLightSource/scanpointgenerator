@@ -10,6 +10,7 @@ from scanpointgenerator import RandomOffsetMutator
 from scanpointgenerator import Points
 from scanpointgenerator.compat import np
 
+
 class GetPointsTest(ScanPointGeneratorTest):
 
     def setUp(self):
@@ -168,7 +169,6 @@ class GetPointsTest(ScanPointGeneratorTest):
                 self.assertAlmostEqual(positions[i], k[0], delta=0.0001)
                 self.assertAlmostEqual(lowx[i], k[1], delta=0.0001)
                 self.assertAlmostEqual(uppy[i], k[2], delta=0.0001)
-
 
     def test_slicing(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)

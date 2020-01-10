@@ -4,10 +4,12 @@
 # Contributors:
 #    Tom Cobb - initial API and implementation and/or initial documentation
 #    Gary Yendell - initial API and implementation and/or initial documentation
+#    Joseph Ware - Points implementation
 #
 ###
 
 import numpy as np
+
 
 class Point(object):
     """Contains information about for each scan point

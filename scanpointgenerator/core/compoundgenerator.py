@@ -5,6 +5,7 @@
 #    Tom Cobb - initial API and implementation and/or initial documentation
 #    Gary Yendell - initial API and implementation and/or initial documentation
 #    Charles Mita - initial API and implementation and/or initial documentation
+#    Joseph Ware - Points implementation
 #
 ###
 

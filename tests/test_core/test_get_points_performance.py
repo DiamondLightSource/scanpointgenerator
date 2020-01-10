@@ -17,7 +17,6 @@ TIMELIMIT = 3 if os.name == "java" else 1
 
 class GetPointsPerformanceTest(ScanPointGeneratorTest):
 
-    #@unittest.skip("Unsuitable")
     def test_90_thousand_time_constraint(self):
         z = LineGenerator("z", "mm", 0, 1, 300, True)
         w = LineGenerator("w", "mm", 0, 1, 300, True)
@@ -26,10 +25,8 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         start_time = time.time()
         C = g.get_points(0, 90000)
         end_time = time.time()
-        # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*9)
         
-    #@unittest.skip("Unsuitable")
     def test_30_thousand_time_constraint_with_outer(self):
         a = StaticPointGenerator(1)
         z = LineGenerator("z", "mm", 0, 1, 300, True)
@@ -39,10 +36,8 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         start_time = time.time()
         C = g.get_points(0, 30000)
         end_time = time.time()
-        # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*3)
         
-    #@unittest.skip("Unsuitable")
     def test_30_thousand_time_constraint_with_inner(self):
         a = StaticPointGenerator(1)
         z = LineGenerator("z", "mm", 0, 1, 300, True)
@@ -52,7 +47,6 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         start_time = time.time()
         C = g.get_points(0, 30000)
         end_time = time.time()
-        # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*3)
     
     #@unittest.skip("Unsuitable")
@@ -70,9 +64,9 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         end_time = time.time()
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*100)
-    
+
     #@unittest.skip("Unsuitable")
-    def test_1_time_constraint_complex(self):
+    def test_small_time_constraint_complex(self):
         a = LineGenerator("a", "mm", 0, 1, 10, True)
         b = LineGenerator("b", "mm", 0, 1, 10)
         c = LineGenerator("c", "mm", 0, 1, 10) 
@@ -97,8 +91,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         # if this test becomes problematic then we'll just have to remove it
         self.assertLess(end_time - start_time, TIMELIMIT*1e-2)
         
-    #@unittest.skip("Unsuitable")
-    def test_ROI_time_constraint(self):
+    def test_roi_time_constraint(self):
         a = LineGenerator("a", "mm", 0, 1, 300, True)
         b = LineGenerator("b", "mm", 0, 1, 300)
         r1 = CircularROI([0.25, 0.33], 0.1)
@@ -127,9 +120,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
         r1 = CircularROI([0.2, 0.2], 0.1)
         r2 = CircularROI([0.4, 0.2], 0.1)
         r3 = CircularROI([0.6, 0.2], 0.1)
-        rect = RectangularROI([0, 0], 1, 1, 1)
         e1 = ROIExcluder([r1, r2, r3], ["a", "b"])
-        #e2 = ROIExcluder([rect], ["e", "h"])
         m1 = RandomOffsetMutator(12, ["a"], [0.1])
         m2 = RandomOffsetMutator(200, ["c", "f"], [0.01, 0.5])
 
@@ -141,6 +132,7 @@ class GetPointsPerformanceTest(ScanPointGeneratorTest):
             g.get_points(0, p)
             end_time = time.time()
             self.assertLess(end_time - start_time, TIMELIMIT*p/1e4)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
