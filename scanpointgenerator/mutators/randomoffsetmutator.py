@@ -81,11 +81,11 @@ class RandomOffsetMutator(Mutator):
             Additionally, for all but innermost dimension, lower = upper = view of positions- mutating any mutates all
             Point[s] do not explicitly preserve information about innermost dimension, so copy for all axes.
             '''
-            idx = idx.astype(np.uint32)
+            idx = idx.astype(np.int32) - 2147483648
             point.lower = {axis: point.lower[axis].copy() for axis in point.lower}
             point.upper = {axis: point.upper[axis].copy() for axis in point.upper}
         else:
-            idx = np.uint32(idx)
+            idx = np.int32(idx) - 2147483648
         for axis in self.axes:
             point_offset = self.calc_offset(axis, idx)
             low_offset = (self.calc_offset(axis, idx-1) + point_offset) / 2

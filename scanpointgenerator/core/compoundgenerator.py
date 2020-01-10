@@ -264,7 +264,7 @@ class CompoundGenerator(Serializable):
         """
         if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
-        if finish > self.size or start < 0:
+        if max(finish, start - 1) > self.size or min(start, finish + 1) < 0:
             raise IndexError("Requested points extend out of range")
         ''' 
         situations:
