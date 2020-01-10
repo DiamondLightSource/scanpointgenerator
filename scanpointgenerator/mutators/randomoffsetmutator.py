@@ -8,7 +8,6 @@
 ###
 
 import collections
-import os.name as name
 
 from annotypes import Anno, Union, Array, Sequence
 
