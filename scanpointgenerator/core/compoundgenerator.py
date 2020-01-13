@@ -264,8 +264,7 @@ class CompoundGenerator(Serializable):
         """
         if not self._prepared:
             raise ValueError("CompoundGenerator has not been prepared")
-        if max(finish, start - 1) > self.size:
-            raise IndexError("Requested points extend out of range")
+
         ''' 
         situations:
             dim N constant, dim N+1 constant (e.g. 1,1 -> 1,1)
@@ -283,11 +282,11 @@ class CompoundGenerator(Serializable):
         '''
         if finish == start:
             return Points()
-        length = int(abs(finish-start))
         indices = np.arange(start, finish, np.sign(finish-start))
-        # Ensure non negativeness so that non-signed ints can be used in Mutator
         indices = np.where(indices < 0, indices + self.size, indices)
-
+        if max(indices) >= self.size:
+            raise IndexError("Requested points extend out of range")
+        length = len(indices)
         points = Points()
 
         for dim in self.dimensions:
@@ -310,7 +309,7 @@ class CompoundGenerator(Serializable):
             index = dim.size - index - 1
         index %= dim.size
         ''' This dimension does not step, all points are the same point, cannot be the lowest dimension 
-        Unless finish = start + 1'''
+        Unless finish = start + 1, in which case all dimensions are treated this way'''
         return Points.points_from_axis_point(dim, int(index), length)
     
     def _points_from_below_m(self, dim, indices):

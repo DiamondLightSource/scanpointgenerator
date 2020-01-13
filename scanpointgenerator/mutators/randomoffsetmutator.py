@@ -68,6 +68,7 @@ class RandomOffsetMutator(Mutator):
         if hasattr(x, "dtype"):
             r = x.astype(np.float32)
         else:
+            # Jython does not like np.float32(x)
             r = np.array([x], dtype=np.float32)[0]
         r /= float(0xFFFFFFFF) # r in interval [0, 1]
         r = r * 2 - 1 # r in [-1, 1]
@@ -78,7 +79,7 @@ class RandomOffsetMutator(Mutator):
             # It's a numpy array:
             ''' 
             In Jython, int bit length conversion does not happen automatically within an array, therefore manually do it
-            Jython bitwise operations overflow not saturate, so must work with 64 bit then reduce after calculation
+            Jython bitwise operations overflow not extend, so work with 64 bit then reduce after calculation
             Additionally, for all but innermost dimension, lower = upper = view of positions=> mutating any mutates all
             as Point[s] do not explicitly preserve information about innermost dimension, must get copies for all axes.
             '''
