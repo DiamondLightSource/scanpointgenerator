@@ -50,6 +50,8 @@ class GetPointsTest(ScanPointGeneratorTest):
                                [0,2,0]]), comp.get_points(0, 11).indexes.tolist())
         self.assertEqual(list([[0,3,1],[0,3,2],[0,3,3],[0,3,4],[0,4,0],[0,4,1],[0,4,2],[0,4,3],[0,4,4],[1,4,0],
                                [1,4,1]]), comp.get_points(16, 27).indexes.tolist())
+        self.assertEqual(list([[0,3,1],[0,3,2],[0,3,3],[0,3,4],[0,4,0],[0,4,1],[0,4,2],[0,4,3],[0,4,4],[1,4,0],
+                                [1,4,1]]), comp.get_points(-109, -98).indexes.tolist())
 
     def test_alternating_bounds(self):
         l1 = LineGenerator("x", "mm", 0, 0.5, 3, True)
@@ -64,50 +66,43 @@ class GetPointsTest(ScanPointGeneratorTest):
         self.assertEqual(list([0.125, 0.375, 0.625, 0.375, 0.125, -0.125]), points.upper["x"].tolist())
 
     def test_backwards(self):
-        l1 = LineGenerator("x", "mm", 0, 0.5, 3, True)
-        l2 = LineGenerator("y", "nm", 0, 0.1, 2)
-        comp = CompoundGenerator([l2, l1], [], [])
-        comp.prepare()
-        fpoints = comp.get_points(0, 6)
-        bpoints = comp.get_points(5,-1)
+        fpoints = self.comp.get_points(0, 6)
+        bpoints = self.comp.get_points(5,-1)
         for i in range(0,5):
+            point = self.comp.get_point(i)
             for axis in fpoints.positions:
                 self.assertEqual(fpoints.positions[axis][i], bpoints.positions[axis][5-i])
                 self.assertEqual(fpoints.lower[axis][i], bpoints.lower[axis][5-i])
                 self.assertEqual(fpoints.upper[axis][i], bpoints.upper[axis][5-i])
             self.assertTrue(np.all(fpoints.indexes[i] == bpoints.indexes[5-i]))
+            self.assertTrue(np.all(point.indexes == fpoints.indexes[i]))
 
     def test_adding_points(self):
-        l1 = LineGenerator("x", "mm", 0, 0.5, 5, True)
-        l2 = LineGenerator("y", "nm", 0, 0.1, 5)
-        comp = CompoundGenerator([l2, l1], [], [])
-        comp.prepare()
-        apoints = comp.get_points(0, 5)
-        apoints += comp.get_points(5, 10)
-        cpoints = comp.get_points(0, 10)
+        apoints = self.comp.get_points(0, 5)
+        apoints += self.comp.get_points(5, 10)
+        cpoints = self.comp.get_points(0, 10)
         for i in range(0,10):
             for axis in apoints.positions:
                 self.assertEqual(apoints.positions[axis][i], cpoints.positions[axis][i])
+                self.assertEqual(apoints.lower[axis][i], cpoints.lower[axis][i])
+                self.assertEqual(apoints.upper[axis][i], cpoints.upper[axis][i])
+        self.assertTrue(np.all(apoints.indexes == cpoints.indexes))
 
     def test_adding_point_to_points(self):
-        l1 = LineGenerator("x", "mm", 0, 0.5, 5, True)
-        l2 = LineGenerator("y", "nm", 0, 0.1, 5)
-        comp = CompoundGenerator([l2, l1], [], [])
-        comp.prepare()
         # 0, 1, 2, 3, 4
-        apoints = comp.get_points(0, 5)
+        apoints = self.comp.get_points(0, 5)
         # nothing
-        apoints += comp.get_points(5, 5)
+        apoints += self.comp.get_points(5, 5)
         # 5
-        apoints += comp.get_point(5)
+        apoints += self.comp.get_point(5)
         # 6, 7
-        apoints += comp.get_points(6, 8)
+        apoints += self.comp.get_points(6, 8)
         # 0, 1, 2, 3, 4, 5, 6, 7
-        cpoints = comp.get_points(0, 8)
+        cpoints = self.comp.get_points(0, 8)
         for i in range(0,8):
             for axis in apoints.positions:
                 self.assertEqual(apoints.positions[axis][i], cpoints.positions[axis][i])
-            self.assertTrue(np.all(apoints.indexes[i] == apoints.indexes[i]))
+        self.assertTrue(np.all(apoints.indexes == cpoints.indexes))
 
     def test_roi(self):
         l1 = LineGenerator("x", "mm", 0.5, 5.5, 6)
@@ -229,3 +224,14 @@ class GetPointsTest(ScanPointGeneratorTest):
             for k in [b, c, d, e]:
                 self.assertAlmostEqual(a[0], k[0])
                 self.assertAlmostEqual(a[1], k[1])
+
+    def test_negative_consistency_and_above_m(self):
+        ''' Also tests "above m" functions as length 1 no dimension moves '''
+        for a in [-1, -2, -7, -9]:
+            point = self.comp.get_point(a)
+            points = self.comp.get_points(a, a - 1)
+            self.assertEquals(list(point.indexes), list(points.indexes[0]))
+            for b in ["x", "y", "z"]:
+                self.assertAlmostEqual(point.positions[b], points.positions[b][0])
+                self.assertAlmostEqual(point.lower[b], points.lower[b][0])
+                self.assertAlmostEqual(point.upper[b], points.upper[b][0])

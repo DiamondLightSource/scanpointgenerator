@@ -8,7 +8,7 @@
 #
 ###
 
-import numpy as np
+from scanpointgenerator.compat import np
 
 
 class Point(object):
@@ -142,11 +142,12 @@ class Points(object):
         return points
 
     @staticmethod
-    def points_from_axis_point(point, index, length):
+    def points_from_axis_point(dim, index, length):
         points = Points()
-        dimension_points = {axis: np.full(length, point[axis]) for axis in point}
+        dimension_points = {axis: np.full(length, dim.positions[axis][index]) for axis in dim.positions}
+        lower, upper = dim.get_bounds(index)
         points.positions.update(dimension_points)
-        points.lower.update(dimension_points.copy())
-        points.upper.update(dimension_points.copy())
+        points.lower.update({axis: np.full(length, lower[axis]) for axis in lower})
+        points.upper.update({axis: np.full(length, upper[axis]) for axis in upper})
         points.indexes = np.full(length, index)
         return points
