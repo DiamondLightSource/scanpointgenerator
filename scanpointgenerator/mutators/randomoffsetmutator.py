@@ -65,26 +65,19 @@ class RandomOffsetMutator(Mutator):
         x &= 0xFFFFFFFF
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
-        if hasattr(x, "dtype"):
-            r = x.astype(np.float32)
-        else:
-            # Jython does not like np.float32(x)
-            r = np.array([x], dtype=np.float32)[0]
+        # Jython does not like np.float32(x)
+        r = np.array([x], dtype=np.float32)[0]
         r /= float(0xFFFFFFFF) # r in interval [0, 1]
-        r = r * 2 - 1 # r in [-1, 1]
+        r = r * 2 - 1  # r in [-1, 1]
         return m * r
 
     def mutate(self, point, idx):
-        if hasattr(idx, "dtype"):
-            # It's a numpy array:
-            ''' 
-            In Jython, int bit length conversion does not happen automatically within an array, therefore manually do it
-            Jython bitwise operations overflow not extend, so work with 64 bit then reduce after calculation
-            '''
-            idx = idx.astype(np.int64)
-        else:
-            # Jython does not allow np.int64(x)
-            idx = np.array([idx], dtype=np.int64)[0]
+        '''
+        In Jython, int bit length conversion does not happen automatically within an array, therefore manually do it
+        Jython bitwise operations overflow not extend, so work with 64 bit then reduce after calculation
+        Jython also does not allow dtype(x), so must wrap in array
+        '''
+        idx = np.array([idx], dtype=np.int64)[0]
         for axis in self.axes:
             point_offset = self.calc_offset(axis, idx)
             low_offset = (self.calc_offset(axis, idx-1) + point_offset) / 2
