@@ -313,38 +313,26 @@ class CompoundGenerator(Serializable):
         return Points.points_from_axis_point(dim, int(index), length)
     
     def _points_from_below_m(self, dim, indices):
-        points_from_below_m = Points()
+        points = Points()
         '''
         This dimension must step and may finish a run through a dimension, alternate.
         One of these will be the innermost dimension, so must calculate bounds
         '''
         dim_run = indices // dim.size
         point_indices = indices % dim.size
-        if dim.alternate:
-            point_indices = (np.where(dim_run % 2 == 1, dim.size - point_indices - 1, point_indices))
+        backwards = (dim_run % 2 == 1) & dim.alternate
+        point_indices = (np.where(backwards, dim.size - point_indices - 1, point_indices))
         dimension_positions = {axis:dim.positions[axis][point_indices] for axis in dim.axes}
-        points_from_below_m.positions.update(dimension_positions)
+        points.positions.update(dimension_positions)
         
         if dim is self.dimensions[-1]:
-            if dim.alternate:
-                points_from_below_m.lower.update({axis: np.where(dim_run % 2 == 1,
-                                                                 dim.upper_bounds[axis][point_indices],
-                                                                 dim.lower_bounds[axis][point_indices])
-                                                  for axis in dim.axes})
-                points_from_below_m.upper.update({axis: np.where(dim_run % 2 == 1,
-                                                                 dim.lower_bounds[axis][point_indices],
-                                                                 dim.upper_bounds[axis][point_indices])
-                                                  for axis in dim.axes})
-            else:
-                points_from_below_m.lower.update({axis: dim.lower_bounds[axis][point_indices]
-                                                  for axis in dim.axes})
-                points_from_below_m.upper.update({axis: dim.upper_bounds[axis][point_indices]
-                                                  for axis in dim.axes})
+                points.lower.update({axis: np.where(backwards, dim.upper_bounds[axis][point_indices],
+                                                    dim.lower_bounds[axis][point_indices]) for axis in dim.axes})
+                points.upper.update({axis: np.where(backwards, dim.lower_bounds[axis][point_indices],
+                                                    dim.upper_bounds[axis][point_indices]) for axis in dim.axes})
         else:
-            points_from_below_m.lower.update({axis: dimension_positions[axis]
-                                              for axis in dimension_positions})
-            points_from_below_m.upper.update({axis: dimension_positions[axis]
-                                              for axis in dimension_positions})
+            points.lower.update({axis: dimension_positions[axis] for axis in dimension_positions})
+            points.upper.update({axis: dimension_positions[axis] for axis in dimension_positions})
             
-        points_from_below_m.indexes = point_indices
-        return points_from_below_m
+        points.indexes = point_indices
+        return points

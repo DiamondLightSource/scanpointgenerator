@@ -1,6 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+import unittest
 
 from test_util import ScanPointGeneratorTest
 from scanpointgenerator import CompoundGenerator
@@ -235,3 +236,7 @@ class GetPointsTest(ScanPointGeneratorTest):
                 self.assertAlmostEqual(point.positions[b], points.positions[b][0])
                 self.assertAlmostEqual(point.lower[b], points.lower[b][0])
                 self.assertAlmostEqual(point.upper[b], points.upper[b][0])
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

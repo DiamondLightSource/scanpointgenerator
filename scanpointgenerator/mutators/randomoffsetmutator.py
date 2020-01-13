@@ -80,12 +80,8 @@ class RandomOffsetMutator(Mutator):
             ''' 
             In Jython, int bit length conversion does not happen automatically within an array, therefore manually do it
             Jython bitwise operations overflow not extend, so work with 64 bit then reduce after calculation
-            Additionally, for all but innermost dimension, lower = upper = view of positions=> mutating any mutates all
-            as Point[s] do not explicitly preserve information about innermost dimension, must get copies for all axes.
             '''
             idx = idx.astype(np.int64)
-            point.lower = {axis: point.lower[axis].copy() for axis in point.lower}
-            point.upper = {axis: point.upper[axis].copy() for axis in point.upper}
         else:
             # Jython does not allow np.int64(x)
             idx = np.array([idx], dtype=np.int64)[0]

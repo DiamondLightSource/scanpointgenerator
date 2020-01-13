@@ -84,8 +84,8 @@ class Points(object):
                 self.indexes = np.vstack((self.indexes, other.indexes))
             elif len(other):
                 self.indexes = np.concatenate((self.indexes, other.indexes), axis=0)
-                self.duration = np.append(self.duration, other.duration)
-                self.delay_after = np.append(self.delay_after, other.delay_after)
+            self.duration = np.append(self.duration, other.duration)
+            self.delay_after = np.append(self.delay_after, other.delay_after)
         return self
 
     def __getitem__(self, sliced):
