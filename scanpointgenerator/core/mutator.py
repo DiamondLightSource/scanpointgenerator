@@ -8,24 +8,25 @@
 #
 ###
 
-from annotypes import Serializable
+from annotypes import Serializable, Union, Array
+from scanpointgenerator.core import Point, Points
 
-from scanpointgenerator.core import Point
-
+UPoint = Union[Point, Points]
+UInt = Union[int, Array[int]]
 
 class Mutator(Serializable):
-    """Abstract class to apply a mutation to the points of an ND
+    """Abstract class to apply a mutation to point/points of an ND
      ScanPointGenerator"""
 
     def mutate(self, point, index):
-        # type: (Point, int) -> Point
+        # type: (UPoint, Uint) -> UPoint
         """
-        Abstract method to take a point, apply a mutation and then return the
+        Abstract method to take a Point or Points, apply a mutation and then return the
         new point
 
         Args:
-            point: point to mutate
-            index: one-dimensional linear index of point
+            point: Point or Points object to mutate
+            index: ind[ex/ices] of the Point[s] to mutate
 
         Returns:
             Point: Mutated point

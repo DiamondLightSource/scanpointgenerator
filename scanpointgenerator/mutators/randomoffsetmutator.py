@@ -11,6 +11,7 @@ import collections
 
 from annotypes import Anno, Union, Array, Sequence
 
+from scanpointgenerator.compat import np
 from scanpointgenerator.core import Mutator
 
 with Anno("Seed for random offset generator"):
@@ -64,27 +65,25 @@ class RandomOffsetMutator(Mutator):
         x &= 0xFFFFFFFF
         x = (x ^ 0xB55A4F09) ^ (x >> 16)
         x &= 0xFFFFFFFF
-        r = float(x) / float(0xFFFFFFFF) # r in interval [0, 1]
-        r = r * 2 - 1 # r in [-1, 1]
+        # Jython does not like np.float32(x)
+        r = np.array([x], dtype=np.float32)[0]
+        r /= float(0xFFFFFFFF) # r in interval [0, 1]
+        r = r * 2 - 1  # r in [-1, 1]
         return m * r
 
     def mutate(self, point, idx):
-        point_offset = None
+        '''
+        In Jython, int bit length conversion does not happen automatically within an array, therefore manually do it
+        Jython bitwise operations overflow not extend, so work with 64 bit then reduce after calculation
+        Jython also does not allow dtype(x), so must wrap in array
+        '''
+        idx = np.array([idx], dtype=np.int64)[0]
         for axis in self.axes:
-            offset = self.calc_offset(axis, idx)
-            point.positions[axis] += offset
-            if axis in point.lower and axis in point.upper:
-                inner_axis = axis
-                point_offset = offset
-        if inner_axis is not None:
-            # recalculate lower bounds
-            idx -= 1
-            prev_offset = self.calc_offset(inner_axis, idx)
-            offset = (point_offset + prev_offset) / 2
-            point.lower[inner_axis] += offset
-            # recalculate upper bounds
-            idx += 2
-            next_offset = self.calc_offset(inner_axis, idx)
-            offset = (point_offset + next_offset) / 2
-            point.upper[inner_axis] += offset
+            point_offset = self.calc_offset(axis, idx)
+            low_offset = (self.calc_offset(axis, idx-1) + point_offset) / 2
+            high_offset = (self.calc_offset(axis, idx+1) + point_offset) / 2
+            point.positions[axis] += point_offset
+            # recalculate lower & upper bounds
+            point.lower[axis] += low_offset
+            point.upper[axis] += high_offset
         return point

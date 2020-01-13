@@ -9,7 +9,7 @@
 ###
 
 from .random import Random
-from .point import Point
+from .point import Point, Points
 from .roi import ROI
 from .mutator import Mutator
 from .excluder import Excluder, AExcluderAxes, UExcluderAxes

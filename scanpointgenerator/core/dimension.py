@@ -10,7 +10,6 @@ import itertools
 
 from scanpointgenerator.compat import np
 
-
 class Dimension(object):
     """
     An unrolled set of generators joined by excluders.
