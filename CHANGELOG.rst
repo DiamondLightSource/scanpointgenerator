@@ -6,6 +6,13 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `Unreleased`_
 -------------
 
+`3-1`_ - 2020-01-27
+-------------------
+
+Added:
+
+- CompoundGenerator.get_points(), optimized for consuming scans chunk by chunk
+
 `3-0`_ - 2019-11-14
 -------------------
 
@@ -218,7 +225,8 @@ Added:
 
 - Initial structure with Line and Nested generators
 
-.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/3-0...HEAD
+.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/3-1...HEAD
+.. _3-1: https://github.com/dls-controls/scanpointgenerator/compare/3-0..3-1
 .. _3-0: https://github.com/dls-controls/scanpointgenerator/compare/2-3..3-0
 .. _2-3: https://github.com/dls-controls/scanpointgenerator/compare/2-2-1...2-3
 .. _2-2-1: https://github.com/dls-controls/scanpointgenerator/compare/2-2...2-2-1
