@@ -1,5 +1,5 @@
 from annotypes import Anno, deserialize_object, Array
-from scanpointgenerator.compat import np
+from scanpointgenerator.compat import np, _range
 from scanpointgenerator.core import Generator, AAlternate
 
 with Anno("The array containing points"):
@@ -23,10 +23,11 @@ class ConcatGenerator(Generator):
         axes = self.generators[0].axes
         size = sum(generator.size for generator in self.generators)
         for generator in self.generators:
-            assert generator.axes == axes, "You cannot Concat generators " \
+            for i in _range(len(axes)):
+                assert generator.axes[i] == axes[i], "You cannot Concat generators " \
                                                 "on different axes"
-            assert generator.units == units, "You cannot Concat " \
-                                             "generators with different units"
+                assert generator.units[i] == units[i], "You cannot Concat " \
+                                            "generators with different units"
             assert not generator.alternate, \
                 "Alternate should not be set on the component generators of a" \
                 "ConcatGenerator. Set it on the top level ConcatGenerator only."
