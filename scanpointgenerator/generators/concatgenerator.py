@@ -19,14 +19,14 @@ class ConcatGenerator(Generator):
 
         assert len(self.generators) > 0, "At least one generator needed"
 
-        units = self.generators[0].units
-        axes = self.generators[0].axes
+        units = list(self.generators[0].units)
+        axes = list(self.generators[0].axes)
         size = sum(generator.size for generator in self.generators)
         for generator in self.generators:
-            assert generator.axes == axes, "You cannot Concat generators " \
-                                                "on different axes"
-            assert generator.units == units, "You cannot Concat " \
-                                             "generators with different units"
+            assert list(generator.axes) == axes, "You cannot Concat generators" \
+                                                " on different axes (expected %s , received %s )" % (generator.axes.seq, axes)
+            assert list(generator.units) == units, "You cannot Concat  generators" \
+                                                " with different units (expected %s , received %s )" % (generator.units.seq, units)
             assert not generator.alternate, \
                 "Alternate should not be set on the component generators of a" \
                 "ConcatGenerator. Set it on the top level ConcatGenerator only."
