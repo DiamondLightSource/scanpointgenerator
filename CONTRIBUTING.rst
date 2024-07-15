@@ -8,7 +8,7 @@ involves big changes, please file a ticket before making a pull request! We
 want to make sure you don't spend your time coding something that might not fit
 the scope of the project.
 
-.. _dls_controls repository: https://github.com/dls-controls/scanpointgenerator/issues
+.. _dls_controls repository: https://github.com/DiamondLightSource/scanpointgenerator/issues
 
 Running the tests
 -----------------

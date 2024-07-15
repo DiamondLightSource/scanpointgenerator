@@ -225,27 +225,27 @@ Added:
 
 - Initial structure with Line and Nested generators
 
-.. _Unreleased: https://github.com/dls-controls/scanpointgenerator/compare/3-1...HEAD
-.. _3-1: https://github.com/dls-controls/scanpointgenerator/compare/3-0..3-1
-.. _3-0: https://github.com/dls-controls/scanpointgenerator/compare/2-3..3-0
-.. _2-3: https://github.com/dls-controls/scanpointgenerator/compare/2-2-1...2-3
-.. _2-2-1: https://github.com/dls-controls/scanpointgenerator/compare/2-2...2-2-1
-.. _2-2: https://github.com/dls-controls/scanpointgenerator/compare/2-1-1...2-2
-.. _2-1-1: https://github.com/dls-controls/scanpointgenerator/compare/2-1-0...2-1-1
-.. _2-1-0: https://github.com/dls-controls/scanpointgenerator/compare/2-0-0...2-1-0
-.. _2-0-0: https://github.com/dls-controls/scanpointgenerator/compare/1-6-1...2-0-0
-.. _1-6-1: https://github.com/dls-controls/scanpointgenerator/compare/1-6...1-6-1
-.. _1-6: https://github.com/dls-controls/scanpointgenerator/compare/1-5...1-6
-.. _1-5: https://github.com/dls-controls/scanpointgenerator/compare/1-4...1-5
-.. _1-4: https://github.com/dls-controls/scanpointgenerator/compare/1-3-1...1-4
-.. _1-3-1: https://github.com/dls-controls/scanpointgenerator/compare/1-3...1-3-1
-.. _1-3: https://github.com/dls-controls/scanpointgenerator/compare/1-2-1...1-3
-.. _1-2-1: https://github.com/dls-controls/scanpointgenerator/compare/1-2...1-2
-.. _1-2: https://github.com/dls-controls/scanpointgenerator/compare/1-1...1-2
-.. _1-1: https://github.com/dls-controls/scanpointgenerator/compare/1-0...1-1
-.. _1-0: https://github.com/dls-controls/scanpointgenerator/compare/0-5...1-0
-.. _0-5: https://github.com/dls-controls/scanpointgenerator/compare/0-4...0-5
-.. _0-4: https://github.com/dls-controls/scanpointgenerator/compare/0-3...0-4
-.. _0-3: https://github.com/dls-controls/scanpointgenerator/compare/0-2...0-3
-.. _0-2: https://github.com/dls-controls/scanpointgenerator/compare/0-1...0-2
+.. _Unreleased: https://github.com/DiamondLightSource/scanpointgenerator/compare/3-1...HEAD
+.. _3-1: https://github.com/DiamondLightSource/scanpointgenerator/compare/3-0..3-1
+.. _3-0: https://github.com/DiamondLightSource/scanpointgenerator/compare/2-3..3-0
+.. _2-3: https://github.com/DiamondLightSource/scanpointgenerator/compare/2-2-1...2-3
+.. _2-2-1: https://github.com/DiamondLightSource/scanpointgenerator/compare/2-2...2-2-1
+.. _2-2: https://github.com/DiamondLightSource/scanpointgenerator/compare/2-1-1...2-2
+.. _2-1-1: https://github.com/DiamondLightSource/scanpointgenerator/compare/2-1-0...2-1-1
+.. _2-1-0: https://github.com/DiamondLightSource/scanpointgenerator/compare/2-0-0...2-1-0
+.. _2-0-0: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-6-1...2-0-0
+.. _1-6-1: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-6...1-6-1
+.. _1-6: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-5...1-6
+.. _1-5: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-4...1-5
+.. _1-4: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-3-1...1-4
+.. _1-3-1: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-3...1-3-1
+.. _1-3: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-2-1...1-3
+.. _1-2-1: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-2...1-2
+.. _1-2: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-1...1-2
+.. _1-1: https://github.com/DiamondLightSource/scanpointgenerator/compare/1-0...1-1
+.. _1-0: https://github.com/DiamondLightSource/scanpointgenerator/compare/0-5...1-0
+.. _0-5: https://github.com/DiamondLightSource/scanpointgenerator/compare/0-4...0-5
+.. _0-4: https://github.com/DiamondLightSource/scanpointgenerator/compare/0-3...0-4
+.. _0-3: https://github.com/DiamondLightSource/scanpointgenerator/compare/0-2...0-3
+.. _0-2: https://github.com/DiamondLightSource/scanpointgenerator/compare/0-1...0-2
 
