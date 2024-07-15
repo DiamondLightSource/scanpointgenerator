@@ -15,7 +15,7 @@ To install the latest release, type::
 
 To install the latest code directly from source, type::
 
-    pip install git+git://github.com/dls-controls/scanpointgenerator.git
+    pip install git+git://github.com/DiamondLightSource/scanpointgenerator.git
 
 Changelog
 ---------
@@ -36,12 +36,12 @@ Documentation
 
 Full documentation is available at http://scanpointgenerator.readthedocs.org
 
-.. |build-status| image:: https://travis-ci.org/dls-controls/scanpointgenerator.svg?style=flat
-    :target: https://travis-ci.org/dls-controls/scanpointgenerator
+.. |build-status| image:: https://travis-ci.org/DiamondLightSource/scanpointgenerator.svg?style=flat
+    :target: https://travis-ci.org/DiamondLightSource/scanpointgenerator
     :alt: Build Status
 
-.. |coverage| image:: https://coveralls.io/repos/dls-controls/scanpointgenerator/badge.svg?branch=master&service=github
-    :target: https://coveralls.io/github/dls-controls/scanpointgenerator?branch=master
+.. |coverage| image:: https://coveralls.io/repos/DiamondLightSource/scanpointgenerator/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/DiamondLightSource/scanpointgenerator?branch=master
     :alt: Test coverage
 
 .. |pypi-version| image:: https://img.shields.io/pypi/v/scanpointgenerator.svg
@@ -52,12 +52,12 @@ Full documentation is available at http://scanpointgenerator.readthedocs.org
     :target: http://scanpointgenerator.readthedocs.org
     :alt: Documentation
 
-.. |health| image:: https://landscape.io/github/dls-controls/scanpointgenerator/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/dls-controls/scanpointgenerator/master
+.. |health| image:: https://landscape.io/github/DiamondLightSource/scanpointgenerator/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/DiamondLightSource/scanpointgenerator/master
    :alt: Code Health
 
-.. _CHANGELOG: https://github.com/dls-controls/scanpointgenerator/blob/master/CHANGELOG.rst
-.. _CONTRIBUTING: https://github.com/dls-controls/scanpointgenerator/blob/master/CONTRIBUTING.rst
-.. _LICENSE: https://github.com/dls-controls/scanpointgenerator/blob/master/LICENSE
+.. _CHANGELOG: https://github.com/DiamondLightSource/scanpointgenerator/blob/master/CHANGELOG.rst
+.. _CONTRIBUTING: https://github.com/DiamondLightSource/scanpointgenerator/blob/master/CONTRIBUTING.rst
+.. _LICENSE: https://github.com/DiamondLightSource/scanpointgenerator/blob/master/LICENSE
 .. _GDA: http://www.opengda.org/
-.. _malcolm: https://github.com/dls-controls/malcolm
+.. _malcolm: https://github.com/DiamondLightSource/malcolm
